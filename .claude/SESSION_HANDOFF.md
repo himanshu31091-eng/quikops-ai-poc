@@ -12,7 +12,8 @@
 
 ## Session Date
 
-**2026-08-07** — Product Audit Mode, continuing from the 2026-08-06 stabilization pass.
+**2026-08-07** — Wave 1 (Executive insights), after Product Audit Mode and the
+partner-reference gap analysis, all on the 2026-08-06 stabilization pass.
 
 **2026-08-06** — Stabilization Mode. No features added, by instruction, with
 two exceptions taken afterwards on request: the work was committed and pushed,
@@ -27,6 +28,43 @@ and the portal was given an icon set.
 ---
 
 ## Completed Work
+
+### Wave 1 — Executive insights (2026-08-07)
+
+Approved after the partner-reference gap analysis, with Wave 0 (order entities)
+deliberately skipped. Built entirely on the existing `OperationalCase` domain:
+**no new entity, no schema change, no fixture change.**
+
+The centre of it is `src/domain/flow-balance.ts` — framework-free, derives
+everything from `CASES`, stores nothing. It answers the one question the
+product could not: *is this getting better, and when does it clear?*
+
+**Delivered:** flow ledger · net-flow ribbon · backlog trajectory with run-rate
+forecast · horizon control (week / 4 weeks / 13 weeks) · count ⇄ exposure toggle
+· period-over-period comparison · composed executive narrative · recommendation
+cards with impact figures and deep links · drill-down by plant, exception,
+priority and owner · band mixture · a flow verdict band on the Executive
+Dashboard as a thin wrapper (D-77).
+
+**Two defects found by verification, not by review:**
+
+1. The flow model reported **21 open against the portfolio-wide 19**. It read
+   `verifiedAt` as the authority on whether a case was resolved, and the fixture
+   generates that timestamp up to thirty days into the future for LOW-band
+   cases — two in the corpus do exactly that. `isOpenStatus` is now the
+   authority and the timestamp only places the bucket (D-73). The invariant
+   `closing === portfolioCounts.openCases` holds exactly: 2 + 27 − 10 = 19.
+2. The narrative rendered `USD1.0M`. The domain module had grown its own money
+   formatter rather than taking one, breaking the single-definition rule. Fixed
+   by parameterising it (D-72).
+
+**One data-shape finding worth carrying forward:** the seeded corpus spans 38
+days, so the 13-week horizon opens before the earliest case and the opening
+balance is zero — which makes "growing" true by construction. Both screens now
+default to four weeks and the ledger carries `precedesCorpus`, which the strip
+surfaces rather than letting a reader draw a conclusion from an artefact.
+
+---
 
 ### Product audit — 2026-08-07
 
@@ -216,6 +254,12 @@ including repairs to four doc sections that described code this pass deleted.
 | D-69 | A tour anchor with no element is a broken tour step |
 | D-70 | A control that does nothing is worse than no control |
 | D-71 | The 404-on-unknown-case is the price of streaming, and it is measured |
+| D-72 | Flow is derived from the case corpus, never stored |
+| D-73 | Status decides whether a case is resolved; the timestamp decides when |
+| D-74 | A forecast states its basis or it is a guess |
+| D-75 | The executive narrative is composed, and says so |
+| D-76 | The flow region reads the whole corpus, not the page filters |
+| D-77 | The frozen dashboard gains a band, not a redesign |
 
 Also amended: **D-19** (placeholder modules — superseded, mechanism removed) and
 **D-60** (`localStorage` — now tour completion only).
@@ -223,6 +267,13 @@ Also amended: **D-19** (placeholder modules — superseded, mechanism removed) a
 ---
 
 ## Bugs Fixed
+
+**From Wave 1 (2026-08-07)**
+
+1. **Flow reported 21 open against the portfolio-wide 19** — a future-dated
+   `verifiedAt` read as "not yet resolved" (D-73).
+2. **The narrative rendered `USD1.0M` instead of `$1.0M`** — a second money
+   formatter had grown inside the domain module (D-72).
 
 **From the product audit (2026-08-07)**
 
@@ -279,8 +330,10 @@ matter to the next session:
 |---|---|
 | `npx eslint .` | **0 errors, 0 warnings** |
 | `npm run typecheck` | **clean** |
-| `npm run build` | **16/16 routes, no warnings** |
-| Route smoke test | **16/16 render**; `/` → 307; `/nope` → 404 |
+| `npm run build` | **19/19 entries (16 routes + 3 icons), no warnings** |
+| Route smoke test | **15/15 render**; `/` → 307; `/nope` → 404 |
+| Flow ledger reconciles | **2 + 27 − 10 = 19**, matching every other screen |
+| Dashboard and Analytics agree on the flow rate | **4.3 cases per week**, both |
 | Live Copilot | **confirmed on the production build** |
 | API key in `.next/static` | **0 occurrences** |
 | Cross-feature imports | **0** across 12 features |
@@ -289,8 +342,9 @@ matter to the next session:
 | Browser icons | `/favicon.ico`, `/icon.svg`, `/apple-icon.png` all **200** |
 | Git | `main` in sync with `origin/main`; working tree clean |
 
-Bundle: 102 kB shared; routes 172–204 kB except `/dashboard` (304 kB) and
-`/analytics` (311 kB), where the charts live.
+Bundle: 102 kB shared; routes 172–204 kB except `/dashboard` (309 kB) and
+`/analytics` (323 kB), where the charts live. Wave 1 added ~5 kB and ~12 kB to
+those two respectively — new components, no new dependency.
 
 Live Copilot response on this build:
 

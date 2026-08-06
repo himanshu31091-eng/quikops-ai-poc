@@ -18,6 +18,7 @@ import {
   WeeklyThroughputChart,
 } from "./analytics-charts";
 import { PersonPerformanceTable, PlantPerformanceTable } from "./performance-table";
+import { FlowSection } from "./flow-section";
 
 /**
  * Module root. Owns composition and nothing else: the state lives in
@@ -89,6 +90,10 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       <section aria-label="Headline metrics">
         <AnalyticsKpiCards kpis={model.kpis} />
       </section>
+
+      {/* 1b — Flow: the only region with its own horizon and unit, and the
+          only one that reads the whole corpus rather than the page filters. */}
+      <FlowSection cases={api.allCases} plants={data.plants} />
 
       {/* 2 — Trends */}
       <div className="grid gap-4 xl:grid-cols-12">

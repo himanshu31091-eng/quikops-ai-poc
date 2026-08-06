@@ -842,6 +842,105 @@ QA checklist named `QO-2026-004112`, which does not exist. The checklist now
 names a real case, and route checks on that segment must assert on content, not
 status.
 
+### D-72 — Flow is derived from the case corpus, never stored
+`src/domain/flow-balance.ts`
+
+Detected, resolved, the balance between them, the burn-down and the forecast are
+all computed from `CASES` on demand. There is no seeded flow series.
+
+**Why:** a stored series would be a second description of the same events, and
+the moment a case is verified in-session the two would disagree — the exact
+defect D-48 was written after. Deriving costs a pass over 29 cases; storing
+costs a reconciliation problem forever.
+
+The module takes `now` as a parameter and imports nothing from `src/lib`, which
+keeps it inside the framework-free rule. Money formatting is passed in as a
+`MoneyFormatter` rather than imported, so `src/lib/format` stays the single
+definition and the narrative quotes `$1.0M` like every other figure on screen
+instead of inventing its own notation.
+
+### D-73 — Status decides whether a case is resolved; the timestamp decides when
+`src/domain/flow-balance.ts` → `resolutionMoment`
+
+A first implementation read `verifiedAt ?? closedAt` as the authority on whether
+a case was still open. It reported **21 open against the 19** the dashboard,
+Analytics and the Copilot all quote.
+
+**Why it was wrong:** `buildCase` generates `verifiedAt = openedAt + slaHours ×
+resolutionFactor`, and a LOW-band case carries a 720-hour target — so a case
+verified today can hold a timestamp thirty days in the future. Two cases in the
+corpus do. A timestamp-only rule reads those as unresolved.
+
+`isOpenStatus` is now the authority on membership — the same predicate
+`portfolio-metrics` uses — and the timestamp is clamped to `now` purely to place
+the resolution in a bucket. That buys an exact invariant: **`ledger.closing ===
+portfolioCounts.openCases`**, verified on the build at 2 + 27 − 10 = 19.
+
+The general rule this is an instance of: when two fields can answer the same
+question and the corpus lets them disagree, name which one is authoritative
+rather than picking the convenient one.
+
+### D-74 — A forecast states its basis or it is a guess
+`src/domain/flow-balance.ts` → `forecastFlow`
+
+The projection extrapolates the mean net rate per bucket and carries
+`basisBuckets` and `volatilityPct` with it. The chart draws measurement solid
+and extrapolation dashed, with a marker at the boundary, and the caption names
+the number of periods behind the rate.
+
+**Why:** an executive asked to act on a clear date will ask where it came from,
+and a dashboard that cannot answer loses the next three claims as well.
+`direction` is also banded rather than taken from the sign: net movement inside
+±2% of the open balance is noise, and calling noise a trend is how a forecast
+stops being read.
+
+Deliberately the simplest defensible extrapolation. A regression or a seasonal
+model would be more impressive and no more honest on 29 cases.
+
+### D-75 — The executive narrative is composed, and says so
+`src/domain/flow-balance.ts` → `buildExecutiveNarrative`
+
+The briefing card is written from the ledger by rule, not by a model, and its
+footer states that plainly beside a Copilot entry point.
+
+**Why:** every number in the sentence is one of the figures on the screen
+beside it, so a director can quote the sentence in a review without checking it
+first — which is the entire value of putting it there. The live Copilot handles
+what a rule cannot anticipate; this is the standing answer to the one question
+every executive opens with. Labelling it "AI" while a rule wrote it would be the
+kind of small dishonesty that costs the whole demo its credibility when someone
+asks how it works.
+
+### D-76 — The flow region reads the whole corpus, not the page filters
+`features/analytics/hooks/use-flow.ts`
+
+Execution Analytics filters by plant, priority, category and date range. The flow
+region ignores all four and carries its own horizon.
+
+**Why:** the opening balance is the set of cases detected before the window and
+not yet resolved. Applying the page's date range on top would drop exactly those
+cases, and the ledger identity would silently stop holding. Two controls that
+look like they compose but do not are worse than two that obviously do not.
+
+Both screens default to the four-week horizon. The seeded corpus spans 38 days,
+so a 13-week window opens before the earliest case and the opening balance is
+zero — arithmetically right and analytically vacuous, since "growing" is then
+true by construction. The ledger carries `precedesCorpus` and the strip says so
+rather than letting the reader draw a conclusion from an artefact.
+
+### D-77 — The frozen dashboard gains a band, not a redesign
+`features/dashboard/components/live-dashboard.tsx` → `LiveFlowVerdict`
+
+The Executive Dashboard gets one row: the flow verdict, the balance movement and
+a link into the full region. Everything else — charts, drill-down, band mixture,
+horizon and unit controls — lives in Execution Analytics.
+
+**Why:** the freeze permits adding where state comes from, not restructuring the
+screen (D-13). A thin client wrapper beside the existing five satisfies both. It
+is pinned to the same horizon Analytics opens at, because a director who reads
+one rate here and a different one after clicking through has been given two
+figures for one question — and both screens now quote 4.3 cases per week.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

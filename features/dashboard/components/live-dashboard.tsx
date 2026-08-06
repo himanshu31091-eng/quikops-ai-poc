@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
 import type {
@@ -11,6 +12,14 @@ import type {
   PlantHealth,
   RevenueImpactBucket,
 } from "@/src/domain/types";
+import {
+  buildExecutiveNarrative,
+  buildFlowLedger,
+  compareFlowWindows,
+  forecastFlow,
+} from "@/src/domain/flow-balance";
+import { cn } from "@/src/lib/cn";
+import { DEMO_NOW } from "@/src/lib/constants";
 import { buildCsv, exportSectionsCsv } from "@/src/lib/export";
 import { formatMoney } from "@/src/lib/format";
 import { useExecutionStore } from "@/src/workflow/execution-store";
@@ -130,6 +139,97 @@ export function LiveSessionChip({ cases }: { cases: CaseListItem[] }) {
       Live session · {changed} case{changed === 1 ? "" : "s"} updated
       {movement.recovered > 0 ? ` · ${formatMoney(movement.recovered)} recovered` : ""}
     </span>
+  );
+}
+
+/**
+ * The flow verdict, on the screen the demo opens with.
+ *
+ * A wrapper, not a redesign: the dashboard stays a server component and this
+ * adds one band to it, reading the same execution store as the KPI cards above
+ * so the verdict cannot contradict them. The heavy version — charts, drill-down,
+ * band mixture, horizon and unit controls — lives in Execution Analytics; this
+ * is the one sentence and the one number a director needs before deciding
+ * whether to go there.
+ *
+ * Fixed at the four-week horizon — the same one the Analytics flow region
+ * opens at. A control here would be a second place to set something Analytics
+ * already owns, and the two would disagree; matching the default means the
+ * sentence here and the sentence there quote the same rate.
+ */
+export function LiveFlowVerdict({ cases }: { cases: CaseListItem[] }) {
+  const { state } = useExecutionStore();
+
+  const { ledger, forecast, narrative } = React.useMemo(() => {
+    const projected = projectCaseFacts(cases, state);
+    const built = buildFlowLedger(projected, DEMO_NOW, "month");
+    const forecasted = forecastFlow(built, DEMO_NOW);
+    const comparison = compareFlowWindows(projected, DEMO_NOW, "month");
+    return {
+      ledger: built,
+      forecast: forecasted,
+      narrative: buildExecutiveNarrative(
+        built,
+        forecasted,
+        comparison,
+        null,
+        (amount) =>
+          formatMoney(amount, projected[0]?.currency ?? "USD", { forceCompact: true }),
+      ),
+    };
+  }, [cases, state]);
+
+  const clearing = forecast.direction === "clearing";
+  const growing = forecast.direction === "growing";
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border px-4 py-3.5 sm:flex-row sm:items-center sm:gap-5",
+        clearing
+          ? "border-success-line bg-success-subtle"
+          : growing
+            ? "border-critical-line bg-critical-subtle"
+            : "border-line bg-surface",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-md",
+          clearing
+            ? "bg-success text-white"
+            : growing
+              ? "bg-critical text-white"
+              : "bg-surface-hover text-content-secondary",
+        )}
+        aria-hidden
+      >
+        <Icon
+          name={clearing ? "TrendingDown" : growing ? "TrendingUp" : "Minus"}
+          size="lg"
+        />
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-content">
+          {narrative.headline}
+        </span>
+        <span className="mt-0.5 block text-2xs leading-relaxed text-content-secondary">
+          {ledger.detected} detected · {ledger.resolved} resolved · open balance{" "}
+          {ledger.opening} → {ledger.closing} over {ledger.horizon.days} days
+          {forecast.bucketsToClear === null
+            ? ""
+            : ` · clears in about ${forecast.bucketsToClear} week${forecast.bucketsToClear === 1 ? "" : "s"} at this rate`}
+        </span>
+      </span>
+
+      <Button variant="secondary" size="sm" asChild className="shrink-0 print:hidden">
+        <Link href="/analytics">
+          See the flow
+          <Icon name="ArrowRight" size="sm" />
+        </Link>
+      </Button>
+    </div>
   );
 }
 

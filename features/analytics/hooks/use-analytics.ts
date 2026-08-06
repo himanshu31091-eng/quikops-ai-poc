@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { FilterOption } from "@/components/patterns/filter-menu";
 import type { AnalyticsData } from "@/src/data/queries/analytics";
+import type { CaseListItem } from "@/src/domain/types";
 import { useExecutionStore } from "@/src/workflow/execution-store";
 import { projectCaseFacts } from "@/src/workflow/projections";
 import {
@@ -53,6 +54,13 @@ import {
 export interface AnalyticsApi {
   filters: AnalyticsFilters;
   model: AnalyticsModel;
+  /**
+   * Every case with session outcomes folded in, before the page filters run.
+   * The flow region reads this rather than the filtered set: it carries its own
+   * horizon, and applying the page date range on top would drop the cases that
+   * make up the opening balance.
+   */
+  allCases: CaseListItem[];
   facets: { plants: FilterOption[]; priorities: FilterOption[]; categories: FilterOption[] };
   ranges: typeof DATE_RANGES;
   /** Human-readable description of the current selection, for exports. */
@@ -204,6 +212,7 @@ export function useAnalytics(data: AnalyticsData): AnalyticsApi {
   return {
     filters,
     model,
+    allCases,
     facets,
     ranges: DATE_RANGES,
     scopeLabel,

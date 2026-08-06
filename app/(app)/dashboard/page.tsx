@@ -21,6 +21,7 @@ import {
 import {
   DashboardExportButton,
   LiveActivityFeed,
+  LiveFlowVerdict,
   LiveExecutionMetrics,
   LiveKpiBand,
   LiveRevenueImpact,
@@ -141,6 +142,12 @@ export default async function ExecutiveDashboardPage() {
       {/* KPI band */}
       <section aria-label="Headline indicators" data-tour="dashboard-kpi-band">
         <LiveKpiBand kpis={kpis} cases={caseBaseline} />
+      </section>
+
+      {/* Flow verdict — one band, added rather than replacing anything. The
+          full flow region lives in Execution Analytics. */}
+      <section aria-label="Backlog flow">
+        <LiveFlowVerdict cases={caseBaseline} />
       </section>
 
       {/* Execution performance */}

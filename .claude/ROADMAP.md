@@ -7,7 +7,7 @@
 > `CLAUDE.md` already routes here. Update the status table when a module lands;
 > append decisions to `DECISIONS.md`, not to this file.
 
-**Last updated:** 2026-08-07 (product audit) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
+**Last updated:** 2026-08-07 (product audit, then partner-reference gap analysis — see *Priority 3*) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
 
 ---
 
@@ -151,6 +151,134 @@ Ordered by what would hurt first. None of it blocks the demo.
 | 6c | **Six modules hand-roll `<table>` markup** instead of using `DataTable`; three of them are frozen. | M | Sorting, pagination and `aria-sort` are re-implemented per module, so an improvement to the shared table does not reach them. |
 | 7 | **No persistence.** Only tour completion survives a reload. | L | Correct for a demo; the first thing a pilot would need. |
 | 8 | **No authentication or authorization.** Persona switching is a cookie write; role only filters navigation. | L | Blocks any deployment where the data is real. |
+
+## Priority 3 — reference-parity capabilities (gap analysis 2026-08-07)
+
+Source: seven partner screenshots reviewed for **business capability only**.
+Standing CEO direction: *"Tool screens — don't copy as it is. Make sure screens
+are 100% different."* Nothing below reproduces a reference layout, table, colour,
+navigation or dashboard composition. Terminology is translated into the QuikOps
+domain vocabulary (`PROJECT_CONTEXT.md` §4) rather than adopted.
+
+### The structural finding
+
+**The reference manages an order schedule line. QuikOps manages a case.**
+
+The reference's atom is an order line carrying its own commitment history —
+order creation date, detection date, initial promise (P0), first broken promise
+(P1), current promise (P2), drift, and a count of delivery-date changes. Every
+one of its distinctive metrics (detection speed, drift, reliability, days in
+trouble) is derived from that object.
+
+QuikOps has no order object at all. `OperationalCase` begins at detection: its
+`openedAt` *is* the detection moment, so detection lag is not merely unbuilt, it
+is unmeasurable from the current schema.
+
+**That is the single largest gap, and eleven of the twenty-three capabilities
+below depend on closing it.** It is a domain and fixture change
+(`src/domain/types.ts`, `src/data/fixtures/`), not a screen — which is why it is
+sequenced first and why any screen built before it would have to be rebuilt.
+
+### Gap table
+
+Legend — **FULL**: exists and is equivalent or better · **PARTIAL**: adjacent
+capability exists but does not answer the same question · **MISSING**: no
+equivalent in the schema or the UI.
+
+| # | Reference capability | Existing QuikOps capability | State | Recommended QuikOps implementation | Target module | Priority |
+|---|---|---|---|---|---|---|
+| 1 | Management performance monitoring | Executive Dashboard + Execution Analytics | **PARTIAL** | Exists at portfolio level; lacks flow, horizons and value/count duality (rows 21–24) | Dashboard · Analytics | — |
+| 2 | Performance by department — *two* dimensions: accountable vs responsible | None. No department exists anywhere in the schema | **MISSING** | Add `accountableTeam` / `respondingTeam` to the org model. Surface as an **Accountability Lens**: one AI-written attribution narrative you pivot across dimensions, not six static tables. The lens states *who owns the pattern* and *who is absorbing it* — the split is the insight | Analytics (new lens) | **P1** |
+| 3 | Performance by root cause | `exceptionType` (what broke). Root-cause narrative exists as prose in case fixtures | **PARTIAL** | Add a structured, owner-editable `rootCause` taxonomy distinct from exception type. Exception type = *what*; root cause = *why*. Feed the Copilot so it can answer "what is actually driving this quarter" | `src/domain` · Case Detail · Analytics | **P1** |
+| 4 | Performance by project / strategic initiative | Playbooks (how to fix a type). No initiative object | **MISSING** | **Initiative Board** — named improvement programmes with cases attached, showing exposure addressed vs exposure remaining and a predicted completion date. Progressive disclosure, not a count table | New module `/initiatives` | **P2** |
+| 5 | Performance by plant | `byPlant`, `plantPerformance`, `PLANT_HEALTH`, SLA + ageing heatmaps | **FULL** | No work | Analytics | — |
+| 6 | Performance by bottleneck type | `exceptionType` — a *cause* category, not a *process-stage* category | **PARTIAL** | Add `processStage` (order creation · processing · stock transfer · distribution · supplier). Orthogonal axis to exception type; enables "where in the flow do we lose time" | `src/domain` · Analytics | **P2** |
+| 7 | Performance by customer | `customerCode` / `customerName` / `customerTier` on the case, feeding priority. No customer view | **PARTIAL** | **Customer exposure drill-down** in Analytics — tier-weighted, with the AI naming the accounts whose exposure is concentrated rather than listing 314 rows | Analytics | **P2** |
+| 8 | Team-lead workload | My Work (personal) · `ownerPerformance` (analytical) | **PARTIAL** | Extend My Work with a role-gated **team view** for `OPS_MANAGER`: load, escalations inbound, and an AI rebalance suggestion. Not a second dashboard — a disclosure inside the one that exists | My Work | **P1** |
+| 9 | Order exceptions requiring attention | Work Manager (14 filters, board + table) · Action Center | **FULL** | No work — richer than the reference at this level | Work Manager | — |
+| 10 | Collaboration workflows (escalate · back to owner) | Threaded comments with @mentions and attachments | **PARTIAL** | Promote to a first-class **hand-off**: escalate-to-person and return-to-owner as workflow events with a reason, feeding the execution store so the dashboard sees them | `src/workflow` · Case Detail | **P0** |
+| 11 | Escalations (to me / by user / days in escalation) | `escalationLevel: number` only. No target person, no inbox | **MISSING** | **Escalation ledger** — a chronological thread per hand-off, plus an inbox surfaced in My Work with its own SLA. Timeline, not a grid | `src/domain` · My Work · Action Center | **P0** |
+| 12 | Comments / actions | Threaded comments · Action Center with bulk operations | **FULL** | No work | Case Detail · Action Center | — |
+| 13 | Order issue history | Per-case audit log (field-level, with source) and timeline | **PARTIAL** | Sound at case level. Order-line history depends on row 14 | Case Detail | — |
+| 14 | Delivery-date changes (P0 → P1 → P2, drift, change count) | Nothing. No promise model | **MISSING** | Add an order-line commitment model, rendered as a **Promise Timeline** — a horizontal commitment track where each broken promise is a marked event and drift is the distance, with an AI reliability verdict. Never a text log in a cell | `src/domain` · new `/orders` surface · Case Detail | **P0** |
+| 15 | Issue detection speed | None. `openedAt` *is* detection, so the lag is unmeasurable | **MISSING** | Add `orderCreatedAt`. Derive **detection lag** and expose it as a first-class quality metric of the detection layer itself — which connectors and exception types detect slowly, and what that costs | `src/domain` · Connector Health · Analytics | **P0** |
+| 16 | Delivery status ("delayed by 4 days") | `dueAt` / `slaBreachedAt` are *case SLA*, not order delivery. `DELIVERY_AT_RISK` type exists | **PARTIAL** | Falls out of row 14 — derived, never stored | `src/domain` | **P0** |
+| 17 | Owner assignment | Full: assign, bulk assign, routing rules, `ASSIGNABLE_ROLES` | **FULL** | No work | Work Manager · Admin | — |
+| 18 | Root-cause management (owner updates it) | Root cause is fixture prose, not an editable field | **MISSING** | Owner-editable on Case Detail with an **AI-suggested root cause** the owner confirms or overrides — the confirmation is what makes the aggregate in row 3 trustworthy | Case Detail | **P1** |
+| 19 | Days in trouble | `ageDays` on `WorkCaseRow` — presentational only | **PARTIAL** | Promote to a domain metric alongside SLA, banded and used consistently. Age is not the same as breach: a case can be young and breached, or old and inside target | `src/domain/portfolio-metrics.ts` | **P1** |
+| 20 | Days in escalation | Nothing | **MISSING** | Falls out of row 11 | `src/workflow` | **P0** |
+| 21 | Inflow / outflow of issues | ✅ **Wave 1** — `buildFlowLedger` | **FULL** | Add a **flow balance** ledger — start · inflow · closed · balance · balance % — as a domain function, so every screen reads one definition | `src/domain/portfolio-metrics.ts` | **P1** |
+| 22 | Throughput (net daily performance) | ✅ **Wave 1** — net-flow ribbon | **FULL** | **Net-flow ribbon**: detection above the line, resolution below, net as the gap, with an AI verdict — *"clearing at 11/week; the critical band clears in ~3 weeks if this holds"*. A forecast, not a bar chart | Analytics | **P1** |
+| 23 | Backlog trends | ✅ **Wave 1** — backlog trajectory | **FULL** | Falls out of rows 21–22 | Analytics | **P1** |
+| 24 | Multi-period trends + number vs value | ✅ **Wave 1** — horizon control + count ⇄ exposure toggle | **FULL** | One **horizon control** and one **count ⇄ value** toggle, applied to every Analytics series from a single state owner. Value is the more persuasive lens for an executive and is currently unavailable anywhere | Analytics | **P1** |
+
+**Score after Wave 1: 8 FULL · 8 PARTIAL · 8 MISSING** across 24 capabilities.
+(Was 4 / 11 / 8 at analysis time — Wave 1 closed rows 21–24 and moved row 1 forward.)
+
+### ✅ Wave 1 — Executive insights (delivered 2026-08-07)
+
+Built on the existing `OperationalCase` domain. **No order entities, no schema
+change, no fixture change.** Decisions D-72 to D-77.
+
+| Delivered | Where |
+|---|---|
+| Flow ledger — opening · detected · resolved · closing, reconciling exactly | `src/domain/flow-balance.ts` |
+| Inflow against outflow, as a diverging ribbon | Analytics → *Detection against resolution* |
+| Backlog burn-down with a run-rate projection | Analytics → *Backlog trajectory* |
+| Backlog forecast with a stated basis and volatility | `forecastFlow` + *Forecast verdict* |
+| Horizon control — this week / 4 weeks / 13 weeks | Analytics → flow region |
+| Value-based reporting — count ⇄ exposure across the whole region | Analytics → flow region |
+| Trend comparison against the preceding window | Analytics → briefing strip |
+| Executive narrative, composed from the ledger | `buildExecutiveNarrative` |
+| Executive recommendation cards with impact figures and deep links | `buildFlowRecommendations` |
+| Drill-down by plant · exception · priority · owner, disclosed in place | Analytics → *Where the net came from* |
+| Band mixture — a flat total hiding a worsening portfolio | Analytics → *Band mixture* |
+| Flow verdict on the Executive Dashboard | `LiveFlowVerdict` (thin wrapper, D-77) |
+
+**Two defects found by verifying rather than assuming:**
+
+1. The flow model reported **21 open against the portfolio's 19**, because it
+   read resolution timestamps the fixture generates up to thirty days in the
+   future. Fixed by making `isOpenStatus` the authority (D-73). The invariant
+   `closing === portfolioCounts.openCases` now holds exactly: 2 + 27 − 10 = 19.
+2. The narrative rendered `USD1.0M` instead of `$1.0M`, because the domain
+   module had grown its own money formatter. Fixed by passing one in, keeping
+   `src/lib/format` the single definition (D-72).
+
+**Not copied from the reference:** no tab strip, no grid of count tables, no
+SmartSheet grid, no ledger table. The balance is a sentence, the flow is a
+diverging ribbon, the forecast is drawn as measurement-then-extrapolation, and
+the drill-down discloses in place rather than opening a sheet.
+
+### What must not be copied
+
+Recorded because the direction is explicit and the temptation is real once the
+capabilities are understood:
+
+- ❌ The tab strip (Business Navigator / Intensive care / Operating trends)
+- ❌ The grid of six side-by-side count tables
+- ❌ The SmartSheet-style editable grid, its toolbar and its row chrome
+- ❌ Date history compressed into a multi-line text cell
+- ❌ The reference's colour usage and visual hierarchy
+- ❌ Its terminology where QuikOps already has a word: **bottleneck → case**,
+  **control → exception type**, **inflow → detection**, **solution status →
+  case status**. Adopt "root cause", "detection lag", "drift" and "days in
+  escalation" only, because QuikOps has no existing word for those four.
+
+### The QuikOps expression
+
+Every capability above lands through the patterns already in the product —
+AI insight cards, drill-down panels, timelines, risk indicators, progressive
+disclosure, contextual Copilot — and through two the product should now earn:
+**predicted outcomes** (when does the backlog clear) and **confirmed AI
+suggestions** (the model proposes a root cause; the owner's confirmation is what
+makes the aggregate trustworthy).
+
+The differentiator to hold on to: the reference reports *what is open*. QuikOps
+should say *what it means, what to do, and what happens if you do not* — and
+then verify the outcome. Nothing in the reference verifies anything.
+
+---
 
 ## Priority 2 — remaining enterprise modules
 
