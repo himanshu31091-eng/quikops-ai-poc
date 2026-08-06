@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { RouteError } from "@/components/patterns/route-error";
 
+/** Error boundary for Work Manager; the shared `RouteError` panel does the rest. */
 export default function WorkManagerError({
   error,
   reset,

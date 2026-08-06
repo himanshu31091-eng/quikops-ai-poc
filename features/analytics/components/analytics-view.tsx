@@ -48,6 +48,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
   return (
     <div className="space-y-5">
       <PageHeader
+        docKey="analytics"
         title="Execution Analytics"
         description="How the operation is performing at closing the exceptions it detects — by plant, by owner and over time."
         meta={

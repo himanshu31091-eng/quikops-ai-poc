@@ -13,6 +13,16 @@ import type { CaseHealth, CaseStatus, CorrectiveAction, PriorityBand } from "./t
 
 const HOUR_MS = 3_600_000;
 
+/** Overrun in the unit that carries meaning at that magnitude. */
+function formatOverrun(hours: number): string {
+  if (hours < 24) {
+    const rounded = Math.max(1, Math.round(hours));
+    return `${rounded} hour${rounded === 1 ? "" : "s"}`;
+  }
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"}`;
+}
+
 export interface CaseHealthInput {
   status: CaseStatus;
   ownerId: string | null;
@@ -41,7 +51,9 @@ export function scoreCaseHealth(input: CaseHealthInput, now: Date): CaseHealth {
     score -= 35;
     drivers.push({
       label: "Past SLA",
-      detail: `${Math.abs(Math.round(hoursRemaining / 24))} days beyond the resolution target.`,
+      // Said in hours under a day: a case three hours past target rounded to
+      // "0 days beyond the resolution target", which reads as no breach at all.
+      detail: `${formatOverrun(Math.abs(hoursRemaining))} beyond the resolution target.`,
       positive: false,
     });
   } else if (hoursRemaining < 24) {

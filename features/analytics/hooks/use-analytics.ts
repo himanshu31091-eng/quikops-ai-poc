@@ -19,7 +19,7 @@ import {
   slaHeatmap,
   sliceSeries,
   toAnalyticsCase,
-  weeklyThroughput,
+  weeklyThroughputSeries,
 } from "../utils/analytics-derive";
 import {
   buildFacets,
@@ -119,7 +119,7 @@ export function useAnalytics(data: AnalyticsData): AnalyticsApi {
       otifSeries: sliceSeries(data.otifSeries, days),
       revenueSeries: sliceSeries(data.revenueAtRiskSeries, days),
       resolutionSeries: resolution,
-      weekly: weeklyThroughput(scoped, days),
+      weekly: weeklyThroughputSeries(scoped, days),
       byPriority: byPriority(scoped),
       byPlant: byPlant(scoped, data.plants),
       byException: byException(scoped),

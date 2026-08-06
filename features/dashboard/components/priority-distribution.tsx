@@ -10,6 +10,12 @@ import { PRIORITY_META } from "@/src/config/app-config";
 import type { PriorityBand, PriorityDistributionSlice } from "@/src/domain/types";
 import { formatMoney, formatNumber } from "@/src/lib/format";
 
+/**
+ * Open cases by priority band.
+ *
+ * Band colours are read from the same CSS custom properties the chips use, so
+ * the chart and the badges beside it cannot drift apart when a token changes.
+ */
 const BAND_COLOR: Record<PriorityBand, string> = {
   CRITICAL: "var(--color-critical)",
   HIGH: "var(--color-high)",

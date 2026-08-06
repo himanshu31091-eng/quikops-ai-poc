@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Button } from "@/components/ui/button";
 
+/** Not-found boundary for every signed-in route that does not define its own. */
 export default function NotFound() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
@@ -11,7 +13,7 @@ export default function NotFound() {
           description="The route you requested does not exist in this build. Check the navigation for available modules."
           action={
             <Button variant="primary" size="md" asChild>
-              <a href="/dashboard">Back to dashboard</a>
+              <Link href="/dashboard">Back to dashboard</Link>
             </Button>
           }
         />

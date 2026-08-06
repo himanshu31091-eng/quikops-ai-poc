@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -17,13 +18,13 @@ export default function CaseNotFound() {
           action={
             <div className="flex items-center gap-2">
               <Button variant="primary" size="md" asChild>
-                <a href="/work">
+                <Link href="/work">
                   <Icon name="Rows3" size="sm" />
                   Open Work Manager
-                </a>
+                </Link>
               </Button>
               <Button variant="secondary" size="md" asChild>
-                <a href="/dashboard">Back to dashboard</a>
+                <Link href="/dashboard">Back to dashboard</Link>
               </Button>
             </div>
           }

@@ -9,6 +9,13 @@ import type { UserRole } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 import { BrandMark } from "./brand-mark";
 
+/**
+ * The primary navigation.
+ *
+ * Sections and items come from `NAVIGATION` in `app-config`, filtered by role,
+ * so a new module appears here by being registered rather than by editing this
+ * file. Badge counts are passed in — the nav counts nothing itself.
+ */
 interface SideNavProps {
   role: UserRole;
   badges: Record<string, number>;
@@ -34,6 +41,7 @@ function NavRow({
   const row = (
     <Link
       href={item.href}
+      data-tour={`nav-${item.key}`}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(

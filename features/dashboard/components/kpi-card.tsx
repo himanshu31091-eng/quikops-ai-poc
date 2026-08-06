@@ -10,6 +10,14 @@ import type { KpiCardModel } from "@/src/domain/types";
 import { formatPercent } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * A dashboard KPI, with its target and trend.
+ *
+ * Distinct from `KpiTile` in `components/patterns`: this is the large, staggered
+ * hero card used only on the Executive Dashboard, where a KPI carries a target,
+ * a sparkline and an animated value. The tile is the compact filter control
+ * used inside modules.
+ */
 const STAGGER = ["", "anim-stagger-1", "anim-stagger-2", "anim-stagger-3"] as const;
 
 const UNIT_FORMAT: Record<KpiCardModel["unit"], NumberFormat> = {

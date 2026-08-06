@@ -13,6 +13,13 @@ import {
 import type { Plant } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * The plant scope control in the top bar.
+ *
+ * Holds its selection locally and does not filter the page. Plant scoping is a
+ * Phase-2 capability (see ROADMAP.md); this is the visible anchor for it, and
+ * it is deliberately inert rather than partially wired.
+ */
 const ALL_PLANTS = "ALL";
 
 export function PlantScopeSelector({ plants }: { plants: Plant[] }) {

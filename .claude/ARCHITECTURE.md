@@ -241,10 +241,9 @@ survives navigation between the queue, a case and the dashboard.
 workflow/types.ts             CaseExecutionOverride, WorkflowEvent, ExecutionState
 workflow/execution-store.tsx  ExecutionProvider, useExecutionStore
                               → recordOutcome, addCreatedCase, reset, isDirty
-workflow/projections.ts       pure: projectCases, projectCaseFacts,
+workflow/projections.ts       pure: applyExecutionOverride, projectCaseFacts,
                               revenueMovement, projectKpis, projectRevenueImpact,
-                              projectExecutionMetrics, projectActivity,
-                              projectNavBadges
+                              projectExecutionMetrics, projectActivity
 ```
 
 **Why split rather than one global store:** a single store holding everything
@@ -420,13 +419,13 @@ composed exclusively from semantic token class names.
 | `/work/[caseId]` | dynamic | **built** |
 | `/my-work` | dynamic | **built** |
 | `/api/copilot` | dynamic | **built** (`runtime: "nodejs"`) |
-| `/actions` `/analytics` `/playbooks` `/reports` `/system/connectors` `/system/audit` `/admin` | dynamic | placeholder |
+| `/actions` `/analytics` `/playbooks` `/reports` `/system/connectors` `/system/audit` `/admin` `/help` | dynamic | **built** |
+| `/login` | static | **built** |
 | `/_not-found` | static | — |
 
-Placeholders render `components/patterns/module-placeholder.tsx` with real scope
-copy from `MODULE_PLACEHOLDER_COPY`. The reasoning is in the source: *a
-navigable page that states its own scope reads as a roadmap; a disabled nav item
-or a grey box reads as broken.*
+Every route is built. The placeholder mechanism these seven once used
+(`ModulePlaceholder` and `MODULE_PLACEHOLDER_COPY`) was removed in the
+stabilization pass — see D-19 for why it existed and D-63 for why it went.
 
 Deep links work: `/work?band=CRITICAL`, `/work?overdue=true`, `/work?sort=revenue`,
 `/work?kpi=OTIF_PCT`. Dashboard KPI cards use them, so a number always opens the

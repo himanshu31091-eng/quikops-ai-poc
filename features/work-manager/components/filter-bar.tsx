@@ -22,6 +22,13 @@ import type {
 import { SORT_META } from "../utils/filter-definitions";
 import { FilterMenu } from "@/components/patterns/filter-menu";
 
+/**
+ * Work Manager's filter bar.
+ *
+ * Predates the shared `ModuleToolbar` and stays as it is: Work Manager is a
+ * frozen module, and its saved views and board/table switch are not part of
+ * the shared toolbar's contract. New modules use `ModuleToolbar`.
+ */
 interface FilterBarProps {
   facets: WorkFacets;
   filters: WorkFilters;

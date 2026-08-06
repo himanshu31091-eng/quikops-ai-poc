@@ -1,7 +1,12 @@
+"use client";
+
+import { ScreenDocButton } from "@/components/patterns/screen-doc-button";
 import * as React from "react";
 import { cn } from "@/src/lib/cn";
 
 interface PageHeaderProps {
+  /** Renders the "What does this screen do?" control beside the title. */
+  docKey?: string;
   title: string;
   description?: string;
   meta?: React.ReactNode;
@@ -10,6 +15,7 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({
+  docKey,
   title,
   description,
   meta,
@@ -24,9 +30,12 @@ export function PageHeader({
       )}
     >
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-[-0.014em] text-content">
-          {title}
-        </h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-xl font-semibold tracking-[-0.014em] text-content">
+            {title}
+          </h1>
+          {docKey ? <ScreenDocButton moduleKey={docKey} /> : null}
+        </div>
         {description ? (
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-content-secondary">
             {description}

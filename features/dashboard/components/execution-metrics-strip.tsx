@@ -3,6 +3,14 @@ import { Icon } from "@/components/patterns/icon";
 import type { ExecutionMetrics } from "@/src/domain/types";
 import { formatHours, formatPercent } from "@/src/lib/format";
 
+/**
+ * The four execution figures beneath the KPI row.
+ *
+ * Each carries a hint naming its definition ("case open to verified"), because
+ * a metric strip without definitions is where two people start quoting the
+ * same number to mean different things. The figures come from
+ * `src/domain/portfolio-metrics`, which is the only place they are computed.
+ */
 interface Metric {
   icon: string;
   label: string;

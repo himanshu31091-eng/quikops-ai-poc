@@ -4,6 +4,13 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Radix Avatar, styled to the design system.
+ *
+ * Kept as a thin wrapper rather than an owner-shaped component: the avatar is
+ * also used for plants and connectors, so the domain meaning belongs to the
+ * caller. `OwnerAvatar` in `components/patterns` is the domain-aware one.
+ */
 export const Avatar = React.forwardRef<
   React.ComponentRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>

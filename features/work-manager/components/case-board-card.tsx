@@ -17,6 +17,12 @@ import { caseHref } from "@/src/lib/routes";
 import { CaseRowActions } from "./case-row-actions";
 import { SelectionBox } from "./selection-box";
 
+/**
+ * One case, as a board card.
+ *
+ * The board and the table render the same `WorkCaseRow`, so switching view
+ * cannot change what a case says about itself — only how much of it fits.
+ */
 interface CaseBoardCardProps {
   row: WorkCaseRow;
   selected: boolean;

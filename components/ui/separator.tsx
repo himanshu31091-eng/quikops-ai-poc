@@ -4,6 +4,13 @@ import * as React from "react";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Radix Separator, styled to the design system.
+ *
+ * Decorative by default — most separators in the layout are visual only, and
+ * announcing each one is noise for a screen reader. Pass `decorative={false}`
+ * where the rule genuinely divides two regions.
+ */
 export const Separator = React.forwardRef<
   React.ComponentRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

@@ -22,6 +22,36 @@ const at = (dayOffset: number, hour = 6, minute = 15): string =>
 /** SLA target resolution hours by band, per the approved sprint plan. */
 const SLA_HOURS = SLA_TARGET_HOURS;
 
+/**
+ * How long a resolved case actually took, as a fraction of its SLA target.
+ *
+ * Previously a flat 0.8 for every terminal case, which meant **every resolved
+ * case met its target by construction** — SLA adherence computed to exactly
+ * 100% no matter how the metric was defined, and no derived figure could ever
+ * disagree with it because there was nothing to disagree about.
+ *
+ * Now derived from the case number so it is stable across every render and
+ * rehearsal (the same reason the trend series use a seeded PRNG), and spread
+ * either side of 1.0 so a realistic minority overran. Roughly a quarter of the
+ * range sits above target.
+ */
+function resolutionFactor(caseNo: string): number {
+  // FNV-1a, then the murmur3 finalizer. The finalizer is the point: case
+  // numbers are sequential, so a plain rolling hash produces near-identical
+  // values for near-identical inputs and every case in a run lands on the same
+  // factor. Without avalanche, five consecutive cases all resolved at 1.07 of
+  // target and all five "missed" — a pattern, not a spread.
+  let hash = 2166136261 >>> 0;
+  for (let index = 0; index < caseNo.length; index += 1) {
+    hash = Math.imul(hash ^ caseNo.charCodeAt(index), 16777619) >>> 0;
+  }
+  hash = Math.imul(hash ^ (hash >>> 16), 2246822507) >>> 0;
+  hash = Math.imul(hash ^ (hash >>> 13), 3266489909) >>> 0;
+  hash = (hash ^ (hash >>> 16)) >>> 0;
+
+  return 0.42 + ((hash % 1000) / 1000) * 0.76;
+}
+
 interface CaseSeed {
   caseNo: string;
   title: string;
@@ -748,6 +778,164 @@ const SEEDS: CaseSeed[] = [
     openActionCount: 0,
     playbookId: "pb_vendor_delay",
   },
+
+  /* ------------------------------------------------- Resolved history ------
+   * Closed work at the fast end of the portfolio.
+   *
+   * Added during fixture reconciliation. Before these existed, every resolved
+   * case in the corpus sat in the LOW or MEDIUM band, so mean time to resolve
+   * was computed entirely from 240- and 720-hour targets and reported ~21 days
+   * — arithmetically correct and completely unrepresentative, because no
+   * critical or high case had ever been resolved. A headline metric drawn from
+   * a biased sample is its own kind of wrong number.
+   *
+   * These five are the fast-band history that makes the average mean something.
+   */
+  {
+    caseNo: "QO-2026-004086",
+    title: "Bearing stockout cleared by expedited air freight",
+    description:
+      "Safety stock on 6206-2RS breached with two days of coverage. Cleared by air-freighting 3,000 units from the approved alternate and raising the reorder threshold.",
+    exceptionType: "INVENTORY_STOCKOUT",
+    detectedBy: "EVERY_ANGLE",
+    status: "VERIFIED",
+    plantCode: "US01",
+    materialCode: "RM-2210",
+    materialDesc: "Deep-groove ball bearing, 6206-2RS",
+    customerCode: "C-90044",
+    customerName: "Continental Drivetrain NA",
+    customerTier: "TIER_1",
+    supplierCode: "V-3390",
+    supplierName: "Shandong Bearing Works",
+    revenueAtRisk: 248_000,
+    kpiKey: "OTIF_PCT",
+    baselineValue: 84.8,
+    targetValue: 95,
+    ownerId: "usr_cmendoza",
+    openedDayOffset: -6,
+    daysToPromisedDate: 1,
+    recurrenceCount: 2,
+    escalationLevel: 2,
+    totalActionCount: 4,
+    openActionCount: 0,
+    playbookId: "pb_stockout",
+  },
+  {
+    caseNo: "QO-2026-004081",
+    title: "Quality hold released after containment and re-inspection",
+    description:
+      "Dimensional variation on stamped brackets held 1,800 units. Containment completed, lot re-inspected and released within the shift; supplier corrective action recorded.",
+    exceptionType: "QUALITY_HOLD",
+    detectedBy: "EVERY_ANGLE",
+    status: "VERIFIED",
+    plantCode: "DE01",
+    materialCode: "SA-1190",
+    materialDesc: "Stamped steel bracket, DC04, 3.0mm",
+    customerCode: "C-90071",
+    customerName: "Bosch Mobility Solutions",
+    customerTier: "TIER_1",
+    supplierCode: "V-4820",
+    supplierName: "Kaltenbach Präzision GmbH",
+    revenueAtRisk: 262_400,
+    kpiKey: "OTIF_PCT",
+    baselineValue: 83.9,
+    targetValue: 95,
+    ownerId: "usr_tberger",
+    openedDayOffset: -4,
+    daysToPromisedDate: 0,
+    recurrenceCount: 1,
+    escalationLevel: 1,
+    totalActionCount: 5,
+    openActionCount: 0,
+    playbookId: "pb_quality_hold",
+  },
+  {
+    caseNo: "QO-2026-004077",
+    title: "Extrusion delay recovered inside the promised window",
+    description:
+      "Confirmed date on aluminium extrusion slipped four days. Recovered by re-sequencing the extrusion line and part-shipping against the earliest customer window.",
+    exceptionType: "VENDOR_DELAY",
+    detectedBy: "EVERY_ANGLE",
+    status: "CLOSED",
+    plantCode: "MX01",
+    materialCode: "RM-4471",
+    materialDesc: "Aluminium extrusion profile, 6063-T5, 2400mm",
+    customerCode: "C-90012",
+    customerName: "Grupo Aeromex Manufactura",
+    customerTier: "TIER_1",
+    supplierCode: "V-2231",
+    supplierName: "Nordex Componentes S.A.",
+    revenueAtRisk: 118_600,
+    kpiKey: "SUPPLIER_OTD_PCT",
+    baselineValue: 82.3,
+    targetValue: 90,
+    ownerId: "usr_aokonkwo",
+    openedDayOffset: -9,
+    daysToPromisedDate: 4,
+    recurrenceCount: 1,
+    escalationLevel: 0,
+    totalActionCount: 4,
+    openActionCount: 0,
+    playbookId: "pb_vendor_delay",
+  },
+  {
+    caseNo: "QO-2026-004072",
+    title: "Forging capacity shortfall absorbed by schedule change",
+    description:
+      "Confirmed load exceeded forging capacity for one week. Absorbed by moving two lower-priority orders out and confirming the revised dates with planning.",
+    exceptionType: "CAPACITY_CONSTRAINT",
+    detectedBy: "PLAYBOOK_MONITOR",
+    status: "VERIFIED",
+    plantCode: "IN01",
+    materialCode: "FG-3308",
+    materialDesc: "Forged steel yoke, 42CrMo4",
+    customerCode: "C-90055",
+    customerName: "Tata Commercial Vehicles",
+    customerTier: "TIER_1",
+    supplierCode: null,
+    supplierName: null,
+    revenueAtRisk: 96_200,
+    kpiKey: "SCHEDULE_ADHERENCE_PCT",
+    baselineValue: 84.1,
+    targetValue: 92,
+    ownerId: "usr_psharma",
+    openedDayOffset: -11,
+    daysToPromisedDate: 6,
+    recurrenceCount: 1,
+    escalationLevel: 1,
+    totalActionCount: 3,
+    openActionCount: 0,
+    playbookId: "pb_capacity",
+  },
+  {
+    caseNo: "QO-2026-004068",
+    title: "Planning deviation corrected at source",
+    description:
+      "Published plan diverged from confirmed demand after a mid-month forecast load. Corrected at source and re-published to downstream planning the same day.",
+    exceptionType: "PLANNING_DEVIATION",
+    detectedBy: "MANUAL",
+    status: "CLOSED",
+    plantCode: "US01",
+    materialCode: null,
+    materialDesc: null,
+    customerCode: null,
+    customerName: null,
+    customerTier: "TIER_2",
+    supplierCode: null,
+    supplierName: null,
+    revenueAtRisk: 58_400,
+    kpiKey: "FORECAST_ACCURACY_PCT",
+    baselineValue: 86.7,
+    targetValue: 92,
+    ownerId: "usr_dkim",
+    openedDayOffset: -13,
+    daysToPromisedDate: 3,
+    recurrenceCount: 1,
+    escalationLevel: 0,
+    totalActionCount: 3,
+    openActionCount: 0,
+    playbookId: null,
+  },
 ];
 
 function buildCase(seed: CaseSeed): OperationalCase & {
@@ -765,12 +953,18 @@ function buildCase(seed: CaseSeed): OperationalCase & {
   });
 
   const openedAt = at(seed.openedDayOffset);
+  // Derived from the same SLA_TARGET_HOURS the domain uses, so the stored
+  // `slaBreachedAt` below is a materialised projection of
+  // `hasBreachedSla()` rather than an independent assertion. The twelve call
+  // sites that read the field therefore cannot drift from the rule: change the
+  // targets in `src/domain/sla.ts` and both move together.
   const slaHours = SLA_HOURS[priority.band] ?? 240;
   const dueAt = new Date(new Date(openedAt).getTime() + slaHours * HOUR_MS).toISOString();
   const isBreached = new Date(dueAt).getTime() < DEMO_NOW.getTime();
 
   const terminal = seed.status === "CLOSED" || seed.status === "VERIFIED";
   const assigned = seed.ownerId !== null;
+  const resolutionHours = slaHours * resolutionFactor(seed.caseNo);
 
   return {
     id: `case_${seed.caseNo.replace(/-/g, "_").toLowerCase()}`,
@@ -806,13 +1000,15 @@ function buildCase(seed: CaseSeed): OperationalCase & {
     dueAt,
     slaBreachedAt: isBreached && !terminal ? dueAt : null,
     verifiedAt: terminal
-      ? new Date(new Date(openedAt).getTime() + slaHours * 0.8 * HOUR_MS).toISOString()
+      ? new Date(new Date(openedAt).getTime() + resolutionHours * HOUR_MS).toISOString()
       : null,
+    // A closed case was verified first, then held open for the measurement
+    // window before the outcome was signed off as durable.
     closedAt:
       seed.status === "CLOSED"
         ? new Date(
             new Date(openedAt).getTime() +
-              (slaHours * 0.8 + KPI_MEASUREMENT_WINDOW_DAYS * 24) * HOUR_MS,
+              (resolutionHours + KPI_MEASUREMENT_WINDOW_DAYS * 24) * HOUR_MS,
           ).toISOString()
         : null,
     recurrenceCount: seed.recurrenceCount,

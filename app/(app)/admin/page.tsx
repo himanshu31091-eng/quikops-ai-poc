@@ -1,17 +1,20 @@
-import { ModulePlaceholder } from "@/components/patterns/module-placeholder";
-import { PageHeader } from "@/components/patterns/page-header";
-import { MODULE_PLACEHOLDER_COPY } from "@/src/config/app-config";
+import { getAdministrationData } from "@/src/data/queries/administration";
+import { AdministrationView } from "@/features/administration/components/administration-view";
 
-export const metadata = { title: MODULE_PLACEHOLDER_COPY["admin"]!.title };
+/**
+ * Administration.
+ *
+ * Server component: users, roles, routing rules and connector registration are
+ * all resolved here and passed down, so the client never asks for the org
+ * chart. Routing rules are derived from the corpus rather than declared (D-55).
+ */
+export const metadata = {
+  title: "Administration",
+  description:
+    "Users, roles, plant scoping, assignment routing rules, SLA thresholds and priority weight configuration.",
+};
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={MODULE_PLACEHOLDER_COPY["admin"]!.title}
-        description="This module is specified in the approved architecture and scheduled for Phase 2."
-      />
-      <ModulePlaceholder moduleKey="admin" />
-    </div>
-  );
+export default async function AdministrationPage() {
+  const data = await getAdministrationData();
+  return <AdministrationView data={data} />;
 }

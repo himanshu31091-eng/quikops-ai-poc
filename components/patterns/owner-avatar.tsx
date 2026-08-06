@@ -5,6 +5,13 @@ import { initials } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 import { Icon } from "./icon";
 
+/**
+ * A person, rendered consistently wherever ownership is shown.
+ *
+ * Unassigned is a first-class case rather than an empty avatar: an unowned
+ * item is the thing a manager is looking for, so it gets its own dashed mark
+ * and the word "Unassigned" instead of silently rendering nothing.
+ */
 interface OwnerAvatarProps {
   user: User | null;
   size?: "sm" | "md";

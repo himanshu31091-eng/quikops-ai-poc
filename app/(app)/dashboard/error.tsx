@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { RouteError } from "@/components/patterns/route-error";
 
+/** Error boundary for the Executive Dashboard; the shared `RouteError` panel does the rest. */
 export default function DashboardError({
   error,
   reset,

@@ -42,18 +42,6 @@ export function applyExecutionOverride(
   };
 }
 
-/** The set of cases a screen should show, with session outcomes folded in. */
-export function projectCases(
-  cases: CaseListItem[],
-  state: ExecutionState,
-  userById: Record<string, User>,
-): CaseListItem[] {
-  const source =
-    state.createdCases.length > 0 ? [...state.createdCases, ...cases] : cases;
-  return source.map((item) =>
-    applyExecutionOverride(item, state.overrides[item.caseNo], userById),
-  );
-}
 
 /**
  * Folds outcomes onto the fields the aggregate views actually read — status,
@@ -280,8 +268,11 @@ const ACTIVITY_KIND: Record<WorkflowEvent["kind"], ActivityEvent["kind"]> = {
 };
 
 /**
- * Session events, newest first, ahead of the stored feed. Mapped onto the
- * existing ActivityEvent shape so the feed component is untouched.
+ * Puts this session's workflow events at the head of the stored activity feed.
+ *
+ * The feed is capped rather than merged by timestamp: session events are always
+ * the most recent thing that happened, so ordering them by hand would only
+ * re-derive that. On an empty store this returns `stored` unchanged.
  */
 export function projectActivity(
   stored: ActivityEvent[],
@@ -303,17 +294,3 @@ export function projectActivity(
   return [...live, ...stored].slice(0, limit);
 }
 
-/* ------------------------------------------------------------- Nav badges */
-
-export function projectNavBadges(
-  badges: Record<string, number>,
-  projected: CaseListItem[],
-): Record<string, number> {
-  const openAfter = projected.filter((item) => isOpenStatus(item.status));
-  return {
-    ...badges,
-    unassigned: openAfter.filter((item) => item.ownerId === null).length,
-    approvals: openAfter.filter((item) => item.status === "PENDING_VERIFY").length,
-    breaches: openAfter.filter((item) => item.slaBreachedAt !== null).length,
-  };
-}

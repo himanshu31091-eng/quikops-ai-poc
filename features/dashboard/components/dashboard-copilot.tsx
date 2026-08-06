@@ -131,7 +131,7 @@ export function DashboardCopilotProvider({
 export function AskCopilotButton() {
   const { open } = useDashboardCopilot();
   return (
-    <Button variant="primary" size="md" onClick={() => open()}>
+    <Button variant="primary" size="md" onClick={() => open()} data-tour="dashboard-copilot">
       <Icon name="Sparkles" size="sm" />
       Ask Copilot
     </Button>

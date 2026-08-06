@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -39,6 +40,13 @@ import { TodaysWorkList } from "@/features/dashboard/components/todays-work-list
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatTimestamp } from "@/src/lib/format";
 
+/**
+ * The Executive Dashboard.
+ *
+ * Every figure on this page comes from `src/domain/portfolio-metrics` via the
+ * dashboard query, which is what makes it agree with Analytics and with the
+ * Copilot. Session work is layered on in `LiveDashboard`, never here.
+ */
 export const metadata = { title: "Executive Dashboard" };
 
 function MetaChip({ icon, children }: { icon: string; children: React.ReactNode }) {
@@ -127,7 +135,7 @@ export default async function ExecutiveDashboardPage() {
       />
 
       {/* KPI band */}
-      <section aria-label="Headline indicators">
+      <section aria-label="Headline indicators" data-tour="dashboard-kpi-band">
         <LiveKpiBand kpis={kpis} cases={caseBaseline} />
       </section>
 
@@ -197,10 +205,10 @@ export default async function ExecutiveDashboardPage() {
             className="h-full"
             action={
               <Button variant="ghost" size="sm" asChild>
-                <a href="/work?band=CRITICAL">
+                <Link href="/work?band=CRITICAL">
                   View all
                   <Icon name="ArrowRight" size="sm" />
-                </a>
+                </Link>
               </Button>
             }
           >
@@ -216,10 +224,10 @@ export default async function ExecutiveDashboardPage() {
             className="h-full"
             action={
               <Button variant="ghost" size="sm" asChild>
-                <a href="/my-work">
+                <Link href="/my-work">
                   My work
                   <Icon name="ArrowRight" size="sm" />
-                </a>
+                </Link>
               </Button>
             }
           >
@@ -247,13 +255,13 @@ export default async function ExecutiveDashboardPage() {
             icon="Activity"
             className="h-full"
             footer={
-              <a
+              <Link
                 href="/system/audit"
                 className="flex items-center gap-1.5 text-2xs font-medium text-accent hover:underline"
               >
                 Open full audit log
                 <Icon name="ArrowRight" size="xs" />
-              </a>
+              </Link>
             }
           >
             <LiveActivityFeed events={activity} limit={7} />

@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/** Loading skeleton for My Work, shaped to the layout it replaces. */
 export default function MyWorkLoading() {
   return (
     <div className="space-y-4">

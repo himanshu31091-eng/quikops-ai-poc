@@ -4,6 +4,13 @@ import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Radix DropdownMenu, styled to the design system.
+ *
+ * Aligned to the end and portalled by default: menus in this product hang off
+ * right-aligned triggers in toolbars and table rows, and portalling keeps them
+ * out of the overflow-clipped table containers.
+ */
 export const DropdownMenu = DropdownMenuPrimitive.Root;
 export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 export const DropdownMenuGroup = DropdownMenuPrimitive.Group;

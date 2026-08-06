@@ -5,6 +5,13 @@ import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { APP } from "@/src/config/app-config";
 
+/**
+ * The root layout.
+ *
+ * Holds only what must wrap every route including the login screen: fonts, the
+ * viewport, and the tooltip provider. Everything with a session in it lives in
+ * the `(app)` layout, which is the first place a user is known.
+ */
 export const metadata: Metadata = {
   title: {
     default: `${APP.name} — ${APP.tagline}`,

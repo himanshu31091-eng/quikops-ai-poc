@@ -7,6 +7,7 @@ import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { Button } from "@/components/ui/button";
 import type { SessionOverlay } from "@/src/ai/types";
 import type { User } from "@/src/domain/types";
+import { useFocusTrap } from "@/src/a11y/use-focus-trap";
 import { cn } from "@/src/lib/cn";
 import { useCopilot } from "./use-copilot";
 import type { CopilotSubject } from "./types";
@@ -126,6 +127,7 @@ export function CopilotPanel({
     ...(subject.caseNo !== undefined ? { caseNo: subject.caseNo } : {}),
     ...(overlayRef !== undefined ? { overlayRef } : {}),
   });
+  const trapRef = useFocusTrap(open);
   const [draft, setDraft] = React.useState("");
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
@@ -195,6 +197,7 @@ export function CopilotPanel({
         focusable controls in the tab order.
       */}
       <aside
+        ref={trapRef as React.RefObject<HTMLElement>}
         aria-label="QuikOps AI Copilot"
         inert={!open}
         className={cn(

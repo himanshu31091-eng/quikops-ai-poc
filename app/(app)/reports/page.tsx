@@ -1,17 +1,20 @@
-import { ModulePlaceholder } from "@/components/patterns/module-placeholder";
-import { PageHeader } from "@/components/patterns/page-header";
-import { MODULE_PLACEHOLDER_COPY } from "@/src/config/app-config";
+import { getReportsData } from "@/src/data/queries/reports";
+import { ReportsView } from "@/features/reports/components/reports-view";
 
-export const metadata = { title: MODULE_PLACEHOLDER_COPY["reports"]!.title };
+/**
+ * Reports.
+ *
+ * Report definitions are resolved on the server and rendered from the live
+ * corpus, so an exported report and the screen it came from cannot disagree.
+ * Delivery scheduling is a Phase-2 item (see ROADMAP.md).
+ */
+export const metadata = {
+  title: "Reports",
+  description:
+    "Scheduled executive and audit reporting with PDF and CSV distribution to stakeholder lists.",
+};
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={MODULE_PLACEHOLDER_COPY["reports"]!.title}
-        description="This module is specified in the approved architecture and scheduled for Phase 2."
-      />
-      <ModulePlaceholder moduleKey="reports" />
-    </div>
-  );
+export default async function ReportsPage() {
+  const data = await getReportsData();
+  return <ReportsView data={data} />;
 }

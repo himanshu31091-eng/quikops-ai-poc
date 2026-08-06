@@ -10,7 +10,7 @@
 
 ### 0a. Before writing any code — every session
 
-Read `CLAUDE.md` at the repo root, then all seven `.claude/*.md` files, then
+Read `CLAUDE.md` at the repo root, then all eight `.claude/*.md` files, then
 `.claude/SESSION_HANDOFF.md` to find where the last session stopped. Check
 whether the module you are about to touch is frozen, and whether `DECISIONS.md`
 already settles the question you are about to answer.
@@ -240,9 +240,10 @@ second copy is a bug:
 
 ```bash
 npm run dev         # next dev
+npx eslint .        # 0 errors, 0 warnings (D-62)
 npm run build       # next build
 npm run typecheck   # tsc --noEmit
-npm run lint        # next lint
+npm run lint        # eslint .
 npm start           # next start
 ```
 

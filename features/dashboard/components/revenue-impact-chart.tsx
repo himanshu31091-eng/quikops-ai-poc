@@ -57,6 +57,13 @@ function renderTooltip(
   );
 }
 
+/**
+ * Revenue at risk by exception type, split into at-risk and recovered.
+ *
+ * Stacked rather than grouped: the question the panel answers is how much of
+ * each type's exposure has been recovered, which is a share of one total, not
+ * two independent quantities.
+ */
 export function RevenueImpactChart({ data }: { data: RevenueImpactBucket[] }) {
   const rows = React.useMemo<Row[]>(
     () =>

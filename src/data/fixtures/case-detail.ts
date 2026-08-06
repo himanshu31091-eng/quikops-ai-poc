@@ -168,6 +168,17 @@ const DETECTION_RULE: Record<
  * The plant's own operations manager reviews where one exists, otherwise the
  * VP of Global Operations does.
  */
+/**
+ * English ordinal. A naive `${n}th` produced "the 3th detection" on the golden
+ * case — the first thing a client reads on the most-demonstrated record.
+ */
+function ordinal(value: number): string {
+  const lastTwo = value % 100;
+  if (lastTwo >= 11 && lastTwo <= 13) return `${value}th`;
+  const suffix = { 1: "st", 2: "nd", 3: "rd" }[value % 10] ?? "th";
+  return `${value}${suffix}`;
+}
+
 export function reviewerFor(item: CaseListItem): User {
   const plantManager = USERS.find(
     (user) =>
@@ -784,7 +795,7 @@ export function buildComments(item: CaseListItem): CaseComment[] {
     authorRole: analyst.role,
     body: `Pulled the history on ${subject}. ${
       item.recurrenceCount > 1
-        ? `This is the ${item.recurrenceCount}th detection in the current window — the interval between detections is shortening, which usually means the underlying condition was never actually cleared.`
+        ? `This is the ${ordinal(item.recurrenceCount)} detection in the current window — the interval between detections is shortening, which usually means the underlying condition was never actually cleared.`
         : "No prior detection against this combination in the last 90 days, so treating it as a first occurrence."
     } @${owner?.name ?? reviewer.name} the numbers behind the priority score are on the case if you want to sanity-check the weighting.`,
     at: plusHours(item.openedAt, 3.5),

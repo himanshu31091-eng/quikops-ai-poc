@@ -7,6 +7,13 @@ import { formatWhen } from "@/src/lib/format";
 import { caseHref } from "@/src/lib/routes";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * The operational activity stream.
+ *
+ * Every event kind gets its own icon and colour from one table, so a new kind
+ * is added by extending `EVENT_META` rather than by branching in the render.
+ * The feed shows what happened; it never derives whether it mattered.
+ */
 const EVENT_META: Record<
   ActivityEvent["kind"],
   { icon: string; className: string }

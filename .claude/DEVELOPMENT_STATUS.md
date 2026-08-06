@@ -3,8 +3,49 @@
 > Authoritative record of what is built, what is frozen, and what is not.
 > **Update this after every completed module, before ending the session.**
 
-**Last updated:** 2026-08-06 · after Phase 5 (Real AI Copilot)
-**Build:** `tsc --noEmit` clean · `next build` ✓ compiled in 6.0s · 15/15 pages
+**Last updated:** 2026-08-06 · after Connector Health
+**Build:** `npm run typecheck` clean · `npm run build` ✓ 15/15 pages
+
+---
+
+## 0. Current state — read this first
+
+**Priority 1 closed**, plus two Priority 2 modules and a full fixture
+reconciliation. Eight modules live:
+
+| Module | Route | State |
+|---|---|---|
+| Executive Dashboard | `/dashboard` | ✅ frozen |
+| Work Manager | `/work` | ✅ frozen |
+| Case Detail | `/work/[caseId]` | ✅ frozen |
+| My Work | `/my-work` | ✅ frozen |
+| Execution Workflow | (cross-module store) | ✅ frozen |
+| AI Copilot | `/api/copilot` | ✅ **live** `claude-opus-5`, case + portfolio scope |
+| Execution Analytics | `/analytics` | ✅ complete |
+| Action Center | `/actions` | ✅ complete |
+| **Connector Health** | `/system/connectors` | ✅ **complete — 2026-08-06** |
+
+Remaining placeholders: Reports, Audit Log, Administration, Playbooks. Backlog
+and sequencing in `ROADMAP.md`.
+
+**Every portfolio figure is derived** by `src/domain/portfolio-metrics.ts`
+(D-48). Dashboard and Analytics report identical values — verified 11d / 62.1% /
+76.9% / 41.4%. Connector throughput derives from the case corpus the same way
+(D-51): 23 cases raised = 17 Every Angle + 6 playbook monitor, 6 manual, 29 total.
+
+### Connector Health — what was built
+
+Connector overview (6 feeds, health-scored cards with sparklines) · 4 KPI tiles,
+two of them filter presets · integration health · last/next sync with overdue
+detection · records processed and failed · ingestion funnel (received →
+deduplicated → rejected → applied, arithmetically closed) · dead-letter queue
+with single and bulk replay · sync history (18 runs per connector, filterable) ·
+field-mapping viewer (27 mappings, scopes to the selected connector) · per-
+connector health trends.
+
+New domain module `src/domain/connector-health.ts` scores three failure modes
+separately, with staleness overriding the numeric band (D-52). Replay publishes
+a workflow event, so the dashboard activity feed shows the intervention.
 
 ---
 
@@ -207,7 +248,7 @@ Both are one-line fixes and both qualify as bug fixes under the module freeze.
 
 Read from the running app. Use these rather than re-deriving.
 
-Open cases **19** of 24 · revenue at risk **$1,531,700** · OTIF **88.5%** ·
+Open cases **19** of 29 · revenue at risk **$1,531,700** · OTIF **88.5%** ·
 open critical **2** · SLA breaches **9** · unassigned **5** · pending
 verification **3** · bands CRITICAL 2 / HIGH 5 / MEDIUM 10 / LOW 2.
 
@@ -220,34 +261,46 @@ SLA-breached, health **0 / OFF_TRACK**, 0 actions, 1 evidence, 1 comment,
 
 ## 5. Placeholder modules
 
-Navigable pages stating their own scope. Copy lives in `MODULE_PLACEHOLDER_COPY`
-(`src/config/app-config.ts`).
-
-| Route | Module | Scope |
-|---|---|---|
-| `/actions` | Action Center (M3) | Cross-case approval queue for corrective actions needing manager sign-off |
-| `/analytics` | Execution Analytics (M8) | MTTR, SLA adherence, verification pass rate, recurrence by plant/owner/type |
-| `/playbooks` | Playbook Library (M6) | Reusable corrective-action templates per exception type |
-| `/reports` | Reports (M13) | Scheduled executive and audit reporting, PDF/Excel distribution |
-| `/system/connectors` | Connector Health (M1) | Every Angle ingestion status, run history, dedup, dead-letter replay |
-| `/system/audit` | Audit Log (M11) | Append-only record of every state change across all cases |
-| `/admin` | Administration (M12) | Users, roles, plant scoping, routing rules, SLA thresholds, priority weights |
+**None.** Every route in the navigation is built. The seven placeholders listed
+here in earlier revisions — `/actions`, `/analytics`, `/playbooks`, `/reports`,
+`/system/connectors`, `/system/audit`, `/admin` — all shipped, and the
+placeholder component and its copy table were removed in the stabilization pass
+(D-19, D-63).
 
 ---
 
 ## 6. Scale
 
-~22,977 lines of TypeScript/TSX across 160 source files.
+**40,508 lines of TypeScript/TSX across 243 source files** (2026-08-06, after
+the stabilization pass removed four files and ten unused exports).
 
 | Area | Lines |
 |---|---|
-| `features/` | 12,774 |
-| `src/` | 6,279 |
-| `components/` | 2,487 |
-| `app/` | 1,437 |
+| `features/` | 21,707 |
+| `src/` | 11,858 |
+| `components/` | 4,844 |
+| `app/` | 2,099 |
 
-Largest files: `src/data/fixtures/case-detail.ts` (1,259) ·
-`features/case-detail/hooks/use-case-detail.ts` (1,252) ·
-`src/data/fixtures/cases.ts` (828) ·
-`features/case-detail/components/corrective-actions-card.tsx` (685) ·
-`features/work-manager/hooks/use-work-manager.ts` (489).
+Largest files: `src/data/fixtures/case-detail.ts` (1,271) ·
+`features/case-detail/hooks/use-case-detail.ts` (1,253) ·
+`src/data/fixtures/cases.ts` (1,025) ·
+`features/case-detail/components/corrective-actions-card.tsx` (686) ·
+`features/action-center/hooks/use-action-center.ts` (626) ·
+`features/reports/components/reports-view.tsx` (598).
+
+---
+
+## 7. Stabilization pass — 2026-08-06
+
+No features added. ESLint introduced and driven to zero; 4 files and 10 exports
+removed; every one of the 243 source files documented; 46 table headers scoped;
+two functional defects fixed (Demo Reset restored only half the product;
+`projectActivity` was deleted by the dead-code sweep and caught by typecheck).
+
+Gates on this build: `npx eslint .` clean · `npm run typecheck` clean ·
+`npm run build` 16/16 routes, no warnings · 16/16 routes render · live
+`claude-opus-5` Copilot confirmed on the production server · zero occurrences of
+the API key in `.next/static`.
+
+Full detail in `RELEASE_NOTES.md`; what was and was not verified is in
+`QA_CHECKLIST.md`; decisions are D-62 to D-66.

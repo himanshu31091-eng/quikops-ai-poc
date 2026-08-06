@@ -8,6 +8,12 @@ import { formatDue } from "@/src/lib/format";
 import { caseHref } from "@/src/lib/routes";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * The actions due today, with where each one came from.
+ *
+ * Origin is shown on every row because an AI-suggested action and a playbook
+ * step carry different weight for the person deciding whether to do it now.
+ */
 const ORIGIN_LABEL = {
   AI_SUGGESTED: { label: "AI suggested", icon: "Sparkles" },
   PLAYBOOK: { label: "Playbook", icon: "BookMarked" },

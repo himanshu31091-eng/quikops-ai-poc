@@ -73,11 +73,23 @@ Also seeded, assignable but not personas: Priya Sharma (Plant Ops Manager,
 Querétaro), Thomas Berger (Senior Production Planner, DE01), Aisha Okonkwo
 (Logistics Lead), Daniel Kim (Supply Chain Analyst).
 
-**24 operational cases** (`src/data/fixtures/cases.ts`), distributed:
+**29 operational cases** (`src/data/fixtures/cases.ts`), distributed:
 
-- Status: 2 `NEW`, 3 `TRIAGED`, 4 `ASSIGNED`, 6 `IN_PROGRESS`, 3 `PENDING_VERIFY`, 2 `VERIFIED`, 3 `CLOSED`, 1 `REOPENED`
-- Detection source: 14 `EVERY_ANGLE`, 5 `PLAYBOOK_MONITOR`, 5 `MANUAL`
+- Status: 2 `NEW`, 3 `TRIAGED`, 4 `ASSIGNED`, 6 `IN_PROGRESS`, 3 `PENDING_VERIFY`, 5 `VERIFIED`, 5 `CLOSED`, 1 `REOPENED` — **19 open, 10 resolved**
+- Detection source: 17 `EVERY_ANGLE`, 6 `PLAYBOOK_MONITOR`, 6 `MANUAL`
 - Priority band is **not seeded** — it is computed by `computePriority()` from the seed's inputs.
+- Resolution time is **not seeded** either — `resolutionFactor(caseNo)` spreads it
+  either side of each case's SLA target, so 8 of the 10 resolved cases met their
+  target and 2 missed. A flat multiplier previously made adherence 100% by
+  construction (D-50).
+
+**Every portfolio figure is derived** from this corpus by
+`src/domain/portfolio-metrics.ts` — open counts, exposure, breaches, MTTR, SLA
+adherence, verification pass rate, recurrence, plant rollups and the dashboard's
+AI summary. Nothing is asserted separately, so no two screens can disagree
+(D-48). The exceptions are OTIF, inventory days and schedule adherence, which
+are Every Angle measurements, and quarter-on-quarter deltas, which need a prior
+period the snapshot does not contain.
 
 ---
 

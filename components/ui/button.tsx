@@ -32,6 +32,13 @@ const buttonVariants = cva(
   },
 );
 
+/**
+ * The one button.
+ *
+ * Every variant the product uses is enumerated here, so a new call site picks
+ * a variant rather than writing classes. `asChild` lets a `<Link>` take the
+ * button's appearance without nesting an anchor inside a button.
+ */
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {

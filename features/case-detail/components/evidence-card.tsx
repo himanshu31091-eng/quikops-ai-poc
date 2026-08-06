@@ -244,6 +244,9 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 ref={inputRef}
                 type="file"
                 multiple
+                // Visually hidden but still focusable, so it needs a name of
+                // its own — the Browse button beside it is not its label.
+                aria-label="Attach evidence files"
                 accept={ACCEPT_ATTRIBUTE}
                 className="sr-only"
                 onChange={(event) => {

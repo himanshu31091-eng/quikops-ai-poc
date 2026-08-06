@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -47,10 +48,10 @@ export function NoDataState({ onCreate }: { onCreate: () => void }) {
             Create case
           </Button>
           <Button variant="secondary" size="md" asChild>
-            <a href="/system/connectors">
+            <Link href="/system/connectors">
               <Icon name="PlugZap" size="sm" />
               Connector health
-            </a>
+            </Link>
           </Button>
         </div>
       }

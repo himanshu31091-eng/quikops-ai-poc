@@ -62,6 +62,12 @@ function renderTooltip(
   );
 }
 
+/**
+ * OTIF over time, against the target line.
+ *
+ * The reference line is what makes the series mean something — a trend without
+ * the target only shows movement, not whether the movement is enough.
+ */
 export function OtifTrendChart({ data }: { data: TrendPoint[] }) {
   const [rangeKey, setRangeKey] = React.useState<string>("90");
   const range = RANGES.find((r) => r.key === rangeKey) ?? RANGES[2];

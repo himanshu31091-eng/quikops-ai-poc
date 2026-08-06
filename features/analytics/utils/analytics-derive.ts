@@ -1,6 +1,7 @@
 import { CHART_COLORS } from "@/components/charts/chart-primitives";
 import { EXCEPTION_META, PRIORITY_META, ROLE_META } from "@/src/config/app-config";
 import { isOpenStatus, statusGroupOf } from "@/src/domain/case-status";
+import { slaAdherencePct } from "@/src/domain/portfolio-metrics";
 import { SLA_TARGET_HOURS } from "@/src/domain/sla";
 import type {
   CaseListItem,
@@ -91,11 +92,14 @@ function mean(values: number[]): number | null {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-/** SLA adherence across resolved cases. Null when nothing has resolved. */
+/**
+ * SLA adherence. Delegates to the domain definition rather than restating it —
+ * Analytics previously measured resolved cases only while the dashboard counted
+ * live breaches, so the two screens reported different adherence for the same
+ * plant. One function now answers for both.
+ */
 function adherencePct(cases: AnalyticsCase[]): number | null {
-  const resolved = cases.filter((item) => item.resolutionHours !== null);
-  if (resolved.length === 0) return null;
-  return (resolved.filter((item) => item.metSla).length / resolved.length) * 100;
+  return slaAdherencePct(cases, DEMO_NOW);
 }
 
 /* -------------------------------------------------------------- KPI cards */
@@ -288,7 +292,7 @@ export function byException(cases: AnalyticsCase[]): CategoryDatum[] {
  * cases themselves rather than a stored series, so it always reconciles with
  * the tables beside it.
  */
-export function weeklyThroughput(cases: AnalyticsCase[], days: number): WeeklyDatum[] {
+export function weeklyThroughputSeries(cases: AnalyticsCase[], days: number): WeeklyDatum[] {
   const cutoff = DEMO_NOW.getTime() - days * DAY_MS;
   const buckets = new Map<string, WeeklyDatum>();
 

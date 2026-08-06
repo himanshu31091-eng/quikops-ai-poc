@@ -1,17 +1,20 @@
-import { ModulePlaceholder } from "@/components/patterns/module-placeholder";
-import { PageHeader } from "@/components/patterns/page-header";
-import { MODULE_PLACEHOLDER_COPY } from "@/src/config/app-config";
+import { getPlaybookLibraryData } from "@/src/data/queries/playbooks";
+import { PlaybooksView } from "@/features/playbooks/components/playbooks-view";
 
-export const metadata = { title: MODULE_PLACEHOLDER_COPY["playbooks"]!.title };
+/**
+ * The Playbook library.
+ *
+ * Reads `PLAYBOOK_LIBRARY`, which is the same data the corrective-action
+ * generator runs. A library describing plays the engine does not run would be
+ * documentation, not configuration.
+ */
+export const metadata = {
+  title: "Playbooks",
+  description:
+    "Reusable corrective-action templates per exception type, with usage counts, average resolution time and measured effectiveness.",
+};
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={MODULE_PLACEHOLDER_COPY["playbooks"]!.title}
-        description="This module is specified in the approved architecture and scheduled for Phase 2."
-      />
-      <ModulePlaceholder moduleKey="playbooks" />
-    </div>
-  );
+export default async function PlaybooksPage() {
+  const data = await getPlaybookLibraryData();
+  return <PlaybooksView data={data} />;
 }

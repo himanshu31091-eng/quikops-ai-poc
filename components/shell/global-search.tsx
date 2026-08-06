@@ -10,6 +10,13 @@ import type { PriorityBand } from "@/src/domain/types";
 import { caseHref } from "@/src/lib/routes";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Command-palette search over cases and navigation.
+ *
+ * Opens on Cmd/Ctrl+K. Searches the case corpus the server already sent for
+ * the shell rather than calling an endpoint, which is what keeps the palette
+ * instant — the demo corpus is small enough to filter in the browser.
+ */
 export interface SearchableCase {
   caseNo: string;
   title: string;

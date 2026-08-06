@@ -5,8 +5,15 @@ import type {
   RevenueImpactBucket,
   TrendPoint,
 } from "@/src/domain/types";
+import { EXCEPTION_TYPES } from "@/src/domain/types";
+import { isOpenStatus } from "@/src/domain/case-status";
+import {
+  computeExecutionMetrics,
+  computePlantRollup,
+} from "@/src/domain/portfolio-metrics";
 import { DEMO_NOW, TREND_WINDOW_DAYS } from "@/src/lib/constants";
-import { PLANT_BY_CODE } from "./organisation";
+import { CASES } from "./cases";
+import { PLANTS } from "./organisation";
 
 const DAY_MS = 86_400_000;
 
@@ -120,57 +127,73 @@ export const SCHEDULE_ADHERENCE_SERIES_90D = buildSeries({
 
 /* ------------------------------------------------------------- Plant health */
 
-export const PLANT_HEALTH: PlantHealth[] = [
-  {
-    plant: PLANT_BY_CODE["MX01"]!,
-    otifPct: 87.4,
-    otifDeltaPts: -3.1,
-    openCases: 8,
-    criticalCases: 2,
-    revenueAtRisk: 440_800,
-    slaAdherencePct: 78.4,
-  },
-  {
-    plant: PLANT_BY_CODE["US01"]!,
-    otifPct: 92.1,
-    otifDeltaPts: -1.4,
-    openCases: 6,
-    criticalCases: 1,
-    revenueAtRisk: 434_900,
-    slaAdherencePct: 86.2,
-  },
-  {
-    plant: PLANT_BY_CODE["DE01"]!,
-    otifPct: 91.7,
-    otifDeltaPts: 0.8,
-    openCases: 7,
-    criticalCases: 1,
-    revenueAtRisk: 458_100,
-    slaAdherencePct: 89.5,
-  },
-  {
-    plant: PLANT_BY_CODE["IN01"]!,
-    otifPct: 94.2,
-    otifDeltaPts: 1.6,
-    openCases: 4,
-    criticalCases: 0,
-    revenueAtRisk: 202_600,
-    slaAdherencePct: 91.8,
-  },
-];
+/**
+ * On-time-in-full per plant, as measured by Every Angle.
+ *
+ * Genuinely external: OTIF is computed by the analytics platform over its own
+ * window against confirmed delivery data QuikOps does not hold. Reading it is
+ * correct; recomputing it from the case list would be inventing a number.
+ * Everything else on the plant-health row *is* derived — see below.
+ */
+const PLANT_OTIF: Record<string, { otifPct: number; otifDeltaPts: number }> = {
+  MX01: { otifPct: 87.4, otifDeltaPts: -3.1 },
+  US01: { otifPct: 92.1, otifDeltaPts: -1.4 },
+  DE01: { otifPct: 91.7, otifDeltaPts: 0.8 },
+  IN01: { otifPct: 94.2, otifDeltaPts: 1.6 },
+};
+
+/**
+ * Plant health, derived from the case corpus.
+ *
+ * Open counts, critical counts, exposure and SLA adherence were hand-authored
+ * and had drifted: two criticals were attributed to Querétaro when both sat at
+ * Ingolstadt, and the live Copilot noticed the contradiction unprompted. They
+ * are now computed by `src/domain/portfolio-metrics.ts`, the same module the
+ * dashboard, the AI summary and Execution Analytics read, so the four can no
+ * longer disagree.
+ */
+export const PLANT_HEALTH: PlantHealth[] = PLANTS.map((plant) => {
+  const rollup = computePlantRollup(CASES, plant.code, DEMO_NOW);
+  const otif = PLANT_OTIF[plant.code] ?? { otifPct: 0, otifDeltaPts: 0 };
+  return {
+    plant,
+    otifPct: otif.otifPct,
+    otifDeltaPts: otif.otifDeltaPts,
+    openCases: rollup.openCases,
+    criticalCases: rollup.criticalCases,
+    revenueAtRisk: rollup.revenueAtRisk,
+    slaAdherencePct: rollup.slaAdherencePct,
+  };
+}).sort((a, b) => a.otifPct - b.otifPct);
 
 /* ----------------------------------------------------------- Revenue impact */
 
-export const REVENUE_IMPACT: RevenueImpactBucket[] = [
-  { exceptionType: "VENDOR_DELAY", atRisk: 430_500, recovered: 162_000, caseCount: 6 },
-  { exceptionType: "CAPACITY_CONSTRAINT", atRisk: 402_400, recovered: 88_600, caseCount: 3 },
-  { exceptionType: "MATERIAL_SHORTAGE", atRisk: 272_600, recovered: 129_800, caseCount: 3 },
-  { exceptionType: "QUALITY_HOLD", atRisk: 155_100, recovered: 71_400, caseCount: 3 },
-  { exceptionType: "INVENTORY_STOCKOUT", atRisk: 150_100, recovered: 34_200, caseCount: 2 },
-  { exceptionType: "DELIVERY_AT_RISK", atRisk: 134_300, recovered: 41_900, caseCount: 3 },
-  { exceptionType: "PLANNING_DEVIATION", atRisk: 117_500, recovered: 26_700, caseCount: 3 },
-  { exceptionType: "INVENTORY_EXCESS", atRisk: 65_500, recovered: 48_300, caseCount: 2 },
-];
+/**
+ * Exposure and recovery by exception type, derived from the case corpus.
+ *
+ * Previously hand-authored, and it did not add up: the buckets totalled
+ * $1,728,000 across 25 cases against a portfolio of $1,531,700 across 19 open
+ * ones. The live Copilot found this by summing the block and comparing it with
+ * the headline — which is exactly the check a client would run.
+ *
+ * `atRisk` counts open exposure; `recovered` counts cases that reached a
+ * verified outcome, because verification is the only route to recovered revenue
+ * (D-02). Empty buckets are dropped so the chart shows categories that exist.
+ */
+export const REVENUE_IMPACT: RevenueImpactBucket[] = EXCEPTION_TYPES.map((exceptionType) => {
+  const ofType = CASES.filter((item) => item.exceptionType === exceptionType);
+  const open = ofType.filter((item) => isOpenStatus(item.status));
+  return {
+    exceptionType,
+    atRisk: open.reduce((sum, item) => sum + item.revenueAtRisk, 0),
+    recovered: ofType
+      .filter((item) => item.verifiedAt !== null)
+      .reduce((sum, item) => sum + item.revenueAtRisk, 0),
+    caseCount: open.length,
+  };
+})
+  .filter((bucket) => bucket.caseCount > 0 || bucket.recovered > 0)
+  .sort((a, b) => b.atRisk - a.atRisk);
 
 /* --------------------------------------------------------- Inventory health */
 
@@ -215,13 +238,30 @@ export const INVENTORY_HEALTH: InventoryHealthRow[] = [
 
 /* -------------------------------------------------------- Execution metrics */
 
-export const EXECUTION_METRICS: ExecutionMetrics = {
-  mttrHours: 38.4,
+/**
+ * Quarter-on-quarter movement.
+ *
+ * The only figures here that are not derived. A delta compares against a prior
+ * period, and the corpus is a single snapshot — deriving these would mean
+ * inventing the quarter they are measured against. Stored, and labelled as
+ * stored, rather than computed from data that does not exist.
+ */
+const HISTORICAL_DELTAS = {
   mttrDeltaPct: -21.6,
-  slaAdherencePct: 86.4,
   slaAdherenceDeltaPts: 4.2,
-  verificationPassRatePct: 91.3,
-  recurrenceRatePct: 14.8,
-  casesClosedThisWeek: 11,
-  casesOpenedThisWeek: 14,
-};
+} as const;
+
+/**
+ * Execution performance, derived from the case corpus.
+ *
+ * Mean time to resolve, SLA adherence, verification pass rate, recurrence rate
+ * and weekly throughput all come from `src/domain/portfolio-metrics.ts`. They
+ * were previously asserted, and the assertions had drifted far enough that the
+ * dashboard reported 86.4% adherence beside a KPI tile counting nine live
+ * breaches.
+ */
+export const EXECUTION_METRICS: ExecutionMetrics = computeExecutionMetrics(
+  CASES,
+  DEMO_NOW,
+  HISTORICAL_DELTAS,
+);

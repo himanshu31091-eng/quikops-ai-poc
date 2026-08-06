@@ -70,12 +70,12 @@ export function PlantPerformanceTable({
       <table className="w-full min-w-140 border-collapse">
         <thead>
           <tr className="border-b border-line">
-            <th className={HEAD_CLASS}>Plant</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>Cases</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>Past SLA</th>
-            <th className={HEAD_CLASS}>SLA adherence</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>Avg resolve</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>At risk</th>
+            <th scope="col" className={HEAD_CLASS}>Plant</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Cases</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Past SLA</th>
+            <th scope="col" className={HEAD_CLASS}>SLA adherence</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Avg resolve</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>At risk</th>
           </tr>
         </thead>
         <tbody>
@@ -160,12 +160,12 @@ export function PersonPerformanceTable({
       <table className="w-full min-w-140 border-collapse">
         <thead>
           <tr className="border-b border-line">
-            <th className={HEAD_CLASS}>Person</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>{loadLabel}</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>Resolved</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>Past SLA</th>
-            <th className={HEAD_CLASS}>SLA adherence</th>
-            <th className={cn(HEAD_CLASS, "text-right")}>Avg resolve</th>
+            <th scope="col" className={HEAD_CLASS}>Person</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{loadLabel}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Resolved</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Past SLA</th>
+            <th scope="col" className={HEAD_CLASS}>SLA adherence</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Avg resolve</th>
           </tr>
         </thead>
         <tbody>

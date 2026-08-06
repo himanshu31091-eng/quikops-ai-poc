@@ -4,6 +4,13 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Radix Dialog, styled to the design system.
+ *
+ * Only `DialogContent` is wrapped — overlay, portal and focus handling come
+ * from Radix, which already implements the focus trap and scroll lock the
+ * modals need.
+ */
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogTitle = DialogPrimitive.Title;

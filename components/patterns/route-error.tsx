@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "./icon";
@@ -51,10 +52,10 @@ export function RouteError({
             Retry
           </Button>
           <Button variant="secondary" size="md" asChild>
-            <a href={fallbackHref}>
+            <Link href={fallbackHref}>
               {fallbackIcon ? <Icon name={fallbackIcon} size="sm" /> : null}
               {fallbackLabel}
-            </a>
+            </Link>
           </Button>
         </div>
       </div>

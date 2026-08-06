@@ -7,6 +7,13 @@ import { OTIF_TARGET_PCT } from "@/src/lib/constants";
 import { formatPercent } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * OTIF attainment by plant, worst first.
+ *
+ * Sorted ascending on purpose: the row a manager needs is the one that is
+ * failing, and putting it first means the panel does not need to be read to be
+ * useful. Each row links into Work Manager already scoped to that plant.
+ */
 export function OperationalHealth({ data }: { data: PlantHealth[] }) {
   const sorted = [...data].sort((a, b) => a.otifPct - b.otifPct);
 

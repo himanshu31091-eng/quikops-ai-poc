@@ -79,7 +79,7 @@ export const NAVIGATION: NavSection[] = [
         label: "Action Center",
         href: "/actions",
         icon: "ListChecks",
-        phase: "PHASE_2",
+        phase: "LIVE",
         badgeKey: "approvals",
         roles: ALL_ROLES,
       },
@@ -102,7 +102,7 @@ export const NAVIGATION: NavSection[] = [
         label: "Playbooks",
         href: "/playbooks",
         icon: "BookMarked",
-        phase: "PHASE_2",
+        phase: "LIVE",
         roles: ALL_ROLES,
       },
       {
@@ -110,7 +110,7 @@ export const NAVIGATION: NavSection[] = [
         label: "Reports",
         href: "/reports",
         icon: "FileText",
-        phase: "PHASE_2",
+        phase: "LIVE",
         roles: ALL_ROLES,
       },
     ],
@@ -124,7 +124,7 @@ export const NAVIGATION: NavSection[] = [
         label: "Connector Health",
         href: "/system/connectors",
         icon: "PlugZap",
-        phase: "PHASE_2",
+        phase: "LIVE",
         roles: ALL_ROLES,
       },
       {
@@ -132,7 +132,15 @@ export const NAVIGATION: NavSection[] = [
         label: "Audit Log",
         href: "/system/audit",
         icon: "ScrollText",
-        phase: "PHASE_2",
+        phase: "LIVE",
+        roles: ALL_ROLES,
+      },
+      {
+        key: "help",
+        label: "Help Center",
+        href: "/help",
+        icon: "CircleHelp",
+        phase: "LIVE",
         roles: ALL_ROLES,
       },
       {
@@ -140,7 +148,7 @@ export const NAVIGATION: NavSection[] = [
         label: "Administration",
         href: "/admin",
         icon: "Settings2",
-        phase: "PHASE_2",
+        phase: "LIVE",
         roles: ["ADMINISTRATOR", "OPS_MANAGER", "EXECUTIVE"],
       },
     ],
@@ -301,61 +309,4 @@ export const ROLE_META: Record<UserRole, { label: string; short: string }> = {
   TASK_OWNER: { label: "Task Owner", short: "Owner" },
   ANALYST: { label: "Supply Chain Analyst", short: "Analyst" },
   ADMINISTRATOR: { label: "Administrator", short: "Admin" },
-};
-
-/* --------------------------------------------------------------- Placeholders */
-
-export const MODULE_PLACEHOLDER_COPY: Record<
-  string,
-  { title: string; scope: string; specRef: string; icon: string }
-> = {
-  actions: {
-    title: "Action Center",
-    scope:
-      "Cross-case approval queue for corrective actions requiring manager sign-off before execution, with overdue and escalation views.",
-    specRef: "Architecture Proposal §6 — Module M3",
-    icon: "ListChecks",
-  },
-  analytics: {
-    title: "Execution Analytics",
-    scope:
-      "Mean time to resolve, SLA adherence, verification pass rate and recurrence rate by plant, owner and exception type.",
-    specRef: "Architecture Proposal §6 — Module M8",
-    icon: "ChartNoAxesColumn",
-  },
-  playbooks: {
-    title: "Playbook Library",
-    scope:
-      "Reusable corrective-action templates per exception type, with usage counts, average resolution time and effectiveness.",
-    specRef: "Architecture Proposal §6 — Module M6",
-    icon: "BookMarked",
-  },
-  reports: {
-    title: "Reports",
-    scope:
-      "Scheduled executive and audit reporting with PDF and Excel distribution to stakeholder lists.",
-    specRef: "Architecture Proposal §6 — Module M13",
-    icon: "FileText",
-  },
-  connectors: {
-    title: "Connector Health",
-    scope:
-      "Every Angle ingestion status, run history, deduplication counts and dead-letter replay for failed signals.",
-    specRef: "Architecture Proposal §6 — Module M1",
-    icon: "PlugZap",
-  },
-  audit: {
-    title: "Audit Log",
-    scope:
-      "Append-only record of every state change, assignment, verification decision and configuration edit, with actor and timestamp.",
-    specRef: "Architecture Proposal §6 — Module M11",
-    icon: "ScrollText",
-  },
-  admin: {
-    title: "Administration",
-    scope:
-      "Users, roles, plant scoping, assignment routing rules, SLA thresholds and priority weight configuration.",
-    specRef: "Architecture Proposal §6 — Module M12",
-    icon: "Settings2",
-  },
 };

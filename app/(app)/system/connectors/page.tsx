@@ -1,17 +1,19 @@
-import { ModulePlaceholder } from "@/components/patterns/module-placeholder";
-import { PageHeader } from "@/components/patterns/page-header";
-import { MODULE_PLACEHOLDER_COPY } from "@/src/config/app-config";
+import { getSessionUser } from "@/src/auth/session";
+import { getConnectorHealthData } from "@/src/data/queries/connectors";
+import { ConnectorHealthView } from "@/features/connector-health/components/connector-health-view";
 
-export const metadata = { title: MODULE_PLACEHOLDER_COPY["connectors"]!.title };
+export const metadata = {
+  title: "Connector Health",
+  description:
+    "Every Angle ingestion status, run history, deduplication counts and dead-letter replay for failed signals.",
+};
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={MODULE_PLACEHOLDER_COPY["connectors"]!.title}
-        description="This module is specified in the approved architecture and scheduled for Phase 2."
-      />
-      <ModulePlaceholder moduleKey="connectors" />
-    </div>
-  );
+/**
+ * Server component. Reads the connector state and scores health in one pass,
+ * then hands it to the client module, which filters and folds in this session's
+ * replays locally.
+ */
+export default async function ConnectorHealthPage() {
+  const [data, user] = await Promise.all([getConnectorHealthData(), getSessionUser()]);
+  return <ConnectorHealthView data={data} sessionUser={user} />;
 }

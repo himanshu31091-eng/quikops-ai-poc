@@ -4,6 +4,13 @@ import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Radix Popover, styled to the design system.
+ *
+ * Used for the filter menus and the scope selector. Distinct from
+ * `DropdownMenu`: a popover holds arbitrary interactive content, a menu holds
+ * a list of commands with roving focus.
+ */
 export const Popover = PopoverPrimitive.Root;
 export const PopoverTrigger = PopoverPrimitive.Trigger;
 export const PopoverAnchor = PopoverPrimitive.Anchor;

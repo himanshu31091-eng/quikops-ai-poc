@@ -8,6 +8,13 @@ import { formatWhen } from "@/src/lib/format";
 import { caseHref } from "@/src/lib/routes";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * The executive summary panel.
+ *
+ * The summary is server-resolved and the callouts are tone-tagged by the
+ * domain, so this component chooses presentation only. Regenerate hands off to
+ * the dashboard Copilot rather than re-running anything locally.
+ */
 const CALLOUT_TONE = {
   critical: {
     wrapper: "border-critical-line bg-critical-subtle",

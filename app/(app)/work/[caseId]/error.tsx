@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { RouteError } from "@/components/patterns/route-error";
 
+/** Error boundary for the case detail page; the shared `RouteError` panel does the rest. */
 export default function CaseDetailError({
   error,
   reset,

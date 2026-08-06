@@ -176,11 +176,15 @@ enterprise UI from consumer UI.*
 digits in a column."*
 
 ### D-19 — Unbuilt modules are navigable pages that state their scope
-`components/patterns/module-placeholder.tsx` · copy in `MODULE_PLACEHOLDER_COPY`
+~~`components/patterns/module-placeholder.tsx` · copy in `MODULE_PLACEHOLDER_COPY`~~
 
 **Why:** *"a navigable page that states its own scope reads as a roadmap; a
 disabled nav item or a grey box reads as broken."* Each cites its spec section,
 which turns a gap into a plan during a client walkthrough.
+
+*Superseded 2026-08-06:* every module is built, so there is nothing left to
+place-hold. Both the component and the copy table were removed (D-63). The
+decision is kept because the reasoning still applies to the next gap.
 
 ### D-20 — Format descriptors, not formatter functions, cross the RSC boundary
 `components/patterns/animated-number.tsx`
@@ -422,6 +426,328 @@ Recharts output to put it in a document. Every browser's print dialog offers
 dependency, and the charts print as rendered.
 
 **Cost:** page breaks are the browser's choice, not ours.
+
+### D-45 — Actions have their own SLA, separate from the case
+`src/domain/action-sla.ts`
+
+An action carries a due date inside the case's resolution window. A case can sit
+comfortably within its 240-hour target while the action blocking it is three days
+late — surfacing exactly that gap is why the Action Center exists.
+
+"Due soon" is banded by the parent case's priority (critical 8h, high 24h,
+medium 48h, low 72h): a critical action three days out is not urgent, one eight
+hours out is, because its case only has 24 hours in total. "Due today" is the
+calendar day rather than a rolling 24 hours — 23:00 tonight and 09:00 tomorrow
+are different conversations even though they are nine hours apart.
+
+### D-46 — Recommendation confidence is scored, not asserted
+`src/domain/action-recommendation.ts` + `src/data/fixtures/recommendations.ts`
+
+Same split as priority: the **wording** of a recommendation is reference data
+(one template per exception type, with `{supplier}` / `{material}`
+substitution), the **confidence** is a deterministic rule over case facts —
+recurrence,
+escalation, customer tier, supplier corroboration, SLA breach.
+
+**Why:** a recommendation an executive cannot interrogate is one they will
+ignore. The panel exposes the drivers on hover, so 94% is defensible line by
+line. A model may draft the prose; it never sets the number.
+
+### D-47 — Pending approvals is keyed on the case, not action progress
+`features/action-center/utils/action-derive.ts`
+
+First cut defined it as `open && completionPct >= 100`. That is **unsatisfiable
+by construction** — action status is derived from completion (D-03), so 100%
+makes an action `DONE`. The KPI tile read 0 and its filter scope was permanently
+empty.
+
+Now keyed on `caseStatus === "PENDING_VERIFY"`, which is what approval actually
+means here: the case is with a reviewer who is never the owner. Reads 11.
+
+**The lesson:** a derived field cannot be used as an independent predicate
+against the thing it was derived from.
+
+### D-48 — One module owns every portfolio figure
+`src/domain/portfolio-metrics.ts`
+
+Open counts, exposure, breach counts, MTTR, SLA adherence, verification pass
+rate, recurrence rate, weekly throughput and per-plant rollups are computed
+here and nowhere else. The dashboard, plant health, the AI executive summary,
+Execution Analytics and the Copilot all read the same functions.
+
+**Why:** each of them previously computed — or asserted — its own version, and
+they disagreed. The summary claimed two unassigned criticals at a plant with
+none, plant health put both criticals at the wrong site, the exception-type
+block totalled $1,728,000 across 25 cases against a portfolio of $1,531,700
+across 19, and a stored 86.4% adherence sat beside a tile counting nine live
+breaches.
+
+**Deliberately not derived:** OTIF, inventory days and schedule adherence are
+Every Angle measurements over its own window — reading them is correct,
+recomputing them would be inventing numbers. Period-over-period deltas need a
+prior period the snapshot does not contain, so they stay stored and are
+labelled as stored at their definition.
+
+### D-49 — One definition of an SLA breach
+`portfolio-metrics.ts::hasBreachedSla`
+
+A resolved case breached if it took longer than its band's target; an open case
+has breached once the target passed without resolution.
+
+**Why:** Analytics measured resolved cases only while the dashboard counted live
+breaches, so the two reported different adherence for the same plant.
+`analytics-derive.ts` now delegates to this function rather than restating it.
+
+`slaBreachedAt` on the stored case remains — it is a *materialised projection*
+of this rule, computed in `cases.ts` from the same `SLA_TARGET_HOURS`, so the
+twelve call sites reading the field cannot drift from the definition.
+
+### D-50 — A metric drawn from a biased sample is its own wrong number
+`src/data/fixtures/cases.ts`
+
+Two seed problems surfaced once the figures were derived rather than asserted.
+
+**Flat resolution factor.** Every terminal case resolved at exactly `0.8 ×
+target`, so **every resolved case met its SLA by construction** — adherence
+computed to 100% under any definition, because there was nothing to disagree
+about. Now derived per case from the case number, spread either side of 1.0.
+
+**Unrepresentative sample.** Every resolved case sat in the LOW or MEDIUM band,
+so MTTR was computed entirely from 240- and 720-hour targets and reported ~21
+days. Arithmetically correct, and meaningless: no critical or high case had ever
+been resolved. Five fast-band resolved cases were added so the average describes
+the portfolio rather than its slowest tail.
+
+**A hashing note worth keeping:** the first factor used a rolling `hash * 31 +
+char`, which does not avalanche. Case numbers are sequential, so five
+consecutive cases produced near-identical hashes, landed on the same factor and
+*all five missed their target* — a pattern presented as a spread. Fixed with
+FNV-1a plus the murmur3 finalizer.
+
+### D-51 — Connector throughput is derived from the case corpus
+`src/data/fixtures/connectors.ts` · `src/data/queries/connectors.ts`
+
+The Every Angle signal connector reports exactly as many raised cases as there
+are cases with `detectedBy: "EVERY_ANGLE"` (17); the playbook monitor reports
+the `PLAYBOOK_MONITOR` ones (6). Manual cases belong to no connector.
+
+**Why:** this is D-48 applied before the drift could happen rather than after.
+A connector screen claiming it raised 34 cases beside a queue holding 29 would
+be the same defect in a new place — and the live Copilot would find it, as it
+found `REVENUE_IMPACT`. The run generator distributes cases across recent runs
+and reconciles any remainder onto the newest successful run, so the total always
+equals the corpus.
+
+The ingestion funnel is arithmetically closed for the same reason:
+received − deduplicated − rejected = applied, and raised + manual = 29.
+
+### D-52 — Three failure modes, scored separately
+`src/domain/connector-health.ts`
+
+Reliability (are runs succeeding), freshness (has it run when it said it would)
+and backlog (how much has it failed to deliver) are scored on their own axes,
+and **staleness overrides the numeric band**.
+
+**Why:** a feed that has not run for six hours is not "80% healthy" because its
+last five runs passed. It has stopped, which is a different problem needing a
+different person — so it bands as `STALE` regardless of score. A disabled
+connector reports as paused rather than failing, because scoring it against a
+cadence it is not trying to meet would bury the real failures.
+
+### D-53 — A replay button that cannot work is worse than none
+`features/connector-health/utils/connector-derive.ts`
+
+`DUPLICATE_KEY` and `SCHEMA_MISMATCH` rows render "Not replayable" with the
+reason on hover, instead of a Replay button.
+
+**Why:** retrying a duplicate produces the same duplicate; a schema mismatch
+needs an upstream contract change. Offering the action and letting it fail
+teaches an operator to distrust the queue. Bulk replay skips them for the same
+reason and says how many it skipped.
+
+### D-54 — Three shared shells replace nine module copies
+`components/patterns/{kpi-tile,data-table,module-toolbar}.tsx`
+
+Analytics, the Action Center and Connector Health had each grown their own KPI
+tile, table chrome and filter row — nine implementations of three things,
+already drifting on padding and delta handling.
+
+**Why it matters beyond DRY:** accessibility is now correct once rather than
+nine times. `DataTable` owns `scope="col"`, `aria-sort`, `aria-rowcount` and a
+live result announcement, so every module inherits them. That was the main
+argument for extracting rather than tolerating the duplication.
+
+A tile renders as a button when given `onSelect` and as a panel otherwise —
+the only branch in it, because a KPI is a filter preset as often as a statistic.
+
+### D-55 — Routing rules are derived, not declared
+`src/data/queries/administration.ts`
+
+For each plant and exception type, the default owner is whoever holds most of
+that work today.
+
+**Why:** a declared routing table drifts from reality the first time someone
+reassigns a case, and D-48 exists because this codebase has been bitten by
+exactly that. Deriving it means the table is always true, and it doubles as a
+description of how work actually flows.
+
+### D-56 — Configuration preview beats configuration
+`src/domain/config-preview.ts`
+
+Changing a priority weight re-scores all 29 cases live and lists which change
+band; changing an SLA target lists which cases newly breach.
+
+**Why:** the entire argument for an admin screen here is that the rules are
+already isolated and documented as deployment-configurable. A settings page
+showing "revenue weight: 35" and nothing else asks an executive to guess.
+Rescaling stored factor contributions reproduces `computePriority` without
+mutating the module-level constant — a preview must never leave a global changed.
+
+### D-57 — Demo reset is a broadcast, not a button per module
+`src/demo/use-demo-reset.ts`
+
+`ExecutionProvider.reset()` already existed, but each module keeps its own
+session state, so clearing the shared store left overrides, created rows and
+replays behind — a half-restored app presented as a reset.
+
+One signal; each hook opts in with `useResetSignal(clearMine)`.
+
+### D-58 — i18n architecture lands before the strings
+`src/i18n/`
+
+Provider, key structure, five catalogues and `useTranslation` are in place while
+components still carry English literals.
+
+**Why:** the surface is ~900–1,400 strings today and every module adds 150–250.
+Landing the foundation first means migration is incremental and mechanical;
+landing it after four more modules would have doubled the retrofit against
+screens that are by then frozen. **The scope decision is stated openly in the
+config:** the shell is translated, the seeded operational corpus is not —
+case titles and root causes are content needing a domain translator, not a
+string table.
+
+### D-59 — Tour steps anchor to data attributes, not selectors
+`src/tour/tours.ts` · `components/tour/tour-overlay.tsx`
+
+Steps reference `data-tour="dashboard-kpi-band"` rather than a CSS selector.
+
+**Why:** this codebase composes classes from tokens that get refactored, so a
+selector-based tour breaks silently on a styling change. A data attribute is a
+contract the component opts into, and adding one to a frozen screen is additive.
+
+Steps carry a `route`, and the store navigates before showing them — the
+executive tour walks Dashboard → nav, the manager tour crosses into the Action
+Center. The spotlight is drawn as four scrim panels around the anchor rather
+than a mask, so the highlighted control stays fully interactive underneath.
+
+### D-60 — Completion persists; nothing else does
+`src/tour/tour-store.tsx`
+
+Tour completion is the only state written to `localStorage`. Everything else in
+the demo is session-scoped by design.
+
+**Why:** onboarding that reappears on every reload is an obstacle, not
+onboarding. It reads after hydration so the server and first client render
+agree, and it degrades silently in private browsing rather than throwing.
+
+*Amended 2026-08-06:* this decision originally also covered
+`src/a11y/use-first-use.ts`, which backed the first-use hints. Neither the hook
+nor `FirstUseHint` was ever rendered — the guided tour and the per-screen
+documentation panels took that job — so both were removed in the stabilization
+pass (D-63).
+
+### D-61 — One PageHeader prop carries the documentation panel
+`components/patterns/screen-doc-button.tsx`
+
+`<PageHeader docKey="analytics" />` renders the ⓘ control. Content lives in
+`src/help/content.ts` beside the Help Center articles.
+
+**Why:** every module already uses `PageHeader`, so this reached seven screens
+as a one-line change each. Sharing the content source with the Help Center is
+what lets the documentation search index screen purpose and KPI definitions
+without maintaining a second index.
+
+### D-62 — Lint is a gate, not a report
+`eslint.config.mjs`
+
+Four rules are raised to `error` above what `eslint-config-next` sets:
+`@typescript-eslint/no-unused-vars`, `react-hooks/exhaustive-deps`,
+`@typescript-eslint/no-explicit-any`, and `no-console` (allowing `error` and
+`warn`).
+
+One non-obvious constraint: **`eslint.config.mjs` must not ignore itself.**
+`next build` detects the Next ESLint plugin by resolving the config that applies
+to the config file, and an ignored file resolves to no config at all — so a
+`"*.config.mjs"` ignore pattern makes every build print "the Next.js plugin was
+not detected" while the plugin is in fact loaded and running.
+
+**Why:** a warning is a thing everyone agrees to fix later. `exhaustive-deps` in
+particular is a warning upstream, and stale-closure bugs are the class this
+codebase has already hit twice (D-24). Stylistic rules are left off — a lint run
+that argues about formatting stops being read.
+
+### D-63 — Dead code is deleted, not commented out
+`components/patterns/module-placeholder.tsx` · `components/patterns/first-use-hint.tsx`
+· `src/a11y/use-announcer.ts` · `src/a11y/use-first-use.ts` · `projectCases`
+· `projectNavBadges` · `PLAYBOOK_STEPS_BY_TYPE` · `LOCALES_NEEDING_CJK_FONT`
+· `TourLauncher` · `MODULE_PLACEHOLDER_COPY`
+
+Ten unreferenced exports and four whole files were removed during stabilization.
+
+**Why:** each of these was written for a shape the product moved past — the
+placeholder page before every module existed, the announcer before `DataTable`
+owned its own live region, `projectCases` before the projection tier settled on
+per-figure functions. Keeping them costs nothing to run and everything to read:
+the next session cannot tell a helper that is unused from one that is not used
+*yet*, so it either re-implements it badly or maintains it forever.
+
+The removal itself found a defect worth recording: deleting `projectCases` with
+a positional script also removed `projectActivity`, which typecheck caught
+immediately. Deletion needs the compiler as its safety net, not care.
+
+### D-64 — The demo reset is only real if modules listen to it
+`features/action-center/hooks/use-action-center.ts` ·
+`features/connector-health/hooks/use-connector-health.ts`
+
+`useResetSignal` existed (D-57) but no module subscribed to it, so Demo Reset
+cleared the shared execution store and left every module's local filters,
+selections and overrides in place.
+
+**Why:** this is the failure D-57 was written to prevent, and it survived because
+a broadcast with no subscribers looks exactly like a working one from the button
+end. A reset that restores half the product is worse than no reset button, since
+the presenter finds out mid-demo. Every module hook that holds session state now
+subscribes; the check for a new module is whether its `useState` calls appear in
+its reset callback.
+
+### D-65 — Same role, same name; different shape, different name
+`features/analytics/utils/analytics-derive.ts`
+
+`isFiltered`, `buildFacets`, `computeKpis` and `buildFilterChips` each exist in
+two or three feature folders and keep their shared names. `weeklyThroughput` in
+Analytics was renamed to `weeklyThroughputSeries`.
+
+**Why:** the first four are the same *role* over a module's own filter type —
+the repeated name is what makes a new module's utils file predictable, and
+merging them would mean one generic signature per filter shape, which is worse
+than four short ones. `weeklyThroughput` was different: the domain function
+returns one `{opened, closed}` pair for the trailing week, the Analytics one
+returns a per-week series over an arbitrary window. Two functions with one name
+and different meanings is how the fixture drift of D-48 starts.
+
+### D-66 — The product is light-theme only, and says so
+`app/globals.css`
+
+There is no `prefers-color-scheme` rule, no `dark:` variant anywhere, and no
+theme toggle. `prefers-reduced-motion` is honoured.
+
+**Why:** the semantic token layer would carry a dark palette without touching a
+component, so this is a deliberate scope decision rather than an oversight — but
+it is recorded here because "verify dark/light theme" has an honest answer, and
+that answer is that only one theme exists. Adding a second palette is a Phase-2
+item with a real cost: every chart colour, every status tone and every
+`bg-surface-inverse` overlay needs a second value chosen and checked for
+contrast, and half-doing it is how a screen ends up unreadable in one mode.
 
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file

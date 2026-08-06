@@ -5,6 +5,13 @@ import { usePathname } from "next/navigation";
 import { Icon } from "@/components/patterns/icon";
 import { NAVIGATION } from "@/src/config/app-config";
 
+/**
+ * Breadcrumbs derived from the pathname.
+ *
+ * Derived rather than declared: a route that exists gets a trail automatically,
+ * so adding a page cannot leave it stranded without one. Labels come from
+ * `NAVIGATION` first, so the trail and the nav always agree on wording.
+ */
 interface Crumb {
   label: string;
   href: string | null;

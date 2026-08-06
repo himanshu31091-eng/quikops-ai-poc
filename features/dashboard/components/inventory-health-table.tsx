@@ -3,6 +3,13 @@ import type { InventoryHealthRow } from "@/src/domain/types";
 import { formatNumber } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Days-of-coverage by plant, against target.
+ *
+ * The bar is scaled to the largest value in the set rather than to a fixed
+ * ceiling, so the comparison between plants stays readable whatever the
+ * absolute numbers are. Status thresholds live with the row data, not here.
+ */
 const STATUS_META = {
   AT_RISK: { label: "At risk", className: "bg-critical-subtle text-critical-content border-critical-line", bar: "bg-critical" },
   WATCH: { label: "Watch", className: "bg-high-subtle text-high-content border-high-line", bar: "bg-high" },

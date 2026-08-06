@@ -1,17 +1,14 @@
-import { ModulePlaceholder } from "@/components/patterns/module-placeholder";
-import { PageHeader } from "@/components/patterns/page-header";
-import { MODULE_PLACEHOLDER_COPY } from "@/src/config/app-config";
+import { getAuditLogData } from "@/src/data/queries/audit";
+import { AuditLogView } from "@/features/audit-log/components/audit-log-view";
 
-export const metadata = { title: MODULE_PLACEHOLDER_COPY["audit"]!.title };
+export const metadata = {
+  title: "Audit Log",
+  description:
+    "Append-only record of every state change, assignment, verification decision and configuration edit, with actor and timestamp.",
+};
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={MODULE_PLACEHOLDER_COPY["audit"]!.title}
-        description="This module is specified in the approved architecture and scheduled for Phase 2."
-      />
-      <ModulePlaceholder moduleKey="audit" />
-    </div>
-  );
+/** Server component. Assembles the network-wide trail in one pass. */
+export default async function AuditLogPage() {
+  const data = await getAuditLogData();
+  return <AuditLogView data={data} />;
 }

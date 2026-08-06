@@ -57,12 +57,13 @@ export function AnalyticsHeatmap({
         <table className="w-full min-w-105 border-separate border-spacing-1">
           <thead>
             <tr>
-              <th className="w-32 px-1 py-1 text-left text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              <th scope="col" className="w-32 px-1 py-1 text-left text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
                 Plant
               </th>
               {grid.columns.map((column) => (
                 <th
                   key={column.key}
+                  scope="col"
                   className="px-1 py-1 text-center text-2xs font-semibold uppercase tracking-wide text-content-tertiary"
                 >
                   {column.label}

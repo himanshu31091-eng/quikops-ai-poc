@@ -7,6 +7,13 @@ import { APP, ROLE_META } from "@/src/config/app-config";
 import { DEMO_PERSONAS, USER_BY_ID } from "@/src/data/fixtures/organisation";
 import { initials } from "@/src/lib/format";
 
+/**
+ * The sign-in screen.
+ *
+ * There is no authentication in this POC: choosing a persona writes the
+ * session cookie through a server action. The screen exists because the demo
+ * opens on it, and because persona is how role-based views are shown.
+ */
 export const metadata = { title: "Sign in" };
 
 const VALUE_POINTS = [

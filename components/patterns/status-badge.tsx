@@ -2,6 +2,13 @@ import { CASE_STATUS_META, ACTION_STATUS_META } from "@/src/config/app-config";
 import type { ActionStatus, CaseStatus } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * Case and action status, from one component.
+ *
+ * The two enums are separate in the domain but identical in presentation, so
+ * `kind` selects the metadata table rather than the product carrying two
+ * badges that must be kept looking the same by hand.
+ */
 interface StatusBadgeProps {
   status: CaseStatus | ActionStatus;
   kind?: "case" | "action";

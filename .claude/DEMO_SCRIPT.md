@@ -58,7 +58,7 @@ Opens on *"Good morning, Elena"* with provenance chips: data as at 09:12 UTC,
 | On-time in full | **88.5%** | 6.5 pts below target |
 | Revenue at risk | **$1,531,700** | Across 19 open cases |
 | Open critical cases | **2** | 5 unassigned overall |
-| SLA breaches | **9** | 86.4% adherence this quarter |
+| SLA breaches | **9** | 62.1% adherence this quarter |
 
 **Say:** "Every one of these is a link, not a tile. The number and the work
 behind it are never more than one click apart."
@@ -71,20 +71,24 @@ argument: *no dashboard-to-spreadsheet gap.*
 
 Headline:
 
-> *"Querétaro is the primary driver of the group OTIF shortfall, and the cause
-> is a repeat vendor issue rather than a new disruption."*
+> *"Greenville is the weakest site in the network, driven by material shortage —
+> and 3 of its 5 open cases are repeat detections rather than new disruptions."*
 
-**Say:** "This is generated and stored at seed time, exactly the way the
-production path stores it, with citations back to the cases it is describing.
-It isn't a chatbot — it's a briefing with sources."
+**Say:** "Every figure in this briefing is computed from the same case data the
+board below is showing — the weakest plant, the largest exposure, the counts,
+the citations. It isn't a chatbot, and it isn't a stored paragraph that drifted
+away from the numbers. Read the callouts; they reconcile."
 
-⚠️ **Do not read the callouts verbatim.** See §8 — three of them contradict the
-live board.
+✅ **Safe to read verbatim.** The callouts are derived and were reconciled on
+2026-08-06 — the earlier warning no longer applies.
 
 ### Execution performance strip
 
-MTTR **38.4h**, down **21.6%** · SLA adherence **86.4%**, up **4.2 pts** ·
-verification pass rate **91.3%** · recurrence **14.8%**.
+MTTR **11d**, down **21.6%** · SLA adherence **62.1%**, up **4.2 pts** ·
+verification pass rate **76.9%** · recurrence **41.4%**.
+
+**Worth knowing:** these are derived, so they will match Execution Analytics
+exactly. If a client compares the two screens, that is the answer you want.
 
 **Say:** "Note what's happening here — the operational numbers are deteriorating
 while the *execution* numbers improve. That's the distinction this product
@@ -115,7 +119,7 @@ Show, in this order, quickly:
 5. **The URL** — point at the address bar. Filter state round-trips through it,
    so any view is shareable as a link.
 
-**Say:** "The scroll is virtualised — this behaves the same at 24 cases or
+**Say:** "The scroll is virtualised — this behaves the same at 29 cases or
 24,000. And the KPI header, the table, the board and the side panel are all
 reading one array, so they can't disagree with each other."
 
@@ -281,37 +285,46 @@ declaring its scope and spec reference rather than a dead nav item.
 
 ---
 
+
+---
+
+## 10. The platform layer — 2 minutes, optional
+
+Four controls sit in the top bar on **every** screen. Worth showing if the
+client asks about onboarding, rollout or accessibility.
+
+| Control | What to say |
+|---|---|
+| ✨ **Product tour** | "Role-based onboarding. An executive gets four steps about reading the position; an operator gets three about executing a case. It walks across screens, and it remembers you have done it." |
+| 🌐 **Language** | "Five locales wired — English, Spanish, German, French, Japanese. The interface translates; operational case content stays in the language it was recorded in." |
+| ↻ **Reset demo** | "One click restores every seeded case, analytic and workflow outcome. Rehearsals are repeatable." |
+| ? **Help Center** | "Eleven articles, downloadable guides, and a search that indexes screens, FAQs and KPI definitions together." |
+
+Also worth a sentence: **the ⓘ beside any page title** opens "What does this
+screen do?" — purpose, business value, every KPI explained, the workflow and
+the related screens. That is the answer to "how will our people learn this?"
+
+**Accessibility, if asked:** skip-link on every page, focus trapped in the
+Copilot and drawers, `aria-sort` and live result counts on every table, one
+visible focus ring, and `prefers-reduced-motion` honoured across all five
+animations. An axe-core audit has not been run — say so rather than claiming AA.
+
 ## 8. Known rough edges — read before presenting
 
 These are real and a sharp client could catch them. None are fixed; all are
 recorded in `NEXT_STEPS.md`.
 
-### ⚠️ The dashboard AI summary contradicts the live data
+### ✅ Fixture drift — RESOLVED 2026-08-06
 
-The seeded executive summary was written independently of the computed priority
-bands and is now out of step:
+The dashboard AI summary, plant health, the exception-type revenue block and
+the two cosmetic defects were all reconciled. Every portfolio figure is now
+derived from the case corpus by `src/domain/portfolio-metrics.ts`, so the
+dashboard, Execution Analytics, the plant table, the AI summary and the Copilot
+all report the same numbers.
 
-| Summary says | Actually |
-|---|---|
-| *"Two critical cases at Querétaro are unassigned, together carrying $227,800"* | Both criticals are at **Ingolstadt (DE01)**, and **both are assigned** |
-| *"11 of the 24 open cases"* | There are **19** open cases |
-| *"closed the week at 89.2%"* | The KPI band reads **88.5%** |
-| *"largest single exposure … $180,000 at Querétaro"* | Largest is **QO-2026-004176, $224,500, DE01** |
-
-**Mitigation for now:** present the headline sentence (which *is* accurate) and
-move on. Do not read the three callout chips aloud, and do not invite the client
-to compare them against the KPI band.
-
-### ⚠️ Two cosmetic defects on the golden case
-
-- The seeded comment from Daniel Kim reads **"the 3th detection"** — an ordinal
-  bug in `buildComments` (`src/data/fixtures/case-detail.ts`). Visible on the
-  single most important case in the demo.
-- A health driver reads **"Past SLA: 0 days beyond the resolution target"** —
-  the case is ~3 hours past, which rounds to zero days.
-
-Both are one-line fixes and both qualify as bug fixes under the module freeze.
-**Recommend fixing before the client session.**
+The live Copilot was asked to audit the dashboard against the case data and
+confirmed it reconciles three ways — by lifecycle, by priority band and by
+plant. Inviting a client to make that comparison is now a strength, not a risk.
 
 ### Things that will not work if tried
 

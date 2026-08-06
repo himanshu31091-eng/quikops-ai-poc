@@ -10,6 +10,13 @@ import { DEMO_NOW } from "@/src/lib/constants";
 import { formatWhen } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * The notification bell and its dropdown.
+ *
+ * Presentational: the tray renders what the server resolved and does not
+ * subscribe to anything. Unread count is derived from the items rather than
+ * stored, so the badge cannot drift from the list beneath it.
+ */
 export interface NotificationModel {
   id: string;
   title: string;

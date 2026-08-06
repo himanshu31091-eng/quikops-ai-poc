@@ -11,6 +11,13 @@ import { formatDue } from "@/src/lib/format";
 import { caseHref } from "@/src/lib/routes";
 import { cn } from "@/src/lib/cn";
 
+/**
+ * The cases holding up the most revenue, as a fixed-column table.
+ *
+ * Column widths are declared as percentages so the table keeps its shape as
+ * case titles vary in length — the manager scans down a column, and a column
+ * that moves between rows defeats that.
+ */
 const HEADERS = [
   { key: "case", label: "Case", className: "w-[40%]" },
   { key: "plant", label: "Plant", className: "w-[8%]" },

@@ -28,19 +28,27 @@ recovered.
 
 ## Mandatory reading order
 
-Read all seven, in this order, before touching anything:
+Read all eight, in this order, before touching anything:
 
 | # | File | Why |
 |---|---|---|
 | 1 | `.claude/PROJECT_CONTEXT.md` | Product, domain vocabulary, seeded org, the frozen clock |
 | 2 | `.claude/ARCHITECTURE.md` | Layers, data seam, state model, Copilot, design system |
 | 3 | `.claude/DEVELOPMENT_STATUS.md` | What is built, what is frozen, verification record, known gaps |
-| 4 | `.claude/DECISIONS.md` | 37 decisions with rationale — **read before proposing a change** |
+| 4 | `.claude/DECISIONS.md` | 66 decisions with rationale — **read before proposing a change** |
 | 5 | `.claude/CLAUDE_RULES.md` | The full rulebook. This file is its summary. |
-| 6 | `.claude/NEXT_STEPS.md` | Ranked roadmap |
-| 7 | `.claude/DEMO_SCRIPT.md` | The client walkthrough — what must never break |
+| 6 | `.claude/NEXT_STEPS.md` | Immediate next actions |
+| 7 | `.claude/ROADMAP.md` | **The backlog** — Phase-2 modules, cross-platform features, and the technical-debt register |
+| 8 | `.claude/DEMO_SCRIPT.md` | The client walkthrough — what must never break |
 
 Then `.claude/SESSION_HANDOFF.md` for where the last session stopped.
+
+Two reference documents, read when they apply rather than every session:
+
+| File | When |
+|---|---|
+| `.claude/RELEASE_NOTES.md` | What shipped, what the AI layer does, and the known limitations — read before describing the product to anyone |
+| `.claude/QA_CHECKLIST.md` | **Before any demo or deploy.** There is no automated test suite; this is it. It marks what was verified on the current build (✅) against what was carried from an earlier one (◻) |
 
 **If this file and `.claude/` disagree, `.claude/` wins.**
 **If `.claude/` and the code disagree, the code wins — and fix the doc that session.**
@@ -85,7 +93,7 @@ app  →  features  →  components  →  src
 
 ## Frozen modules — do not redesign
 
-**FROZEN: Executive Dashboard · Work Manager · Case Detail · Execution Workflow**
+**FROZEN: Executive Dashboard · Work Manager · Case Detail · My Work · Execution Workflow**
 
 - ❌ Do NOT redesign any frozen screen
 - ❌ Do NOT change typography, spacing, colours, or navigation
@@ -167,7 +175,7 @@ layers frozen — interpolating anything into them silently kills prompt caching
 
 ## Mandatory workflow before writing code
 
-1. **Read all seven `.claude/` files** plus `SESSION_HANDOFF.md`.
+1. **Read all eight `.claude/` files** plus `SESSION_HANDOFF.md`.
 2. **Check `DEVELOPMENT_STATUS.md`** — is the module you are about to touch frozen?
 3. **Check `DECISIONS.md`** — has this already been decided, and why?
 4. **Confirm scope with the user.** Do not begin a module without approval.
@@ -180,9 +188,10 @@ two sentences, then proceed as instructed** if the user reaffirms. Their call.
 
 ## Mandatory workflow at the end of every session
 
-Run both, and fix every issue before stopping:
+Run all three, and fix every issue before stopping:
 
 ```bash
+npx eslint .         # 0 errors, 0 warnings — this is a gate, not a report (D-62)
 npm run typecheck    # tsc --noEmit
 npm run build        # next build
 ```

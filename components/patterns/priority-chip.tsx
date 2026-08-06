@@ -6,6 +6,13 @@ import type { PriorityBand, PriorityFactor } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 import { Icon } from "./icon";
 
+/**
+ * The priority band, with the score behind it.
+ *
+ * Passing `factors` turns the chip into a popover explaining why the case
+ * scored where it did. That is the point of showing a computed priority at
+ * all — a number a manager cannot interrogate is a number they will not trust.
+ */
 interface PriorityChipProps {
   band: PriorityBand;
   score?: number;

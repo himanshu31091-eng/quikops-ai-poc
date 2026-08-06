@@ -9,8 +9,17 @@ import { GlobalSearch, type SearchableCase } from "./global-search";
 import { NotificationTray, type NotificationModel } from "./notification-tray";
 import { PlantScopeSelector } from "./plant-scope-selector";
 import { SideNav } from "./side-nav";
+import { PlatformControls } from "@/components/shell/platform-controls";
+import { SkipLink } from "@/components/patterns/skip-link";
 import { UserMenu } from "./user-menu";
 
+/**
+ * The application frame: side navigation, top bar, and the content slot.
+ *
+ * Every prop here is server-resolved and passed down once. The shell holds no
+ * data of its own — it is the only client component high enough to own the
+ * mobile-nav open state, and that is all it owns.
+ */
 interface AppShellProps {
   user: User;
   personas: User[];
@@ -41,6 +50,7 @@ export function AppShell({
 
   return (
     <div className="flex min-h-dvh bg-canvas">
+      <SkipLink />
       {/* Persistent sidebar — lg and above */}
       <div className="sticky top-0 hidden h-dvh lg:block">
         <SideNav role={user.role} badges={badges} />
@@ -92,13 +102,14 @@ export function AppShell({
             <div className="hidden xl:block">
               <PlantScopeSelector plants={plants} />
             </div>
+            <PlatformControls />
             <NotificationTray items={notifications} />
             <div className="h-5 w-px bg-line" />
             <UserMenu user={user} personas={personas} />
           </div>
         </header>
 
-        <main className="min-w-0 flex-1">
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
           <div className="mx-auto w-full min-w-0 max-w-content px-4 py-5 sm:px-6 sm:py-6">
             {children}
           </div>
