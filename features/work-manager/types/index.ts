@@ -1,3 +1,4 @@
+import type { FilterOption } from "@/components/patterns/filter-menu";
 import type { CaseStatusGroup } from "@/src/domain/case-status";
 import type {
   CaseListItem,
@@ -128,15 +129,13 @@ export interface WorkQuickStats {
   slaAtRiskCount: number;
 }
 
-/** One selectable value in a filter menu, with a live count from the data. */
-export interface FilterOption {
-  value: string;
-  label: string;
-  hint?: string;
-  count: number;
-  dotClassName?: string;
-  icon?: string;
-}
+/**
+ * One selectable value in a filter menu, with a live count from the data.
+ * Defined with the menu it belongs to — Execution Analytics uses the same
+ * control, and a feature may not import from another feature. Re-exported so
+ * existing Work Manager imports keep resolving.
+ */
+export type { FilterOption };
 
 export interface WorkFacets {
   plants: FilterOption[];

@@ -4,9 +4,27 @@ import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/src/lib/cn";
-import type { FilterOption, MultiFilterField } from "../types";
 
-interface FilterMenuProps {
+/**
+ * One multi-select facet control, reused by every module that filters a working
+ * set — the Work Manager queue and Execution Analytics today.
+ *
+ * Lives here rather than inside a feature because two features need it, and a
+ * feature may not import from another feature. Generic over the field key so
+ * each module keeps its own narrow union rather than falling back to `string`.
+ */
+
+/** One selectable value, with a live count from the current working set. */
+export interface FilterOption {
+  value: string;
+  label: string;
+  hint?: string;
+  count: number;
+  dotClassName?: string;
+  icon?: string;
+}
+
+interface FilterMenuProps<Field extends string> {
   label: string;
   icon: string;
   /**
@@ -14,21 +32,16 @@ interface FilterMenuProps {
    * hand every menu the same two stable callbacks instead of a fresh closure
    * per menu per render.
    */
-  field: MultiFilterField;
+  field: Field;
   options: FilterOption[];
   selected: string[];
-  onToggle: (field: MultiFilterField, value: string) => void;
-  onClear: (field: MultiFilterField) => void;
+  onToggle: (field: Field, value: string) => void;
+  onClear: (field: Field) => void;
   /** Shows a type-ahead inside the menu once the list gets long. */
   searchable?: boolean;
 }
 
-/**
- * One multi-select control, reused by every facet. Options carry live counts
- * from the current working set, so a manager can see there is no point filtering
- * to Pune before clicking it.
- */
-export const FilterMenu = React.memo(function FilterMenu({
+function FilterMenuInner<Field extends string>({
   label,
   icon,
   field,
@@ -37,7 +50,7 @@ export const FilterMenu = React.memo(function FilterMenu({
   onToggle,
   onClear,
   searchable = false,
-}: FilterMenuProps) {
+}: FilterMenuProps<Field>) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
 
@@ -173,4 +186,10 @@ export const FilterMenu = React.memo(function FilterMenu({
       </PopoverContent>
     </Popover>
   );
-});
+}
+
+/**
+ * `as typeof FilterMenuInner` preserves generic inference through `React.memo`,
+ * which otherwise widens the type parameter and forces every caller to annotate.
+ */
+export const FilterMenu = React.memo(FilterMenuInner) as typeof FilterMenuInner;

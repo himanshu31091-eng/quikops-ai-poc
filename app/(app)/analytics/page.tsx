@@ -1,17 +1,18 @@
-import { ModulePlaceholder } from "@/components/patterns/module-placeholder";
-import { PageHeader } from "@/components/patterns/page-header";
-import { MODULE_PLACEHOLDER_COPY } from "@/src/config/app-config";
+import { getAnalyticsData } from "@/src/data/queries/analytics";
+import { AnalyticsView } from "@/features/analytics/components/analytics-view";
 
-export const metadata = { title: MODULE_PLACEHOLDER_COPY["analytics"]!.title };
+export const metadata = {
+  title: "Execution Analytics",
+  description:
+    "Mean time to resolve, SLA adherence, verification pass rate and recurrence by plant, owner and exception type.",
+};
 
-export default function Page() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        title={MODULE_PLACEHOLDER_COPY["analytics"]!.title}
-        description="This module is specified in the approved architecture and scheduled for Phase 2."
-      />
-      <ModulePlaceholder moduleKey="analytics" />
-    </div>
-  );
+/**
+ * Server component. Reads the working set in one pass and hands it to the
+ * client module, which filters and aggregates locally so a filter change costs
+ * one memoised pass rather than a round trip.
+ */
+export default async function ExecutionAnalyticsPage() {
+  const data = await getAnalyticsData();
+  return <AnalyticsView data={data} />;
 }

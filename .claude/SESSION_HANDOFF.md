@@ -258,6 +258,39 @@ but its hit rate is unconfirmed. Would need temporary usage logging in
 
 ---
 
+## Phase 5 Module 1 — Execution Analytics (2026-08-06)
+
+✅ **Complete.** `/analytics` replaces the placeholder. All six requirement
+groups delivered: 4 KPI trend cards · 7 charts · 4 performance tables ·
+2 heatmaps · 4 filters · CSV + PDF export.
+
+**Reuse over duplication:** 3 chart components cover 7 required charts,
+2 table components cover 4 required tables, 1 heatmap component covers 2. No
+business rule is restated — SLA targets come from `src/domain/sla`, the
+lifecycle collapse from `src/domain/case-status`, labels from
+`src/config/app-config`, and session outcomes fold in through the existing
+`projectCaseFacts`.
+
+**Two helpers moved down** so Analytics could reuse them without a
+feature→feature import: `FilterMenu` → `components/patterns/`, CSV escaping and
+download → `src/lib/csv.ts`. See D-43.
+
+⚠️ **A real derivation flaw was found and fixed mid-build.** The KPI cards
+initially compared computed figures against `EXECUTION_METRICS`, which measures
+a different population — producing a confident, meaningless delta. Now compared
+against the same derivation over the unfiltered set. See D-42.
+
+⚠️ **What the honest numbers expose:** `cases.ts` sets
+`verifiedAt = openedAt + slaHours × 0.8` for every terminal case, so **SLA
+adherence computes to 100% by construction** and MTTR to 18d. Both figures are
+correct derivations and both are labelled with their sample size (5 resolved
+cases). They will not match the dashboard's 38.4h / 86.4%, because those are
+stated portfolio figures over a wider population. A client who compares the two
+screens will notice. **Same class as the `EXECUTIVE_SUMMARY` and `PLANT_HEALTH`
+drift** — worth fixing in one fixture pass.
+
+---
+
 ## Resume From Here
 
 **Nothing is half-finished. The tree is clean, the build passes, and Priority 1

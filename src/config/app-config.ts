@@ -94,7 +94,7 @@ export const NAVIGATION: NavSection[] = [
         label: "Execution Analytics",
         href: "/analytics",
         icon: "ChartNoAxesColumn",
-        phase: "PHASE_2",
+        phase: "LIVE",
         roles: ALL_ROLES,
       },
       {

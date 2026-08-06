@@ -373,6 +373,56 @@ question immediately**, rather than opening an empty panel.
 comment claimed it "issues a live call" when it had no handler at all. Opening a
 blank panel would have been a second, quieter lie.
 
+### D-42 — Analytics KPI deltas compare like with like
+`features/analytics/utils/analytics-derive.ts::buildKpis`
+
+Each headline card compares the filtered slice against **the same derivation
+over the unfiltered set** — not against `EXECUTION_METRICS`.
+
+**Why:** the first cut compared computed figures against the stored portfolio
+metrics and produced nonsense. `EXECUTION_METRICS` reports 38.4h MTTR and 86.4%
+adherence for the quarter; the seeded case corpus computes 18d and 100%. Both
+are correct — they measure different populations. Subtracting one from the other
+yields a confident number that means nothing.
+
+The root cause is worth knowing: `cases.ts` sets
+`verifiedAt = openedAt + slaHours * 0.8` for every terminal case, so **every
+resolved case meets its SLA by construction** and MTTR is just the mean of
+0.8 × target across whichever bands happen to be terminal.
+
+Comparing like with like also reads as zero when nothing is filtered, which is
+the correct answer, and removes the dependency on fixture figures that have
+already drifted twice.
+
+### D-43 — `FilterMenu` and the CSV primitive moved down
+`components/patterns/filter-menu.tsx` · `src/lib/csv.ts`
+
+Analytics needed both, and a feature may not import from another feature.
+
+`FilterMenu` is generic over the field key — `React.memo(Fn) as typeof Fn`
+preserves inference, which plain `React.memo` widens. Each module keeps its own
+narrow union (`MultiFilterField`, `AnalyticsFilterField`) instead of falling
+back to `string`.
+
+`src/lib/csv.ts` owns escaping, section joining and the browser download; column
+definitions stay with each feature, because what belongs in a Work Manager
+export is not what belongs in an Analytics export.
+
+**Third instance of the same lesson** (after `caseHref` and the Copilot panel):
+a helper inside one feature is a helper the next feature re-implements badly.
+
+### D-44 — PDF export via the browser's print pipeline
+`features/analytics/utils/export-analytics.ts::exportAnalyticsPdf`
+
+`window.print()` plus `print:` variants, not a PDF library.
+
+**Why:** every renderer worth using is 300kB+ and would have to re-draw the
+Recharts output to put it in a document. Every browser's print dialog offers
+"Save as PDF", which is what a manager does with a report anyway. No new
+dependency, and the charts print as rendered.
+
+**Cost:** page breaks are the browser's choice, not ours.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

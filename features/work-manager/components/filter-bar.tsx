@@ -20,7 +20,7 @@ import type {
   WorkSort,
 } from "../types";
 import { SORT_META } from "../utils/filter-definitions";
-import { FilterMenu } from "./filter-menu";
+import { FilterMenu } from "@/components/patterns/filter-menu";
 
 interface FilterBarProps {
   facets: WorkFacets;
