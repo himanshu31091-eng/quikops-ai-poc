@@ -1,0 +1,8 @@
+{
+  "/api/copilot/route": "app/api/copilot/route.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
+  "/(app)/work/[caseId]/page": "app/(app)/work/[caseId]/page.js",
+  "/(app)/work/page": "app/(app)/work/page.js",
+  "/(app)/my-work/page": "app/(app)/my-work/page.js"
+}

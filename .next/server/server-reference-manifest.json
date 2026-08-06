@@ -1,0 +1,52 @@
+{
+  "node": {
+    "40e1296fd7b7e91136f463e5429c1c34ba8e3efa1b": {
+      "workers": {
+        "app/(app)/dashboard/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%2C%5B%7B%22id%22%3A%2240e1296fd7b7e91136f463e5429c1c34ba8e3efa1b%22%2C%22exportedName%22%3A%22switchPersona%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/(app)/work/[caseId]/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%2C%5B%7B%22id%22%3A%2240e1296fd7b7e91136f463e5429c1c34ba8e3efa1b%22%2C%22exportedName%22%3A%22switchPersona%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/(app)/work/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%2C%5B%7B%22id%22%3A%2240e1296fd7b7e91136f463e5429c1c34ba8e3efa1b%22%2C%22exportedName%22%3A%22switchPersona%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/(app)/my-work/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%2C%5B%7B%22id%22%3A%2240e1296fd7b7e91136f463e5429c1c34ba8e3efa1b%22%2C%22exportedName%22%3A%22switchPersona%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/(auth)/login/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Capp%5C%5C(auth)%5C%5Clogin%5C%5Cpage.tsx%22%2C%5B%7B%22id%22%3A%224003a12bad2ad672fed019f671f136fbcf0633f46f%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Capp%5C%5C(auth)%5C%5Clogin%5C%5Cpage.tsx%22%7D%5D%5D%2C%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%2C%5B%7B%22id%22%3A%2240e1296fd7b7e91136f463e5429c1c34ba8e3efa1b%22%2C%22exportedName%22%3A%22switchPersona%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/dashboard/page": "action-browser",
+        "app/(app)/work/[caseId]/page": "action-browser",
+        "app/(app)/work/page": "action-browser",
+        "app/(app)/my-work/page": "action-browser",
+        "app/(auth)/login/page": "rsc"
+      },
+      "filename": "../C:\\Users\\user\\Downloads\\files (1)\\quikops-ai-poc-phase1-3\\quikops\\src\\auth\\session-actions.ts",
+      "exportedName": "switchPersona"
+    },
+    "4003a12bad2ad672fed019f671f136fbcf0633f46f": {
+      "workers": {
+        "app/(auth)/login/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Capp%5C%5C(auth)%5C%5Clogin%5C%5Cpage.tsx%22%2C%5B%7B%22id%22%3A%224003a12bad2ad672fed019f671f136fbcf0633f46f%22%2C%22exportedName%22%3A%22%24%24RSC_SERVER_ACTION_0%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Capp%5C%5C(auth)%5C%5Clogin%5C%5Cpage.tsx%22%7D%5D%5D%2C%5B%22C%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%2C%5B%7B%22id%22%3A%2240e1296fd7b7e91136f463e5429c1c34ba8e3efa1b%22%2C%22exportedName%22%3A%22switchPersona%22%2C%22filename%22%3A%22..%2FC%3A%5C%5CUsers%5C%5Cuser%5C%5CDownloads%5C%5Cfiles%20(1)%5C%5Cquikops-ai-poc-phase1-3%5C%5Cquikops%5C%5Csrc%5C%5Cauth%5C%5Csession-actions.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(auth)/login/page": "rsc"
+      },
+      "filename": "../C:\\Users\\user\\Downloads\\files (1)\\quikops-ai-poc-phase1-3\\quikops\\app\\(auth)\\login\\page.tsx",
+      "exportedName": "$$RSC_SERVER_ACTION_0"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "spGNMPAkm2NMAAAkl/4T+9uUrgdzw/UJyI2M+dfsEK0="
+}
