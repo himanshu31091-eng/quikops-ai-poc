@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!--
+    The QuikOps mark, as the browser-tab icon.
+
+    Geometry is identical to `components/shell/brand-mark.tsx` — three stacked
+    bars resolving into a forward chevron, detection resolving into execution.
+    The accent is written as a literal here because a file-convention icon is
+    served as a static asset and never sees `globals.css`; it must match
+    `--color-accent` (#1d4ed8) by hand.
+  -->
+  <rect x="1" y="1" width="22" height="22" rx="5.5" fill="#1d4ed8" />
+  <path
+    d="M7 8.25h5.4M7 12h8M7 15.75h5.4"
+    stroke="#ffffff"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    opacity="0.55"
+  />
+  <path
+    d="M15.6 8.4 19 12l-3.4 3.6"
+    stroke="#ffffff"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

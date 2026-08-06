@@ -749,6 +749,33 @@ item with a real cost: every chart colour, every status tone and every
 `bg-surface-inverse` overlay needs a second value chosen and checked for
 contrast, and half-doing it is how a screen ends up unreadable in one mode.
 
+### D-67 — Three icon files, one geometry
+`app/icon.svg` · `app/favicon.ico` · `app/apple-icon.png`
+
+The portal had no icon at all, so every tab showed the browser's blank-page
+glyph. All three are the `BrandMark` geometry from
+`components/shell/brand-mark.tsx`, unchanged.
+
+**Why three:** `icon.svg` is the real answer — one file, sharp at every size,
+and what modern browsers use. `favicon.ico` exists because browsers request
+`/favicon.ico` unprompted and a 404 on every page load is noise in the server
+log during a demo; it carries 16, 32 and 48 px frames as PNG payloads, which is
+what every browser since IE11 reads. `apple-icon.png` is 180 px and **full
+bleed** — iOS applies its own squircle mask, and a transparent corner under that
+mask renders black, so the rounded frame the other two use would show as four
+dark notches on a home screen.
+
+**Why the accent is a literal `#1d4ed8`:** a file-convention icon is served as a
+static asset and never sees `globals.css`, so it cannot read `--color-accent`.
+This is the one sanctioned exception to the no-raw-hex rule, and it is a
+single-definition hazard: if the accent token changes, these change with it.
+
+The two rasters were generated once from the same SVG with `sharp` (already
+present as a Next transitive dependency). Nothing at runtime depends on it, and
+nothing regenerates them on build — they are committed artefacts. To reproduce:
+render `icon.svg` at 16/32/48 for the `.ico`, and the full-bleed variant at 180
+for the touch icon.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

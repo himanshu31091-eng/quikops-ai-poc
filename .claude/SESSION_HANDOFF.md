@@ -12,7 +12,9 @@
 
 ## Session Date
 
-**2026-08-06** — Stabilization Mode. No features added, by instruction.
+**2026-08-06** — Stabilization Mode. No features added, by instruction, with
+two exceptions taken afterwards on request: the work was committed and pushed,
+and the portal was given an icon set.
 
 ---
 
@@ -88,6 +90,22 @@ arbitrary window in Analytics. The Analytics one is now
 `weeklyThroughputSeries`. The four *same-role* duplicate names (`isFiltered`,
 `buildFacets`, `computeKpis`, `buildFilterChips`) were deliberately kept (D-65).
 
+### Browser icon
+
+The portal had no icon — every tab showed the blank-page glyph. Added
+`app/icon.svg`, `app/favicon.ico` (16/32/48) and `app/apple-icon.png` (180,
+full bleed for the iOS mask), all from the existing `BrandMark` geometry.
+Verified in the emitted head and served at 200 (D-67).
+
+### Git
+
+The repository was already initialised against
+`github.com/himanshu31091-eng/quikops-ai-poc`, in sync at `4ef92e6`, with every
+module and the whole stabilization pass uncommitted — 81 modified, 50
+untracked, 1 deleted. Committed as `05466d5` and pushed to `main`.
+`tsconfig.tsbuildinfo` was tracked from the initial commit despite matching
+`.gitignore`; untracked with `git rm --cached`, file left on disk.
+
 ### Documents
 
 `RELEASE_NOTES.md` and `QA_CHECKLIST.md` created. `ROADMAP.md`,
@@ -99,7 +117,8 @@ including repairs to four doc sections that described code this pass deleted.
 ## Files Modified
 
 **Created**
-`eslint.config.mjs` · `.claude/RELEASE_NOTES.md` · `.claude/QA_CHECKLIST.md`
+`eslint.config.mjs` · `.claude/RELEASE_NOTES.md` · `.claude/QA_CHECKLIST.md` ·
+`app/icon.svg` · `app/favicon.ico` · `app/apple-icon.png`
 
 **Deleted**
 `components/patterns/module-placeholder.tsx` ·
@@ -143,6 +162,7 @@ including repairs to four doc sections that described code this pass deleted.
 | D-64 | The demo reset is only real if modules listen to it |
 | D-65 | Same role, same name; different shape, different name |
 | D-66 | The product is light-theme only, and says so |
+| D-67 | Three icon files, one geometry |
 
 Also amended: **D-19** (placeholder modules — superseded, mechanism removed) and
 **D-60** (`localStorage` — now tour completion only).
@@ -199,6 +219,8 @@ matter to the next session:
 | Cross-feature imports | **0** across 12 features |
 | `console.log` | **0** (12 intentional `console.error`) |
 | `TODO` / `FIXME` | **0** |
+| Browser icons | `/favicon.ico`, `/icon.svg`, `/apple-icon.png` all **200** |
+| Git | `main` in sync with `origin/main`; working tree clean |
 
 Bundle: 102 kB shared; routes 172–204 kB except `/dashboard` (304 kB) and
 `/analytics` (311 kB), where the charts live.
