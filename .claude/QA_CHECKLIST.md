@@ -8,7 +8,7 @@
 >
 > | | Meaning |
 > |---|---|
-> | ✅ | Verified against the 2026-08-06 stabilization build |
+> | ✅ | Verified against the 2026-08-07 product-audit build |
 > | ◻ | Passed in an earlier session; not re-run on this build |
 > | ❌ | Not done, or not implemented |
 >
@@ -21,11 +21,11 @@
 
 Run in this order. Each one must be clean before the next is meaningful.
 
-| # | Command | Expected | 2026-08-06 |
+| # | Command | Expected | 2026-08-07 |
 |---|---|---|---|
 | 1.1 | `npx eslint .` | no output, exit 0 | ✅ |
 | 1.2 | `npm run typecheck` | no output | ✅ |
-| 1.3 | `rm -rf .next && npm run build` | 16/16 routes, no warnings | ✅ |
+| 1.3 | `rm -rf .next && npm run build` | 19/19 entries (16 routes + 3 icons), no warnings | ✅ |
 
 If `.next` is stale after deleting a route or an API handler, typecheck fails on
 generated types that no longer describe the project. Delete `.next` first.
@@ -35,15 +35,15 @@ generated types that no longer describe the project. Delete `.next` first.
 ## 2 · Routes
 
 Start the production server (`npx next start -p 3000`) and confirm each route
-renders. A signed-in session cookie is `qo_session=usr_mgr_01`.
+renders. A signed-in session cookie is `qo_persona=usr_mreinhardt`.
 
-| Route | Expect | 2026-08-06 |
+| Route | Expect | 2026-08-07 |
 |---|---|---|
 | `/` | 307 → `/dashboard` | ✅ |
 | `/login` | 200, four personas | ✅ |
 | `/dashboard` | 200, KPI row populated | ✅ |
 | `/work` | 200, table view, 29 cases | ✅ |
-| `/work/QO-2026-004112` | 200, full case | ✅ |
+| `/work/QO-2026-004115` | 200 **and the case renders** — this segment answers 200 for any string, so assert on content (D-71) | ✅ |
 | `/my-work` | 200 | ✅ |
 | `/actions` | 200 | ✅ |
 | `/analytics` | 200, charts render | ✅ |
@@ -53,7 +53,7 @@ renders. A signed-in session cookie is `qo_session=usr_mgr_01`.
 | `/help` | 200 | ✅ |
 | `/system/audit` | 200 | ✅ |
 | `/system/connectors` | 200 | ✅ |
-| `/work/does-not-exist` | "Case not found" page (returns 200 — known limitation) | ⚠️ |
+| `/work/does-not-exist` | "Case not found" page — **returns 200, not 404** (D-71) | ⚠️ |
 | `/nope` | 404 | ✅ |
 
 ---
@@ -63,7 +63,7 @@ renders. A signed-in session cookie is `qo_session=usr_mgr_01`.
 The single most damaging demo failure is two screens quoting different numbers.
 Check these four pairs every time fixtures or domain logic change.
 
-| Figure | Dashboard | Analytics | Copilot | 2026-08-06 |
+| Figure | Dashboard | Analytics | Copilot | 2026-08-07 |
 |---|---|---|---|---|
 | Mean time to resolve | 11d | 11d | 258.7h | ✅ |
 | SLA adherence | 62.1% | 62.1% | 62.1% | ✅ |
@@ -85,14 +85,14 @@ disagree, the bug is a screen that stopped asking it — not a fixture.
 
 ## 4 · The AI Copilot
 
-| # | Check | How | 2026-08-06 |
+| # | Check | How | 2026-08-07 |
 |---|---|---|---|
 | 4.1 | `.env.local` is loaded | build log shows `Environments: .env.local` | ✅ |
 | 4.2 | Live mode, not offline | response header `x-copilot-mode: live` | ✅ |
 | 4.3 | Correct model | first NDJSON line: `"model":"claude-opus-5"` | ✅ |
 | 4.4 | Streaming is incremental | tokens arrive before `{"type":"done"}` | ✅ |
 | 4.5 | Dashboard Copilot opens from two controls | header action *and* AI summary Regenerate | ◻ |
-| 4.6 | Case Copilot answers about the open case | ask "what is blocking this case?" | ◻ |
+| 4.6 | Case Copilot answers about the open case | ask "what is blocking this case?" | ✅ |
 | 4.7 | Cancellation is clean | close mid-stream; no server error | ◻ |
 | 4.8 | Answers reconcile with the screen | figures match §3 | ✅ |
 | 4.9 | Offline fallback works | unset the key, restart; panel shows **Demo AI** | ◻ |
@@ -102,7 +102,7 @@ Request shape (the client sends a scope, never content):
 ```bash
 curl -X POST http://localhost:3000/api/copilot \
   -H "Content-Type: application/json" \
-  -b "qo_session=usr_mgr_01" \
+  -b "qo_persona=usr_mreinhardt" \
   -d '{"scope":"portfolio","question":"How many open cases?"}'
 ```
 
@@ -110,7 +110,7 @@ curl -X POST http://localhost:3000/api/copilot \
 
 ## 5 · Security
 
-| # | Check | Command | 2026-08-06 |
+| # | Check | Command | 2026-08-07 |
 |---|---|---|---|
 | 5.1 | Key absent from client bundles | `grep -rl "sk-ant" .next/static` → 0 | ✅ |
 | 5.2 | Key read on the server only | one `process.env.ANTHROPIC_API_KEY` read, in `src/ai/services/copilot-service.ts` | ✅ |
@@ -142,7 +142,7 @@ Walk one case end to end. This is the demo's spine.
 
 Structural checks are automated below; the rest is a manual pass.
 
-| # | Check | 2026-08-06 |
+| # | Check | 2026-08-07 |
 |---|---|---|
 | 7.1 | Every `<th>` carries `scope` (46 across 9 files) | ✅ |
 | 7.2 | No icon-only button without an accessible name | ✅ |
@@ -151,7 +151,7 @@ Structural checks are automated below; the rest is a manual pass.
 | 7.5 | Every focusable input has a name | ✅ |
 | 7.6 | Skip link is the first focusable element | ✅ |
 | 7.7 | `:focus-visible` is styled globally (`app/globals.css`) | ✅ |
-| 7.8 | Escape closes every overlay (dialog, drawer, tour, palette) | ◻ |
+| 7.8 | Escape closes every overlay (dialog, drawer, tour, palette, **mobile nav**) | ◻ |
 | 7.9 | Sorted tables expose `aria-sort`; result counts announce live | ✅ |
 | 7.10 | `prefers-reduced-motion` disables the five animations | ✅ |
 | 7.11 | axe-core audit | ❌ not run — Phase 2 |
@@ -164,7 +164,7 @@ navigation → search → each KPI → each panel. Then ⌘K, arrow, Enter, Esca
 
 ## 8 · Responsive and print
 
-| # | Check | 2026-08-06 |
+| # | Check | 2026-08-07 |
 |---|---|---|
 | 8.1 | All nine tables sit in a horizontal scroll container | ✅ |
 | 8.2 | No fixed-width page container (only `max-w-*`) | ✅ |
@@ -182,7 +182,7 @@ modules landed.
 
 ## 9 · Theme
 
-| # | Check | 2026-08-06 |
+| # | Check | 2026-08-07 |
 |---|---|---|
 | 9.1 | Light theme renders correctly throughout | ✅ |
 | 9.2 | Dark theme | ❌ **not implemented** — light only, by decision (D-66) |

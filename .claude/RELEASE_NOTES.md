@@ -131,8 +131,10 @@ with a short list of honest gaps.
    catalogues and formatting are in place; roughly 900–1,400 UI strings are
    still literals in components.
 3. **An unknown case number returns HTTP 200** while rendering the correct
-   "Case not found" page — the segment's `loading.tsx` commits the response
-   status before `notFound()` throws. Visually correct; wrong for crawlers.
+   "Case not found" page. The parent `/work/loading.tsx` commits the status
+   before `notFound()` throws — measured, and the fix costs Work Manager and
+   Case Detail their loading skeletons, so it is a recorded trade (D-71).
+   Visually correct; wrong for crawlers and for status-only smoke tests.
 4. **Plant scope selector is inert.** It holds a selection and does not filter.
    Deliberate: a control that filters some screens and not others is worse than
    one that visibly does nothing yet.

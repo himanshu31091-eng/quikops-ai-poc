@@ -776,6 +776,72 @@ nothing regenerates them on build — they are committed artefacts. To reproduce
 render `icon.svg` at 16/32/48 for the `.ico`, and the full-bleed variant at 180
 for the touch icon.
 
+### D-68 — Every route gets a loading boundary, and it mirrors its own module
+`app/(app)/{admin,help,playbooks,reports,system/audit}/loading.tsx`
+
+Five routes had an error boundary but no loading boundary, so navigating to them
+held the previous screen until the server render finished. Each new skeleton is
+shaped to its own module's layout — header, toolbar, KPI row, table or cards.
+
+**Why shaped rather than generic:** a spinner tells you to wait; a skeleton tells
+you what is coming and does not move the page when it arrives. A generic one
+would reintroduce the layout shift a skeleton exists to prevent. The rule is now
+symmetric: `loading.tsx` and `error.tsx` for every route that fetches.
+
+### D-69 — A tour anchor with no element is a broken tour step
+`src/tour/tours.ts` · `data-tour` attributes
+
+Four of the fourteen guided-tour steps pointed at anchors that did not exist —
+`dashboard-ai-summary`, `work-toolbar`, `action-queue`, `admin-weights`. The
+overlay degrades quietly when an anchor is missing (`setRect(null)`), so the
+card floated in the corner highlighting nothing and no error was raised.
+
+**Why it survived:** graceful degradation hid it. Both the tour definition and
+the elements changed over the final sprint, and nothing connects them at compile
+time — `data-tour` is a string on one side and a string on the other. The check
+is now part of the audit script rather than a type: making it a type would mean
+every screen importing the tour module, which is worse.
+
+### D-70 — A control that does nothing is worse than no control
+`features/dashboard/components/live-dashboard.tsx` → `DashboardExportButton` ·
+`features/connector-health/utils/export-connectors.ts`
+
+The Executive Dashboard shipped an **Export** button with no handler, on the
+demo's opening screen. Connector Health had no export at all, against a module
+contract every other module meets.
+
+**Why a wrapper for the dashboard:** the page is a server component, and the
+export must reflect what is on screen — which means reading the execution store,
+because the figures shown are session-projected. Exporting the server's numbers
+while the screen shows adjusted ones is how an export stops being trusted. So it
+is a thin client wrapper beside the other five, per the frozen-module pattern —
+not an edit to the page's structure.
+
+This is the second dead primary button found on the dashboard (the first was
+"Ask Copilot", Phase 5). Both looked complete in review because a button with no
+`onClick` renders identically to one with.
+
+### D-71 — The 404-on-unknown-case is the price of streaming, and it is measured
+`app/(app)/work/loading.tsx` · `app/(app)/work/[caseId]/loading.tsx`
+
+An unknown case number renders the correct "Case not found" screen but returns
+**HTTP 200**. A layout-level existence check was written to fix it and **did not
+work**; removing both `loading.tsx` files does — verified by building without
+them, at which point `/work/does-not-exist` returns 404 correctly.
+
+**Why it stays:** the boundary that commits the status is the *parent*
+`/work/loading.tsx`, not the case segment's own, so the fix costs Work Manager
+and Case Detail their skeletons — the two heaviest screens in the product, on
+the main demo path. Wrong status for crawlers and uptime monitors; invisible to
+a user. The trade is recorded rather than taken, and the speculative fix was
+deleted rather than left in as reassurance.
+
+It has a real cost worth knowing: because the case route answers 200 for
+anything, a smoke test that curls a *made-up* case number passes. One did — the
+QA checklist named `QO-2026-004112`, which does not exist. The checklist now
+names a real case, and route checks on that segment must assert on content, not
+status.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

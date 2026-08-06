@@ -2,13 +2,16 @@
 
 import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
+import { Button } from "@/components/ui/button";
 import type {
   ActivityEvent,
   CaseListItem,
   ExecutionMetrics,
   KpiCardModel,
+  PlantHealth,
   RevenueImpactBucket,
 } from "@/src/domain/types";
+import { buildCsv, exportSectionsCsv } from "@/src/lib/export";
 import { formatMoney } from "@/src/lib/format";
 import { useExecutionStore } from "@/src/workflow/execution-store";
 import {
@@ -127,6 +130,82 @@ export function LiveSessionChip({ cases }: { cases: CaseListItem[] }) {
       Live session · {changed} case{changed === 1 ? "" : "s"} updated
       {movement.recovered > 0 ? ` · ${formatMoney(movement.recovered)} recovered` : ""}
     </span>
+  );
+}
+
+/**
+ * Exports the dashboard's figures, projected through this session's work.
+ *
+ * A wrapper for the same reason as the others: the page is a server component
+ * and the export has to reflect what is actually on screen, which means reading
+ * the execution store. Exporting the server's numbers while the screen shows
+ * session-adjusted ones is how an export stops being trusted.
+ */
+export function DashboardExportButton({
+  kpis,
+  metrics,
+  plantHealth,
+  cases,
+}: {
+  kpis: KpiCardModel[];
+  metrics: ExecutionMetrics;
+  plantHealth: PlantHealth[];
+  cases: CaseListItem[];
+}) {
+  const { state } = useExecutionStore();
+
+  const onExport = React.useCallback(() => {
+    const liveKpis = projectKpis(kpis, cases, projectCaseFacts(cases, state), state);
+    const liveMetrics = projectExecutionMetrics(metrics, cases, state);
+
+    exportSectionsCsv("executive-dashboard", "Executive Dashboard", [
+      {
+        title: "Headline indicators",
+        csv: buildCsv(liveKpis, [
+          { header: "Indicator", value: (row) => row.label },
+          { header: "Value", value: (row) => String(row.value) },
+          { header: "Unit", value: (row) => row.unit },
+          { header: "Target", value: (row) => (row.target === null ? "" : String(row.target)) },
+          { header: "Change", value: (row) => `${row.deltaValue} ${row.deltaUnit}` },
+        ]),
+      },
+      {
+        title: "Execution performance",
+        csv: buildCsv(
+          [
+            { measure: "Mean time to resolve (hours)", value: liveMetrics.mttrHours },
+            { measure: "SLA adherence (%)", value: liveMetrics.slaAdherencePct },
+            { measure: "Verification pass rate (%)", value: liveMetrics.verificationPassRatePct },
+            { measure: "Recurrence rate (%)", value: liveMetrics.recurrenceRatePct },
+            { measure: "Cases closed this week", value: liveMetrics.casesClosedThisWeek },
+            { measure: "Cases opened this week", value: liveMetrics.casesOpenedThisWeek },
+          ],
+          [
+            { header: "Measure", value: (row) => row.measure },
+            { header: "Value", value: (row) => String(row.value) },
+          ],
+        ),
+      },
+      {
+        title: "Plant health",
+        csv: buildCsv(plantHealth, [
+          { header: "Plant", value: (row) => row.plant.code },
+          { header: "Name", value: (row) => row.plant.name },
+          { header: "OTIF %", value: (row) => String(row.otifPct) },
+          { header: "Open cases", value: (row) => String(row.openCases) },
+          { header: "Critical cases", value: (row) => String(row.criticalCases) },
+          { header: "Revenue at risk", value: (row) => String(row.revenueAtRisk) },
+          { header: "SLA adherence %", value: (row) => String(row.slaAdherencePct) },
+        ]),
+      },
+    ]);
+  }, [cases, kpis, metrics, plantHealth, state]);
+
+  return (
+    <Button variant="secondary" size="md" onClick={onExport}>
+      <Icon name="Download" size="sm" />
+      Export
+    </Button>
   );
 }
 

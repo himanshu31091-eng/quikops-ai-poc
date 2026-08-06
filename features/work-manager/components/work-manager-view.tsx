@@ -167,6 +167,7 @@ export function WorkManagerView({
       <PageHeader
         title="Work Manager"
         description="Every operational case Every Angle has detected, in one queue — triage it, own it, execute it, verify it."
+        docKey="work"
         meta={
           <>
             <MetaChip icon="Clock">Data as at {formatTimestamp(DEMO_NOW)} UTC</MetaChip>
@@ -184,7 +185,7 @@ export function WorkManagerView({
       <WorkKpiHeader kpis={manager.kpis} onToggle={manager.toggleKpi} />
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-12">
-        <div className="flex min-w-0 flex-col gap-3 2xl:col-span-9">
+        <div className="flex min-w-0 flex-col gap-3 2xl:col-span-9" data-tour="work-toolbar">
           <WorkToolbar
             search={manager.filters.search}
             onSearchChange={manager.setSearch}

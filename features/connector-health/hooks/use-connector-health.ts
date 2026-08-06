@@ -63,6 +63,8 @@ export interface ConnectorHealthApi {
   replayMessage: (id: string) => void;
   replayAll: (ids: string[]) => void;
   refresh: () => void;
+  /** Surfaces a confirmation in the module toast — used by the export. */
+  notify: (message: string, tone?: "success" | "info") => void;
   dismissNotice: () => void;
 }
 
@@ -308,6 +310,7 @@ export function useConnectorHealth(
     replayMessage,
     replayAll,
     refresh,
+    notify,
     dismissNotice,
   };
 }

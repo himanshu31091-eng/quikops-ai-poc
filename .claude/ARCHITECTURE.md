@@ -408,7 +408,7 @@ composed exclusively from semantic token class names.
 
 ## 9. Routes
 
-15 routes, all building clean.
+16 routes plus three icon assets, all building clean.
 
 | Route | Kind | Status |
 |---|---|---|

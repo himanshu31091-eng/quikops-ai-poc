@@ -182,7 +182,7 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
             </AssignMenu>
           </BulkActionBar>
 
-          <div id="action-queue" className="scroll-mt-20">
+          <div id="action-queue" data-tour="action-queue" className="scroll-mt-20">
             <SectionCard
               title="Action queue"
               subtitle="Every corrective action across the network, worst SLA first"

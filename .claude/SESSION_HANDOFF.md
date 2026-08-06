@@ -12,6 +12,8 @@
 
 ## Session Date
 
+**2026-08-07** — Product Audit Mode, continuing from the 2026-08-06 stabilization pass.
+
 **2026-08-06** — Stabilization Mode. No features added, by instruction, with
 two exceptions taken afterwards on request: the work was committed and pushed,
 and the portal was given an icon set.
@@ -25,6 +27,53 @@ and the portal was given an icon set.
 ---
 
 ## Completed Work
+
+### Product audit — 2026-08-07
+
+Twenty review dimensions across the whole application. **No Critical issues.**
+Seven High, all fixed. Full dimension table in `ROADMAP.md`; decisions D-68…D-71.
+
+**The four that mattered:**
+
+1. **Four of fourteen guided-tour steps pointed at anchors that did not exist**
+   — `dashboard-ai-summary`, `work-toolbar`, `action-queue`, `admin-weights`.
+   The overlay degrades quietly when an anchor is missing, so those steps
+   floated a card in the corner highlighting nothing and no error was raised.
+   The tour is among the first things a client clicks (D-69).
+2. **The Dashboard's Export button had no handler** — a dead primary control on
+   the demo's opening screen, and the second one found there. It is now a thin
+   client wrapper (`DashboardExportButton`) exporting the KPI band, execution
+   metrics and plant health *projected through the session*, so the file matches
+   the screen. Connector Health had no export at all; it has one now (D-70).
+3. **Five routes had an error boundary but no loading boundary** — `/admin`,
+   `/help`, `/playbooks`, `/reports`, `/system/audit` — so navigating to them
+   held the previous screen until the server render finished. Each now has a
+   skeleton shaped to its own module (D-68).
+4. **The mobile nav drawer had no Escape and no focus trap**, unlike every other
+   overlay in the product. It is now `role="dialog"` with `useFocusTrap` and
+   Escape-to-close.
+
+**Also fixed:** the Dashboard and Work Manager had no ⓘ documentation panel
+while `SCREEN_DOCS.dashboard` and `SCREEN_DOCS.work` were already written and
+unreachable — one `docKey` prop each; a `/login` error boundary was added; and
+the bare `no-img-element` disable in the evidence card now says why it is there.
+
+**One fix written and then deleted.** An unknown case number renders the correct
+"Case not found" page but returns HTTP 200. A layout-level existence check was
+written for it and measured as no help: the boundary that commits the status is
+the *parent* `/work/loading.tsx`, so the only real fix costs Work Manager and
+Case Detail their skeletons. Both the layout and the `caseExists` query were
+removed rather than left in as reassurance, and the trade is recorded (D-71).
+
+That defect had already cost something. The QA checklist named
+`QO-2026-004112`, which **does not exist** — the route answers 200 for any
+string, so a status-only smoke test passed on a made-up case number. Corrected
+to `QO-2026-004115`, along with the session cookie, which the checklist had as
+`qo_session` when the code reads `qo_persona`.
+
+---
+
+### Stabilization pass — 2026-08-06
 
 A seventeen-point audit of the whole codebase, then the fixes it produced.
 
@@ -163,6 +212,10 @@ including repairs to four doc sections that described code this pass deleted.
 | D-65 | Same role, same name; different shape, different name |
 | D-66 | The product is light-theme only, and says so |
 | D-67 | Three icon files, one geometry |
+| D-68 | Every route gets a loading boundary, and it mirrors its own module |
+| D-69 | A tour anchor with no element is a broken tour step |
+| D-70 | A control that does nothing is worse than no control |
+| D-71 | The 404-on-unknown-case is the price of streaming, and it is measured |
 
 Also amended: **D-19** (placeholder modules — superseded, mechanism removed) and
 **D-60** (`localStorage` — now tour completion only).
@@ -170,6 +223,20 @@ Also amended: **D-19** (placeholder modules — superseded, mechanism removed) a
 ---
 
 ## Bugs Fixed
+
+**From the product audit (2026-08-07)**
+
+1. **Four tour steps highlighted nothing** — anchors with no matching element.
+2. **The Dashboard Export button did nothing** — no handler, on the opening screen.
+3. **Connector Health had no export**, against the contract every module meets.
+4. **Five routes had no loading state**, so navigation held the previous screen.
+5. **The mobile nav drawer trapped nothing and ignored Escape.**
+6. **Dashboard and Work Manager had no ⓘ panel** while their content existed.
+7. **`/login` had no error boundary** — a failure there showed Next's default page.
+8. **The QA checklist named a case number that does not exist**, and the wrong
+   session cookie. Both corrected.
+
+**From the stabilization pass (2026-08-06)**
 
 1. **Demo Reset cleared only the shared store**, leaving module-local state
    intact. Would have failed live, between demos.

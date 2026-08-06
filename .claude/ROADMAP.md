@@ -7,7 +7,7 @@
 > `CLAUDE.md` already routes here. Update the status table when a module lands;
 > append decisions to `DECISIONS.md`, not to this file.
 
-**Last updated:** 2026-08-06 — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
+**Last updated:** 2026-08-07 (product audit) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
 
 ---
 
@@ -105,6 +105,36 @@ gaps; all are fixed. Full detail in RELEASE_NOTES.md, decisions in D-62 to D-66.
 
 ---
 
+## ✅ Product audit — 2026-08-07
+
+Twenty review dimensions across the whole application. **No Critical issues.**
+Seven High issues found and fixed; decisions in D-68 to D-71.
+
+| Dimension | Result |
+|---|---|
+| Navigation | 11/11 nav hrefs resolve; 0 orphan routes |
+| Loading states | **5 routes had none** — added, each shaped to its own module (D-68) |
+| Error states | 13/13 routes covered; a `/login` boundary added |
+| Empty states | Every module reaches `EmptyState`, or `DataTable`'s own |
+| Demo flow | **4 of 14 tour steps pointed at anchors that did not exist** — fixed (D-69) |
+| UI consistency | 9/11 module views use `PageHeader`; Case Detail owns its own by design |
+| UX consistency | **Dashboard and Work Manager had no ⓘ doc panel** while their content already existed — wired |
+| Enterprise polish | **Dashboard Export was a dead button**; Connector Health had no export — both fixed (D-70) |
+| Accessibility | **Mobile nav drawer had no Escape and no focus trap** — added |
+| Mobile usability | Drawer now behaves like every other overlay; global search is still `md:` and above |
+| Design tokens | 0 raw hex and 0 palette classes outside `globals.css` (the Microsoft logo and `themeColor` excepted) |
+| Type safety | 0 `any`, 0 `@ts-ignore`, 2 documented `eslint-disable` |
+| Build warnings | 0 |
+| Dead code | 1 dead button; 1 speculative fix written and deleted when measured as no help (D-71) |
+| Duplicate code | None — the three feature export files are column definitions over `src/lib/csv` |
+| Component reuse | 3 modules on `DataTable`, 6 hand-rolled (3 of them frozen) — see debt |
+| Workflow consistency | 4 modules write through `recordOutcome`; readers use projections |
+| AI integration | Live `claude-opus-5` re-confirmed at both scopes on this build |
+| Performance | 0 stale-closure dep regressions; all 3 context values memoised |
+| Responsive | 9/9 tables scroll; 0 fixed-width containers |
+
+---
+
 ## Technical debt
 
 Ordered by what would hurt first. None of it blocks the demo.
@@ -115,8 +145,10 @@ Ordered by what would hurt first. None of it blocks the demo.
 | 2 | **i18n is architecture, not translation.** ~900–1,400 literals still sit in components. | XL | Grows with every string written. The provider and catalogues are in place, so the work is mechanical — but it is mechanical work over 243 files. |
 | 3 | **No axe-core audit, no measured contrast.** Structural a11y is verified; tooling is not run. | M | Structural checks miss contrast and screen-reader flow, which is where AA is usually lost. |
 | 4 | **Charts are statically imported** on `/dashboard` (304 kB) and `/analytics` (311 kB) against a 172–204 kB baseline elsewhere. | S | ~110–130 kB of first-load JS on the two routes that open the demo. `next/dynamic` would move it, at the cost of a chart loading state on a frozen screen — a deliberate trade, not an oversight. |
-| 5 | **Unknown case numbers return HTTP 200** with the correct not-found page; the segment's `loading.tsx` commits the status before `notFound()` throws. | S | Wrong for crawlers and uptime monitoring. Invisible to a user. |
+| 5 | **Unknown case numbers return HTTP 200** with the correct not-found page. Measured: the *parent* `/work/loading.tsx` commits the status, so the only fix is losing the skeletons on the two heaviest screens (D-71). | S | Wrong for crawlers and uptime monitoring, and it makes a smoke test on a made-up case number pass. Invisible to a user. |
 | 6 | **Plant scope selector is inert.** | M | It looks like a filter. Either wire it through every module or label it. |
+| 6b | **Global search is hidden below `md`.** The ⌘K palette is keyboard-only, so a phone has no way to search. | S | Mobile is not the demo surface, but the top bar advertises a capability that is absent at that width. |
+| 6c | **Six modules hand-roll `<table>` markup** instead of using `DataTable`; three of them are frozen. | M | Sorting, pagination and `aria-sort` are re-implemented per module, so an improvement to the shared table does not reach them. |
 | 7 | **No persistence.** Only tour completion survives a reload. | L | Correct for a demo; the first thing a pilot would need. |
 | 8 | **No authentication or authorization.** Persona switching is a cookie write; role only filters navigation. | L | Blocks any deployment where the data is real. |
 

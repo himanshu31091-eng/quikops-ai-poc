@@ -11,6 +11,7 @@ import { PlantScopeSelector } from "./plant-scope-selector";
 import { SideNav } from "./side-nav";
 import { PlatformControls } from "@/components/shell/platform-controls";
 import { SkipLink } from "@/components/patterns/skip-link";
+import { useFocusTrap } from "@/src/a11y/use-focus-trap";
 import { UserMenu } from "./user-menu";
 
 /**
@@ -40,12 +41,25 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
+  const navTrapRef = useFocusTrap(mobileNavOpen);
 
   React.useEffect(() => {
     document.body.style.overflow = mobileNavOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
+  }, [mobileNavOpen]);
+
+  // The drawer is a modal overlay and behaves like every other one in the
+  // product: Escape closes it, and Tab stays inside it. Without this, opening
+  // the nav on a small screen left focus on the page behind the scrim.
+  React.useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileNavOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [mobileNavOpen]);
 
   return (
@@ -58,14 +72,22 @@ export function AppShell({
 
       {/* Mobile drawer */}
       {mobileNavOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
+          className="fixed inset-0 z-50 lg:hidden"
+        >
           <button
             type="button"
             aria-label="Close navigation"
             onClick={() => setMobileNavOpen(false)}
             className="absolute inset-0 bg-surface-inverse/25"
           />
-          <div className="anim-panel absolute left-0 top-0 h-full">
+          <div
+            ref={navTrapRef as React.RefObject<HTMLDivElement>}
+            className="anim-panel absolute left-0 top-0 h-full"
+          >
             <SideNav
               role={user.role}
               badges={badges}

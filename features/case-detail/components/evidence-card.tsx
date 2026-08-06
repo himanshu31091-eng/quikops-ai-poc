@@ -298,6 +298,9 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 )}
               >
                 {file.objectUrl ? (
+                  // A blob URL from this session, not a served asset — 
+                  // cannot optimise one, and the alt is empty because the file
+                  // name sits beside it and would otherwise be read twice.
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={file.objectUrl}

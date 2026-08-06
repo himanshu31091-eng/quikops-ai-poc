@@ -13,6 +13,7 @@ import { DEMO_NOW } from "@/src/lib/constants";
 import { cn } from "@/src/lib/cn";
 import { formatTimestamp } from "@/src/lib/format";
 import { useConnectorHealth } from "../hooks/use-connector-health";
+import { exportConnectorHealth } from "../utils/export-connectors";
 import type { ConnectorKpiTile, ConnectorScope } from "../types";
 import { ConnectorCards } from "./connector-cards";
 import {
@@ -94,6 +95,12 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
 
   const selected = model.connectors.find((connector) => connector.id === api.selectedId);
 
+  const { notify } = api;
+  const onExport = React.useCallback(() => {
+    const filename = exportConnectorHealth(model, api.runs);
+    notify(`Exported ${filename}`, "success");
+  }, [model, api.runs, notify]);
+
   const clearSelection = React.useCallback(() => selectConnector(null), [selectConnector]);
 
   const toggleSelection = React.useCallback(
@@ -127,15 +134,21 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
           </>
         }
         actions={
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={api.refresh}
-            disabled={api.isRefreshing}
-          >
-            <Icon name="RefreshCw" size="sm" className={cn(api.isRefreshing && "animate-spin")} />
-            Refresh
-          </Button>
+          <>
+            <Button variant="secondary" size="md" onClick={onExport}>
+              <Icon name="Download" size="sm" />
+              Export
+            </Button>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={api.refresh}
+              disabled={api.isRefreshing}
+            >
+              <Icon name="RefreshCw" size="sm" className={cn(api.isRefreshing && "animate-spin")} />
+              Refresh
+            </Button>
+          </>
         }
       />
 

@@ -287,102 +287,104 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       </SectionCard>
 
       {/* Priority weights */}
-      <SectionCard
-        title="Priority weights"
-        subtitle="Re-scored across every open case as you change them. Nothing is saved until you apply."
-        icon="Target"
-        action={
-          weightsDirty ? (
-            <Button variant="ghost" size="xs" onClick={resetWeights}>
-              <Icon name="RefreshCw" size="xs" />
-              Reset
-            </Button>
-          ) : null
-        }
-      >
-        <div className="grid gap-4 xl:grid-cols-2">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {WEIGHT_LABELS.map(({ key, label, hint }) => (
-              <FormField key={key} label={label} htmlFor={`weight-${key}`} hint={hint}>
-                <input
-                  id={`weight-${key}`}
-                  type="number"
-                  min={0}
-                  max={60}
-                  value={weights[key]}
-                  onChange={(event) =>
-                    setWeights((previous) => ({
-                      ...previous,
-                      [key]: Number.parseInt(event.target.value, 10) || 0,
-                    }))
-                  }
-                  className={FIELD_CLASS}
-                />
-              </FormField>
-            ))}
-          </div>
-
-          <div className="min-w-0 rounded-md border border-line bg-surface-subtle p-3">
-            <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-              Preview
-            </p>
-
-            <ul className="mt-2 space-y-1.5">
-              {weightPreview.distribution.map((entry) => (
-                <li key={entry.band} className="flex items-center gap-2">
-                  <PriorityChip band={entry.band} size="sm" />
-                  <span className="flex-1 text-2xs tabular-nums text-content-secondary">
-                    {entry.before} → {entry.after}
-                  </span>
-                  {entry.delta !== 0 ? (
-                    <span
-                      className={cn(
-                        "text-2xs font-semibold tabular-nums",
-                        entry.delta > 0 ? "text-critical-content" : "text-success-content",
-                      )}
-                    >
-                      {entry.delta > 0 ? "+" : ""}
-                      {entry.delta}
-                    </span>
-                  ) : (
-                    <span className="text-2xs text-content-tertiary">no change</span>
-                  )}
-                </li>
+      <div data-tour="admin-weights">
+        <SectionCard
+          title="Priority weights"
+          subtitle="Re-scored across every open case as you change them. Nothing is saved until you apply."
+          icon="Target"
+          action={
+            weightsDirty ? (
+              <Button variant="ghost" size="xs" onClick={resetWeights}>
+                <Icon name="RefreshCw" size="xs" />
+                Reset
+              </Button>
+            ) : null
+          }
+        >
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {WEIGHT_LABELS.map(({ key, label, hint }) => (
+                <FormField key={key} label={label} htmlFor={`weight-${key}`} hint={hint}>
+                  <input
+                    id={`weight-${key}`}
+                    type="number"
+                    min={0}
+                    max={60}
+                    value={weights[key]}
+                    onChange={(event) =>
+                      setWeights((previous) => ({
+                        ...previous,
+                        [key]: Number.parseInt(event.target.value, 10) || 0,
+                      }))
+                    }
+                    className={FIELD_CLASS}
+                  />
+                </FormField>
               ))}
-            </ul>
+            </div>
 
-            <p className="mt-3 border-t border-line pt-2.5 text-2xs text-content-secondary">
-              {weightPreview.movedCount === 0
-                ? "No case changes band under these weights."
-                : `${weightPreview.movedCount} case${weightPreview.movedCount === 1 ? "" : "s"} would change band.`}
-            </p>
+            <div className="min-w-0 rounded-md border border-line bg-surface-subtle p-3">
+              <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                Preview
+              </p>
 
-            {weightPreview.moved.length > 0 ? (
-              <ul className="mt-2 space-y-1">
-                {weightPreview.moved.slice(0, 5).map((entry) => (
-                  <li key={entry.caseNo} className="flex items-center gap-1.5">
-                    <Link
-                      href={caseHref(entry.caseNo)}
-                      className="font-mono text-2xs text-accent hover:underline"
-                    >
-                      {entry.caseNo}
-                    </Link>
-                    <span className="text-2xs text-content-tertiary">
-                      {entry.fromBand.toLowerCase()} → {entry.toBand.toLowerCase()} (
-                      {entry.fromScore.toFixed(1)} → {entry.toScore.toFixed(1)})
+              <ul className="mt-2 space-y-1.5">
+                {weightPreview.distribution.map((entry) => (
+                  <li key={entry.band} className="flex items-center gap-2">
+                    <PriorityChip band={entry.band} size="sm" />
+                    <span className="flex-1 text-2xs tabular-nums text-content-secondary">
+                      {entry.before} → {entry.after}
                     </span>
+                    {entry.delta !== 0 ? (
+                      <span
+                        className={cn(
+                          "text-2xs font-semibold tabular-nums",
+                          entry.delta > 0 ? "text-critical-content" : "text-success-content",
+                        )}
+                      >
+                        {entry.delta > 0 ? "+" : ""}
+                        {entry.delta}
+                      </span>
+                    ) : (
+                      <span className="text-2xs text-content-tertiary">no change</span>
+                    )}
                   </li>
                 ))}
-                {weightPreview.moved.length > 5 ? (
-                  <li className="text-2xs text-content-tertiary">
-                    +{weightPreview.moved.length - 5} more
-                  </li>
-                ) : null}
               </ul>
-            ) : null}
+
+              <p className="mt-3 border-t border-line pt-2.5 text-2xs text-content-secondary">
+                {weightPreview.movedCount === 0
+                  ? "No case changes band under these weights."
+                  : `${weightPreview.movedCount} case${weightPreview.movedCount === 1 ? "" : "s"} would change band.`}
+              </p>
+
+              {weightPreview.moved.length > 0 ? (
+                <ul className="mt-2 space-y-1">
+                  {weightPreview.moved.slice(0, 5).map((entry) => (
+                    <li key={entry.caseNo} className="flex items-center gap-1.5">
+                      <Link
+                        href={caseHref(entry.caseNo)}
+                        className="font-mono text-2xs text-accent hover:underline"
+                      >
+                        {entry.caseNo}
+                      </Link>
+                      <span className="text-2xs text-content-tertiary">
+                        {entry.fromBand.toLowerCase()} → {entry.toBand.toLowerCase()} (
+                        {entry.fromScore.toFixed(1)} → {entry.toScore.toFixed(1)})
+                      </span>
+                    </li>
+                  ))}
+                  {weightPreview.moved.length > 5 ? (
+                    <li className="text-2xs text-content-tertiary">
+                      +{weightPreview.moved.length - 5} more
+                    </li>
+                  ) : null}
+                </ul>
+              ) : null}
+            </div>
           </div>
-        </div>
-      </SectionCard>
+        </SectionCard>
+      </div>
 
       {/* SLA targets */}
       <SectionCard

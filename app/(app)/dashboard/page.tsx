@@ -19,6 +19,7 @@ import {
   getTodaysActions,
 } from "@/src/data/queries/dashboard";
 import {
+  DashboardExportButton,
   LiveActivityFeed,
   LiveExecutionMetrics,
   LiveKpiBand,
@@ -109,6 +110,7 @@ export default async function ExecutiveDashboardPage() {
       <PageHeader
         title={`Good morning, ${firstName}`}
         description="Operational health across four plants, with every number traceable to the cases behind it."
+        docKey="dashboard"
         meta={
           <>
             <MetaChip icon="Clock">
@@ -125,10 +127,12 @@ export default async function ExecutiveDashboardPage() {
         }
         actions={
           <>
-            <Button variant="secondary" size="md">
-              <Icon name="Download" size="sm" />
-              Export
-            </Button>
+            <DashboardExportButton
+              kpis={kpis}
+              metrics={executionMetrics}
+              plantHealth={plantHealth}
+              cases={caseBaseline}
+            />
             <AskCopilotButton />
           </>
         }
@@ -149,7 +153,7 @@ export default async function ExecutiveDashboardPage() {
 
       {/* Intelligence + plant health */}
       <div className="grid gap-4 xl:grid-cols-12">
-        <div className="min-w-0 xl:col-span-8">
+        <div className="min-w-0 xl:col-span-8" data-tour="dashboard-ai-summary">
           <AiSummaryCard summary={summary} />
         </div>
         <div className="min-w-0 xl:col-span-4">
