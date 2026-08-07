@@ -194,7 +194,7 @@ export function ExecutiveBriefing({
           </div>
         </div>
 
-        <dl className="mt-3 grid grid-cols-3 gap-2">
+        <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[
             {
               label: "Detected",

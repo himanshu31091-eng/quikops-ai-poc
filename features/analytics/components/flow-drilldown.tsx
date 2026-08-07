@@ -67,7 +67,7 @@ function SliceRow({
           selected ? "bg-surface-active" : "hover:bg-surface-hover",
         )}
       >
-        <span className="w-40 shrink-0 truncate text-xs font-medium text-content">
+        <span className="w-24 shrink-0 truncate text-xs font-medium text-content sm:w-40">
           {slice.label}
         </span>
 
@@ -207,7 +207,7 @@ export function FlowDrilldown({
       ) : (
         <>
           <p className="flex items-center gap-3 px-2.5 text-2xs text-content-tertiary">
-            <span className="w-40 shrink-0">Worst first</span>
+            <span className="w-24 shrink-0 sm:w-40">Worst first</span>
             <span className="flex flex-1 items-center justify-between">
               <span className="text-success-content">← resolved</span>
               <span className="text-critical-content">detected →</span>
@@ -259,7 +259,7 @@ export function BandMixture({
         const net = band.detected - band.resolved;
         return (
           <div key={band.band} className="flex items-center gap-3">
-            <span className="flex w-24 shrink-0 items-center gap-1.5">
+            <span className="flex w-20 shrink-0 items-center gap-1.5 sm:w-24">
               <span className={cn("size-1.5 rounded-full", meta.dotClassName)} aria-hidden />
               <span className="text-2xs font-medium text-content">{meta.label}</span>
             </span>

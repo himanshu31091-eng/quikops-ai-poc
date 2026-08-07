@@ -11,6 +11,8 @@ import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { SectionCard } from "@/components/patterns/section-card";
+import { SavedReportsPanel } from "./saved-reports-panel";
+import { useSavedReports, type SavedReport } from "../hooks/use-saved-reports";
 import { Button } from "@/components/ui/button";
 import {
   REPORT_SECTION_META,
@@ -48,6 +50,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
   );
   const [search, setSearch] = React.useState("");
   const [notice, setNotice] = React.useState<string | null>(null);
+  const saved = useSavedReports();
 
   const selected = data.templates.find((template) => template.id === selectedId) ?? null;
   const [sections, setSections] = React.useState<Set<ReportSection>>(
@@ -131,6 +134,40 @@ export function ReportsView({ data }: { data: ReportsData }) {
    * path has to interleave them with title rows and let Excel guess at every
    * value. Here a count arrives as a number and a plant code stays a string.
    */
+  /**
+   * Applying a saved report restores the template and the section selection
+   * together. Setting the template alone would reset the sections to that
+   * template's default — the ref-based reset below fires on any template change
+   * — so the ref is advanced first and the sections written after.
+   */
+  const applySaved = React.useCallback((report: SavedReport) => {
+    previousTemplate.current = report.templateId;
+    setSelectedId(report.templateId);
+    setSections(new Set(report.sections));
+    setNotice(`Applied "${report.name}"`);
+  }, []);
+
+  const saveCurrent = React.useCallback(
+    (name: string) => {
+      if (!selected) return;
+      const entry = saved.save({
+        name,
+        templateId: selected.id,
+        sections: [...sections],
+        savedAt: DEMO_NOW.toISOString(),
+      });
+      if (entry) setNotice(`Saved "${entry.name}"`);
+    },
+    [saved, selected, sections],
+  );
+
+  const templateNameFor = React.useCallback(
+    (templateId: string) =>
+      data.templates.find((template) => template.id === templateId)?.name ??
+      "Unknown template",
+    [data.templates],
+  );
+
   const exportExcel = React.useCallback(() => {
     if (!selected) return;
     const sheets: XlsSheet<never>[] = [];
@@ -352,6 +389,23 @@ export function ReportsView({ data }: { data: ReportsData }) {
                 ))}
               </ul>
             )}
+          </SectionCard>
+
+          <SectionCard
+            title="Saved reports"
+            subtitle="The template and the sections you kept, together"
+            icon="BookMarked"
+          >
+            <SavedReportsPanel
+              reports={saved.reports}
+              isReady={saved.isReady}
+              currentTemplateName={selected?.name ?? null}
+              sectionCount={sections.size}
+              onSave={saveCurrent}
+              onApply={applySaved}
+              onRemove={saved.remove}
+              templateNameFor={templateNameFor}
+            />
           </SectionCard>
 
           <SectionCard

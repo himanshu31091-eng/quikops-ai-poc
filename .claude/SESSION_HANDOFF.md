@@ -12,6 +12,8 @@
 
 ## Session Date
 
+**2026-08-08** — Demo-freeze sprint: saved reports, responsive pass, final QA.
+
 **2026-08-07** — Wave 1 (Executive insights), after Product Audit Mode and the
 partner-reference gap analysis, all on the 2026-08-06 stabilization pass.
 
@@ -28,6 +30,31 @@ and the portal was given an icon set.
 ---
 
 ## Completed Work
+
+### Demo-freeze sprint — saved reports and the responsive pass (2026-08-08)
+
+**Saved reports.** The only genuine gap left in Reports — templates, scheduling
+and case drill-down already existed. A saved report captures the template *and*
+the section selection, because those together are the artefact a manager sends;
+a template alone is where they start. Stored in `localStorage`, which is now the
+third and last thing this product keeps locally, alongside tour completion and
+tip dismissals. Storage is validated on read rather than trusted — it is
+user-writable, and a hand-edited entry should degrade to "not there" rather than
+crash the screen.
+
+**Responsive pass, finally run.** A static audit over the eleven components
+added across this session found **three real defects**: two grids that went
+straight to three columns with no single-column fallback, and a 176px fixed
+label column that would overflow a 375px viewport. All fixed, plus one adjacent
+case the threshold had missed.
+
+**What that pass cannot tell you.** It catches structural failure — a grid with
+no fallback, a table outside a scroll container, a fixed width wider than the
+viewport. It cannot see wrapping, truncation, or whether a chart is legible at
+375px. §8.3–8.7 of QA_CHECKLIST stay ◻ and should not be promoted from a source
+read.
+
+---
 
 ### Final sprint — Playbooks knowledge, Oracle, Excel (2026-08-07)
 

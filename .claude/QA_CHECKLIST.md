@@ -8,7 +8,7 @@
 >
 > | | Meaning |
 > |---|---|
-> | ✅ | Verified against the 2026-08-07 product-audit build |
+> | ✅ | Verified against the 2026-08-08 demo-freeze build |
 > | ◻ | Passed in an earlier session; not re-run on this build |
 > | ❌ | Not done, or not implemented |
 >
@@ -21,7 +21,7 @@
 
 Run in this order. Each one must be clean before the next is meaningful.
 
-| # | Command | Expected | 2026-08-07 |
+| # | Command | Expected | 2026-08-08 |
 |---|---|---|---|
 | 1.1 | `npx eslint .` | no output, exit 0 | ✅ |
 | 1.2 | `npm run typecheck` | no output | ✅ |
@@ -37,7 +37,7 @@ generated types that no longer describe the project. Delete `.next` first.
 Start the production server (`npx next start -p 3000`) and confirm each route
 renders. A signed-in session cookie is `qo_persona=usr_mreinhardt`.
 
-| Route | Expect | 2026-08-07 |
+| Route | Expect | 2026-08-08 |
 |---|---|---|
 | `/` | 307 → `/dashboard` | ✅ |
 | `/login` | 200, four personas | ✅ |
@@ -63,7 +63,7 @@ renders. A signed-in session cookie is `qo_persona=usr_mreinhardt`.
 The single most damaging demo failure is two screens quoting different numbers.
 Check these four pairs every time fixtures or domain logic change.
 
-| Figure | Dashboard | Analytics | Copilot | 2026-08-07 |
+| Figure | Dashboard | Analytics | Copilot | 2026-08-08 |
 |---|---|---|---|---|
 | Mean time to resolve | 11d | 11d | 258.7h | ✅ |
 | SLA adherence | 62.1% | 62.1% | 62.1% | ✅ |
@@ -85,7 +85,7 @@ disagree, the bug is a screen that stopped asking it — not a fixture.
 
 ## 4 · The AI Copilot
 
-| # | Check | How | 2026-08-07 |
+| # | Check | How | 2026-08-08 |
 |---|---|---|---|
 | 4.1 | `.env.local` is loaded | build log shows `Environments: .env.local` | ✅ |
 | 4.2 | Live mode, not offline | response header `x-copilot-mode: live` | ✅ |
@@ -110,7 +110,7 @@ curl -X POST http://localhost:3000/api/copilot \
 
 ## 5 · Security
 
-| # | Check | Command | 2026-08-07 |
+| # | Check | Command | 2026-08-08 |
 |---|---|---|---|
 | 5.1 | Key absent from client bundles | `grep -rl "sk-ant" .next/static` → 0 | ✅ |
 | 5.2 | Key read on the server only | one `process.env.ANTHROPIC_API_KEY` read, in `src/ai/services/copilot-service.ts` | ✅ |
@@ -142,7 +142,7 @@ Walk one case end to end. This is the demo's spine.
 
 Structural checks are automated below; the rest is a manual pass.
 
-| # | Check | 2026-08-07 |
+| # | Check | 2026-08-08 |
 |---|---|---|
 | 7.1 | Every `<th>` carries `scope` (46 across 9 files) | ✅ |
 | 7.2 | No icon-only button without an accessible name | ✅ |
@@ -164,9 +164,9 @@ navigation → search → each KPI → each panel. Then ⌘K, arrow, Enter, Esca
 
 ## 8 · Responsive and print
 
-| # | Check | 2026-08-07 |
+| # | Check | 2026-08-08 |
 |---|---|---|
-| 8.1 | All nine tables sit in a horizontal scroll container | ✅ |
+| 8.1 | All tables sit in a horizontal scroll container | ✅ |
 | 8.2 | No fixed-width page container (only `max-w-*`) | ✅ |
 | 8.3 | 1440px — full layout | ◻ |
 | 8.4 | 1024px — sidebar collapses to icons | ◻ |
@@ -174,15 +174,22 @@ navigation → search → each KPI → each panel. Then ⌘K, arrow, Enter, Esca
 | 8.6 | 375px — no horizontal page scroll | ◻ |
 | 8.7 | Print — toolbars hidden, tables unclipped | ◻ |
 
-8.1 and 8.2 are structural and were re-checked by inspection on this build.
-8.3–8.7 need a browser at each width; they have not been re-run since the
-modules landed.
+8.1 and 8.2 are structural and were re-checked on this build. A static
+responsive audit also ran over the eleven components added across this
+session and found three real defects — two grids that went straight to three
+columns with no single-column fallback, and a 176px fixed label column that
+would overflow a 375px viewport. All three are fixed, plus one adjacent case
+the threshold had missed.
+
+**8.3–8.7 still need a browser.** The static pass catches the structural
+classes of failure; it cannot see wrapping, truncation or whether a chart is
+legible at 375px. Do not promote these to ✅ from a source read.
 
 ---
 
 ## 9 · Theme
 
-| # | Check | 2026-08-07 |
+| # | Check | 2026-08-08 |
 |---|---|---|
 | 9.1 | Light theme renders correctly throughout | ✅ |
 | 9.2 | Dark theme | ❌ **not implemented** — light only, by decision (D-66) |

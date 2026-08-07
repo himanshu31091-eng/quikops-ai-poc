@@ -155,6 +155,22 @@ case: it means the previous corrective action did not hold.
 
 ---
 
+## 4a. What the browser remembers
+
+Three things, and only three, survive a reload — all of them belonging to a
+person's habits rather than to the operation:
+
+| What | Where | Why |
+|---|---|---|
+| Tour completion | `localStorage` (D-60) | Onboarding that reappears on every reload is an obstacle |
+| Tip dismissals | `localStorage` (D-78) | Same argument, per hint; cleared by demo reset |
+| Saved reports | `localStorage` | The template plus the sections a manager kept is the artefact they send |
+
+Everything else — every case mutation, every filter, every selection — is
+session-scoped by design and discarded on refresh.
+
+---
+
 ## 5. The frozen clock
 
 `DEMO_NOW = new Date("2026-08-05T09:12:00Z")` — `src/lib/constants.ts`.

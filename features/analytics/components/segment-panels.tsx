@@ -214,7 +214,7 @@ export function EscalationPanel({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {[
           {
             label: "Escalated",
@@ -250,7 +250,7 @@ export function EscalationPanel({
       <ul className="space-y-2">
         {data.bands.map((band) => (
           <li key={band.level} className="flex items-center gap-3">
-            <span className="w-44 shrink-0">
+            <span className="w-28 shrink-0 sm:w-44">
               <span className="block text-2xs font-medium text-content">{band.label}</span>
               <span className="block text-2xs text-content-tertiary">
                 {band.openCases} open
