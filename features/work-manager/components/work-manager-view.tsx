@@ -190,8 +190,9 @@ export function WorkManagerView({
       </div>
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-12">
-        <div className="flex min-w-0 flex-col gap-3 2xl:col-span-9" data-tour="work-toolbar">
-          <WorkToolbar
+        <div className="flex min-w-0 flex-col gap-3 2xl:col-span-9">
+          <div data-tour="work-toolbar">
+            <WorkToolbar
             search={manager.filters.search}
             onSearchChange={manager.setSearch}
             view={manager.view}
@@ -206,9 +207,10 @@ export function WorkManagerView({
             selectedRows={manager.selectedRows}
             users={assignableUsers}
             sessionUser={sessionUser}
-            onBulkAssign={bulkAssign}
-            onBulkClose={bulkClose}
-          />
+              onBulkAssign={bulkAssign}
+              onBulkClose={bulkClose}
+            />
+          </div>
 
           <FilterBar
             facets={facets}
