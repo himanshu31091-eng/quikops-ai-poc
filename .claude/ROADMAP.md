@@ -7,7 +7,7 @@
 > `CLAUDE.md` already routes here. Update the status table when a module lands;
 > append decisions to `DECISIONS.md`, not to this file.
 
-**Last updated:** 2026-08-07 (Sprints 3–5; see *Sprint log* below and *Priority 3* for the gap table) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
+**Last updated:** 2026-08-07 (final sprint — Playbooks knowledge layer, Oracle connector, Excel export; see *Priority 3* for the gap table) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
 
 ---
 

@@ -29,6 +29,33 @@ and the portal was given an icon set.
 
 ## Completed Work
 
+### Final sprint — Playbooks knowledge, Oracle, Excel (2026-08-07)
+
+**Playbooks knowledge layer.** `src/data/fixtures/knowledge.ts` — five SOPs with
+per-step guardrails written from real failure modes, six preventive actions each
+naming the signal that would show it worked, and five knowledge articles. One
+search and one category filter span all three, because a reader looking
+something up does not yet know whether the answer is a procedure, a prevention
+or a reason. Content is procedural only: nothing in that file is a number the
+product reports.
+
+**Oracle connector.** Added to `CONNECTORS`; run history, health scoring and the
+funnel derive from the seed automatically — the architecture reuse working as
+intended. Two dead-letter entries and four field mappings authored: one a schema
+mismatch that cannot be replayed (Oracle case-pack units), one a timing failure
+that can.
+
+**Excel export.** `src/lib/xlsx.ts` — SpreadsheetML, no dependency. The reason
+to have it over CSV is typing: Excel guesses at a CSV, and a leading-zero plant
+code or a locale-ambiguous date is guessed wrong. Wired into Reports, where each
+report section becomes its own sheet.
+
+The typed `sheet()` helper earned itself immediately — widening the array at the
+literal would have made every column callback `any`; doing it inside a generic
+call kept inference, which caught two wrong field paths in the first compile.
+
+---
+
 ### Sprints 3–5 (2026-08-07)
 
 **Administration completed** — the module was missing five of its eight named

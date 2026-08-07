@@ -10,6 +10,7 @@ import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
 import { ProgressBar } from "@/components/patterns/progress-bar";
 import { SectionCard } from "@/components/patterns/section-card";
+import { KnowledgePanels } from "./knowledge-panels";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ROLE_META } from "@/src/config/app-config";
@@ -435,6 +436,16 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
           </p>
         </SectionCard>
       ) : null}
+
+      {/* The knowledge layer beneath the playbooks: procedure, prevention and
+          the reasoning behind both. One search spans all three. */}
+      <SectionCard
+        title="Knowledge"
+        subtitle="Standing procedure, what stops the condition recurring, and why it is done that way"
+        icon="BookMarked"
+      >
+        <KnowledgePanels />
+      </SectionCard>
     </div>
   );
 }

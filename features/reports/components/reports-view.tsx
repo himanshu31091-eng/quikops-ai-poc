@@ -19,7 +19,14 @@ import {
 import type { ReportsData, RunView, ScheduleView } from "@/src/data/queries/reports";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { cn } from "@/src/lib/cn";
-import { exportPdf, exportSectionsCsv, buildCsv } from "@/src/lib/export";
+import {
+  exportPdf,
+  exportSectionsCsv,
+  exportWorkbook,
+  buildCsv,
+  sheet,
+  type XlsSheet,
+} from "@/src/lib/export";
 import { formatHours, formatMoney, formatPercent, formatWhen } from "@/src/lib/format";
 import { caseHref } from "@/src/lib/routes";
 
@@ -117,6 +124,69 @@ export function ReportsView({ data }: { data: ReportsData }) {
     [data],
   );
 
+  /**
+   * The same report as a workbook rather than a flattened CSV.
+   *
+   * Each section becomes its own sheet, which is what a section *is* — the CSV
+   * path has to interleave them with title rows and let Excel guess at every
+   * value. Here a count arrives as a number and a plant code stays a string.
+   */
+  const exportExcel = React.useCallback(() => {
+    if (!selected) return;
+    const sheets: XlsSheet<never>[] = [];
+
+    if (sections.has("headline")) {
+      sheets.push(sheet({
+        name: "Headline",
+        rows: [source.counts],
+        columns: [
+          { header: "Open cases", value: (r) => r.open },
+          { header: "Revenue at risk", value: (r) => r.revenueAtRisk, width: 16 },
+          { header: "Past SLA", value: (r) => r.breached },
+          { header: "Unassigned", value: (r) => r.unassigned },
+          { header: "Critical", value: (r) => r.openCritical },
+        ],
+      }));
+    }
+
+    if (sections.has("plant-performance")) {
+      sheets.push(sheet({
+        name: "Plant performance",
+        rows: source.plants,
+        columns: [
+          { header: "Plant", value: (r) => r.code },
+          { header: "Name", value: (r) => r.name, width: 20 },
+          { header: "Country", value: (r) => r.country, width: 16 },
+          { header: "Open cases", value: (r) => r.openCases },
+          { header: "Critical", value: (r) => r.criticalCases },
+          { header: "Revenue at risk", value: (r) => r.revenueAtRisk, width: 16 },
+          { header: "SLA adherence %", value: (r) => r.slaAdherencePct, width: 16 },
+        ],
+      }));
+    }
+
+    if (sections.has("case-list")) {
+      sheets.push(sheet({
+        name: "Open cases",
+        rows: source.openCases,
+        columns: [
+          { header: "Case", value: (r) => r.caseNo, width: 16 },
+          { header: "Title", value: (r) => r.title, width: 44 },
+          { header: "Plant", value: (r) => r.plantCode },
+          { header: "Priority", value: (r) => r.priorityBand },
+          { header: "Score", value: (r) => r.priorityScore },
+          { header: "Owner", value: (r) => r.owner?.name ?? "Unassigned", width: 20 },
+          { header: "Revenue at risk", value: (r) => r.revenueAtRisk, width: 16 },
+          { header: "Opened", value: (r) => r.openedAt, width: 22 },
+        ],
+      }));
+    }
+
+    if (sheets.length === 0) return;
+    const filename = exportWorkbook(`report-${selected.id}`, sheets);
+    setNotice(`Exported ${filename}`);
+  }, [selected, sections, source]);
+
   const exportCsv = React.useCallback(() => {
     if (!selected) return;
     const parts: { title: string; csv: string }[] = [];
@@ -213,6 +283,10 @@ export function ReportsView({ data }: { data: ReportsData }) {
             <Button variant="secondary" size="sm" onClick={exportCsv} disabled={!selected}>
               <Icon name="Download" size="sm" />
               CSV
+            </Button>
+            <Button variant="secondary" size="sm" onClick={exportExcel} disabled={!selected}>
+              <Icon name="Sheet" size="sm" />
+              Excel
             </Button>
             <Button variant="primary" size="sm" onClick={exportPdf} disabled={!selected}>
               <Icon name="FileText" size="sm" />

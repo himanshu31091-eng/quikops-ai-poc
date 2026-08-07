@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { DEMO_NOW } from "./constants";
 import { buildCsv, buildCsvSections, downloadCsv, type CsvColumn } from "./csv";
+import { buildWorkbook, downloadWorkbook, sheet, type XlsSheet } from "./xlsx";
 
 /**
  * The export framework.
@@ -18,7 +19,7 @@ import { buildCsv, buildCsvSections, downloadCsv, type CsvColumn } from "./csv";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
-export type ExportFormat = "csv" | "pdf";
+export type ExportFormat = "csv" | "xls" | "pdf";
 
 /** `quikops-action-center-2026-08-06.csv` — module, date, extension. */
 export function exportFilename(moduleSlug: string, extension: string): string {
@@ -70,5 +71,27 @@ export function exportPdf(): void {
   window.print();
 }
 
-export type { CsvColumn };
+/**
+ * Exports one or more sheets as a real workbook.
+ *
+ * Distinct from the CSV path rather than replacing it: a CSV is the right
+ * answer when the destination is another system, and a workbook is the right
+ * answer when the destination is a person. The difference that matters is
+ * typing — Excel guesses at a CSV, and a material code with a leading zero or a
+ * date in the wrong locale is guessed wrong.
+ *
+ * Returns the filename, for the confirmation toast.
+ */
+export function exportWorkbook(
+  moduleSlug: string,
+  sheets: XlsSheet<never>[],
+): string {
+  return downloadWorkbook(
+    exportFilename(moduleSlug, "xls"),
+    buildWorkbook(sheets),
+  );
+}
+
+export { sheet };
+export type { CsvColumn, XlsSheet };
 export { buildCsv, buildCsvSections };

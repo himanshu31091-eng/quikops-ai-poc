@@ -148,6 +148,28 @@ export const CONNECTORS: ConnectorDefinition[] = [
     minutesSinceLastRun: 41,
   },
   {
+    // The second ERP. Northbridge runs SAP at the European and US sites and
+    // Oracle at Querétaro and Pune following an acquisition — which is the
+    // ordinary situation and the reason the ingestion layer normalises rather
+    // than assuming one source. It is the least stable feed in the estate
+    // because it crosses a network the group does not operate.
+    id: "conn_oracle_scm",
+    name: "Oracle SCM — Plant Operations",
+    system: "Oracle Fusion Cloud SCM",
+    description:
+      "Work orders, on-hand balances and goods movements for Querétaro and Pune. The Oracle side of the estate, normalised into the same signal shape as SAP.",
+    direction: "INBOUND",
+    cadenceMinutes: 90,
+    isEnabled: true,
+    raisesFor: null,
+    ownerTeam: "ERP Integration",
+    icon: "Boxes",
+    seed: 70413,
+    baseVolume: 2_650,
+    instability: 0.22,
+    minutesSinceLastRun: 112,
+  },
+  {
     id: "conn_outbound_notify",
     name: "Notification Gateway",
     system: "Microsoft 365",
@@ -345,6 +367,36 @@ const ago = (hours: number): string =>
 
 export const DEAD_LETTER: DeadLetterMessage[] = [
   {
+    // Oracle sends its own unit of measure vocabulary; the mapping covers the
+    // documented set and this lot arrived in a unit the contract does not name.
+    // A replay cannot help — the transform has to learn the unit first.
+    id: "dlq_010",
+    connectorId: "conn_oracle_scm",
+    signalRef: "EA-2026-08-04-MX-004191",
+    reason: "SCHEMA_MISMATCH",
+    detail:
+      "Unit of measure 'CS' is not in the mapped set. Oracle uses case-pack units at Querétaro that the transform does not yet translate.",
+    receivedAt: ago(14),
+    attempts: 2,
+    field: "unitOfMeasure",
+    payloadPreview: '{ "unitOfMeasure": "CS", "quantity": 48, "plantCode": "MX01", … }',
+  },
+  {
+    // A timing failure rather than a contract one: the movement referenced a
+    // work order the later run had not yet delivered. This is the case a
+    // replay is actually for.
+    id: "dlq_011",
+    connectorId: "conn_oracle_scm",
+    signalRef: "EA-2026-08-04-IN-004192",
+    reason: "MISSING_REFERENCE",
+    detail:
+      "Goods movement references work order WO-88214, which had not arrived when the movement was processed.",
+    receivedAt: ago(6),
+    attempts: 1,
+    field: "workOrderRef",
+    payloadPreview: '{ "workOrderRef": "WO-88214", "plantCode": "IN01", … }',
+  },
+  {
     id: "dlq_001",
     connectorId: "conn_sap_master",
     signalRef: "EA-2026-08-04-DE-004188",
@@ -467,6 +519,10 @@ export const FIELD_MAPPINGS: FieldMapping[] = [
   { connectorId: "conn_sap_master", sourceField: "NAME1", sourceType: "CHAR(35)", targetField: "supplierName", targetType: "string | null", required: false, transform: null },
 
   // SAP orders
+  { connectorId: "conn_oracle_scm", sourceField: "WO_HEADER_ID", sourceType: "NUMBER", targetField: "workOrderRef", targetType: "string", required: true, transform: "Prefixed WO-" },
+  { connectorId: "conn_oracle_scm", sourceField: "ORGANIZATION_CODE", sourceType: "VARCHAR2(18)", targetField: "plantCode", targetType: "string", required: true, transform: "Org to plant lookup" },
+  { connectorId: "conn_oracle_scm", sourceField: "UOM_CODE", sourceType: "VARCHAR2(3)", targetField: "unitOfMeasure", targetType: "string", required: true, transform: "Oracle UOM to ISO" },
+  { connectorId: "conn_oracle_scm", sourceField: "TRANSACTION_DATE", sourceType: "DATE", targetField: "movedAt", targetType: "string", required: true, transform: "Local to UTC" },
   { connectorId: "conn_sap_orders", sourceField: "EBELN", sourceType: "CHAR(10)", targetField: "orderRef", targetType: "string", required: true, transform: "Prefixed PO-" },
   { connectorId: "conn_sap_orders", sourceField: "EINDT", sourceType: "DATS", targetField: "promisedDate", targetType: "string", required: true, transform: "YYYYMMDD to ISO" },
   { connectorId: "conn_sap_orders", sourceField: "KUNNR", sourceType: "CHAR(10)", targetField: "customerCode", targetType: "string | null", required: false, transform: "Leading zeros stripped" },
