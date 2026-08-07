@@ -439,6 +439,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
 
       {/* The knowledge layer beneath the playbooks: procedure, prevention and
           the reasoning behind both. One search spans all three. */}
+      <div data-tour="playbooks-knowledge">
       <SectionCard
         title="Knowledge"
         subtitle="Standing procedure, what stops the condition recurring, and why it is done that way"
@@ -446,6 +447,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
       >
         <KnowledgePanels />
       </SectionCard>
+      </div>
     </div>
   );
 }

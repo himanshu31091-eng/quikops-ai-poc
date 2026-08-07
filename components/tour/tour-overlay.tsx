@@ -4,6 +4,7 @@ import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
 import { useTour } from "@/src/tour/tour-store";
+import { useFocusTrap } from "@/src/a11y/use-focus-trap";
 import { cn } from "@/src/lib/cn";
 
 /**
@@ -11,9 +12,25 @@ import { cn } from "@/src/lib/cn";
  *
  * Positioned from the anchor element's own bounding box rather than a
  * positioning library — one element, one rectangle, recalculated on scroll and
- * resize. Adding Floating UI for this would be a dependency for four callouts.
+ * resize. Adding Floating UI for this would be a dependency for a dozen
+ * callouts.
  *
- * Uses `.anim-fade` only. No sixth animation was added for it, and the
+ * Three things this has to get right, each of which it previously got wrong:
+ *
+ * 1. **A hidden anchor is not a found anchor.** Six steps point at navigation
+ *    items, and the sidebar is `hidden lg:block` — so below 1024px the element
+ *    is in the DOM with a zero-size rect. The old code took that at face value
+ *    and drew a spotlight of size zero at the top-left corner, which reads as a
+ *    full-screen scrim with a dot in it. Any laptop under 1024px broke on 40%
+ *    of the steps.
+ * 2. **An anchor on another route needs waiting for, not guessing at.** Three
+ *    fixed retries at 120/320/640ms lost the race whenever the destination
+ *    route was heavy. This polls on animation frames until a deadline.
+ * 3. **The card is the content; the spotlight is the garnish.** When an anchor
+ *    genuinely cannot be resolved, the step still has something to say — so it
+ *    centres and says it, rather than pointing at nothing.
+ *
+ * Uses `.anim-fade` only. No sixth animation was added, and the
  * `prefers-reduced-motion` rule in `globals.css` already covers it.
  */
 
@@ -26,49 +43,103 @@ interface Rect {
 
 const PADDING = 6;
 const CARD_WIDTH = 320;
+const CARD_MARGIN = 12;
+/** How long to wait for an anchor that a route change is still bringing in. */
+const ANCHOR_TIMEOUT_MS = 1_800;
 
-function useAnchorRect(anchor: string | undefined): Rect | null {
-  const [rect, setRect] = React.useState<Rect | null>(null);
+/**
+ * Whether an element is genuinely on screen and measurable.
+ *
+ * `offsetParent === null` catches `display: none` on the element or any
+ * ancestor, which is what `hidden lg:block` produces. The size check catches
+ * the rest — a collapsed flex child, a zero-height container mid-transition.
+ */
+function isMeasurable(node: HTMLElement): boolean {
+  if (node.offsetParent === null) return false;
+  const box = node.getBoundingClientRect();
+  return box.width > 1 && box.height > 1;
+}
+
+type AnchorState =
+  | { status: "resolved"; rect: Rect }
+  | { status: "waiting" }
+  | { status: "unavailable" };
+
+function useAnchorRect(anchor: string | undefined, stepId: string | undefined): AnchorState {
+  const [state, setState] = React.useState<AnchorState>({ status: "waiting" });
 
   React.useEffect(() => {
     if (!anchor) {
-      setRect(null);
+      setState({ status: "unavailable" });
       return;
     }
 
-    const measure = () => {
+    setState({ status: "waiting" });
+
+    let frame = 0;
+    let settled = false;
+    const deadline = performance.now() + ANCHOR_TIMEOUT_MS;
+
+    const measure = (): boolean => {
       const node = document.querySelector<HTMLElement>(`[data-tour="${anchor}"]`);
-      if (!node) {
-        setRect(null);
+      if (!node || !isMeasurable(node)) return false;
+
+      const box = node.getBoundingClientRect();
+      setState({
+        status: "resolved",
+        rect: { top: box.top, left: box.left, width: box.width, height: box.height },
+      });
+      return true;
+    };
+
+    // Poll on frames rather than fixed timeouts: a route change brings the
+    // anchor in when it is ready, not on a schedule we can predict.
+    const poll = () => {
+      if (measure()) {
+        settled = true;
+        const node = document.querySelector<HTMLElement>(`[data-tour="${anchor}"]`);
+        const box = node?.getBoundingClientRect();
+        // Scroll once, on resolution — not on every re-measure, or a scrolling
+        // user fights the tour for control of the viewport.
+        if (box && (box.top < 96 || box.bottom > window.innerHeight - 96)) {
+          node?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
         return;
       }
-      const box = node.getBoundingClientRect();
-      setRect({ top: box.top, left: box.left, width: box.width, height: box.height });
-      // Bring the anchor into view before the spotlight is drawn around it.
-      if (box.top < 80 || box.bottom > window.innerHeight - 80) {
-        node.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (performance.now() > deadline) {
+        setState({ status: "unavailable" });
+        return;
       }
+      frame = window.requestAnimationFrame(poll);
     };
 
-    // The step may navigate first; retry briefly until the anchor mounts.
-    measure();
-    const retries = [120, 320, 640].map((delay) => window.setTimeout(measure, delay));
+    frame = window.requestAnimationFrame(poll);
 
-    window.addEventListener("resize", measure);
-    window.addEventListener("scroll", measure, true);
+    // Once resolved, keep the rectangle honest as the page moves under it.
+    const track = () => {
+      if (!settled) return;
+      if (!measure()) setState({ status: "unavailable" });
+    };
+
+    window.addEventListener("resize", track);
+    window.addEventListener("scroll", track, true);
+
     return () => {
-      for (const id of retries) window.clearTimeout(id);
-      window.removeEventListener("resize", measure);
-      window.removeEventListener("scroll", measure, true);
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", track);
+      window.removeEventListener("scroll", track, true);
     };
-  }, [anchor]);
+    // `stepId` is in the dependency list so returning to the same anchor on a
+    // later step still re-runs the measurement.
+  }, [anchor, stepId]);
 
-  return rect;
+  return state;
 }
 
 export function TourOverlay() {
   const { isOpen, step, index, tour, next, previous, skip } = useTour();
-  const rect = useAnchorRect(step?.anchor);
+  const anchorState = useAnchorRect(step?.anchor, step?.id);
+  const trapRef = useFocusTrap(isOpen);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -81,22 +152,38 @@ export function TourOverlay() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, next, previous, skip]);
 
+  // The page behind the scrim must not scroll under a modal overlay — every
+  // other overlay in the product locks it, and the tour was the exception.
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen || !step) return null;
 
   const isLast = index === tour.steps.length - 1;
+  const rect = anchorState.status === "resolved" ? anchorState.rect : null;
+  const isWaiting = anchorState.status === "waiting";
 
   // Placed beneath the anchor by default, flipping above when there is no room.
+  // With no anchor the card centres, because a corner card pointing at nothing
+  // reads as a bug rather than as a step.
+  const viewportWidth = typeof window === "undefined" ? 1280 : window.innerWidth;
   const cardTop = rect
     ? step.placement === "top"
-      ? Math.max(12, rect.top - 12)
-      : rect.top + rect.height + 12
-    : 120;
+      ? Math.max(CARD_MARGIN, rect.top - CARD_MARGIN)
+      : rect.top + rect.height + CARD_MARGIN
+    : undefined;
   const cardLeft = rect
     ? Math.min(
-        Math.max(12, rect.left),
-        (typeof window !== "undefined" ? window.innerWidth : 1280) - CARD_WIDTH - 12,
+        Math.max(CARD_MARGIN, rect.left),
+        viewportWidth - CARD_WIDTH - CARD_MARGIN,
       )
-    : 24;
+    : undefined;
 
   return (
     <div
@@ -151,11 +238,15 @@ export function TourOverlay() {
       )}
 
       <div
+        ref={trapRef as React.RefObject<HTMLDivElement>}
         className={cn(
-          "fixed w-80 rounded-lg border border-line bg-surface p-3.5 shadow-overlay",
-          step.placement === "top" && "-translate-y-full",
+          "fixed w-80 max-w-[calc(100vw-1.5rem)] rounded-lg border border-line bg-surface p-3.5 shadow-overlay",
+          rect
+            ? step.placement === "top" && "-translate-y-full"
+            : // Centred when there is nothing to point at.
+              "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
         )}
-        style={{ top: cardTop, left: cardLeft }}
+        style={rect ? { top: cardTop, left: cardLeft } : undefined}
       >
         <div className="flex items-start justify-between gap-2">
           <p className="text-2xs font-semibold uppercase tracking-wide text-accent">
@@ -174,20 +265,49 @@ export function TourOverlay() {
         <h2 className="mt-1.5 text-sm font-semibold text-content">{step.title}</h2>
         <p className="mt-1 text-xs leading-relaxed text-content-secondary">{step.body}</p>
 
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1" aria-hidden>
-            {tour.steps.map((entry, dot) => (
+        {step.tip ? (
+          <p className="mt-2 flex items-start gap-1.5 rounded-md border border-accent-line bg-accent-subtle px-2 py-1.5 text-2xs leading-relaxed text-accent-content">
+            <Icon name="Sparkles" size="xs" className="mt-px shrink-0" />
+            {step.tip}
+          </p>
+        ) : null}
+
+        {/* Said plainly rather than hidden: the step still has its content, and
+            a reader who cannot see the highlight should know why. */}
+        {anchorState.status === "unavailable" && step.anchor ? (
+          <p className="mt-2 flex items-start gap-1.5 text-2xs leading-relaxed text-content-tertiary">
+            <Icon name="Info" size="xs" className="mt-px shrink-0" />
+            {step.whenHidden ??
+              "This control is not visible at the current window size — widen the window, or open the navigation menu, to see it highlighted."}
+          </p>
+        ) : null}
+
+        {isWaiting ? (
+          <p className="mt-2 flex items-center gap-1.5 text-2xs text-content-tertiary">
+            <Icon name="RefreshCw" size="xs" className="animate-spin" />
+            Opening {step.route}…
+          </p>
+        ) : null}
+
+        {/* Progress: a bar for scale, dots for position. Twelve dots read as a
+            decoration; a bar with a count reads as progress. */}
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <span
+              className="h-1 flex-1 overflow-hidden rounded-full bg-surface-active"
+              aria-hidden
+            >
               <span
-                key={entry.id}
-                className={cn(
-                  "size-1.5 rounded-full transition-colors duration-150",
-                  dot === index ? "bg-accent" : "bg-line-strong",
-                )}
+                className="block h-full rounded-full bg-accent transition-all duration-200"
+                style={{ width: `${((index + 1) / tour.steps.length) * 100}%` }}
               />
-            ))}
+            </span>
+            <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">
+              {index + 1}/{tour.steps.length}
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-end gap-1.5">
             <Button variant="ghost" size="sm" onClick={skip}>
               Skip
             </Button>
@@ -214,13 +334,14 @@ export function TourInvitation() {
   if (hasCompleted || isOpen) return null;
 
   return (
-    <div className="anim-settle fixed bottom-4 right-4 z-[70] w-80 rounded-lg border border-accent-line bg-surface p-3.5 shadow-overlay">
+    <div className="anim-settle fixed bottom-4 right-4 z-[70] w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-accent-line bg-surface p-3.5 shadow-overlay">
       <p className="flex items-center gap-1.5 text-xs font-semibold text-content">
         <Icon name="Sparkles" size="sm" className="text-accent" />
         First time here?
       </p>
       <p className="mt-1 text-2xs leading-relaxed text-content-secondary">
-        {tour.description} {tour.steps.length} steps, about a minute.
+        {tour.description} {tour.steps.length} steps, about{" "}
+        {Math.max(1, Math.round(tour.steps.length * 0.25))} minutes.
       </p>
       <div className="mt-2.5 flex items-center justify-end gap-1.5">
         <Button variant="ghost" size="sm" onClick={skip}>

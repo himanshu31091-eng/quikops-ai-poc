@@ -56,7 +56,11 @@ export function FlowSection({
   const ages = React.useMemo(() => ageProfile(cases, DEMO_NOW), [cases]);
 
   return (
-    <section aria-label="Flow balance and forecast" className="space-y-4">
+    <section
+      aria-label="Flow balance and forecast"
+      data-tour="analytics-flow"
+      className="space-y-4"
+    >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="flex items-center gap-2 text-base font-semibold text-content">
@@ -86,13 +90,15 @@ export function FlowSection({
         <FlowLedgerStrip ledger={flow.ledger} unit={flow.unit} currency={currency} />
       </SectionCard>
 
-      <ExecutiveBriefing
-        narrative={flow.narrative}
-        recommendations={flow.recommendations}
-        ledger={flow.ledger}
-        comparison={flow.comparison}
-        {...(onAskCopilot ? { onAskCopilot } : {})}
-      />
+      <div data-tour="analytics-briefing">
+        <ExecutiveBriefing
+          narrative={flow.narrative}
+          recommendations={flow.recommendations}
+          ledger={flow.ledger}
+          comparison={flow.comparison}
+          {...(onAskCopilot ? { onAskCopilot } : {})}
+        />
+      </div>
 
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">

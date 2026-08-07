@@ -154,6 +154,7 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
 
   return (
     <div className="space-y-4">
+<div data-tour="case-header">
       <CaseHeader
         detail={detail}
         session={session}
@@ -167,6 +168,7 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
         onOpenCopilot={openCopilot}
         pending={api.pending}
       />
+      </div>
 
       {api.notice ? (
         <ActionToast
@@ -210,6 +212,7 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
           </div>
 
           <div id="case-section-actions" className="scroll-mt-20">
+            <div data-tour="case-actions">
             <CorrectiveActionsCard
               actions={session.actions}
               users={detail.assignableUsers}
@@ -225,9 +228,11 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
               onReorder={api.reorderAction}
               onRemove={api.removeAction}
             />
+            </div>
           </div>
 
           <div id="case-section-evidence" className="scroll-mt-20">
+            <div data-tour="case-evidence">
             <EvidenceCard
               evidence={session.evidence}
               actions={session.actions}
@@ -237,6 +242,7 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
               onRemove={api.removeEvidence}
               dropZoneRef={dropZoneRef}
             />
+            </div>
           </div>
 
           <div id="case-section-comments" className="scroll-mt-20">
@@ -250,6 +256,7 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
           </div>
 
           <div id="case-section-verification" className="scroll-mt-20">
+            <div data-tour="case-verification">
             <VerificationCard
               session={session}
               reviewer={api.reviewer}
@@ -260,10 +267,13 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
               onRequest={api.requestVerification}
               onDecide={api.decideVerification}
             />
+            </div>
           </div>
 
           <div id="case-section-audit" className="scroll-mt-20">
+            <div data-tour="case-audit">
             <AuditLogCard entries={session.audit} recentIds={api.recentIds} />
+            </div>
           </div>
         </div>
 

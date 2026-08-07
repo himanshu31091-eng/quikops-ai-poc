@@ -616,7 +616,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
 
       {/* Governance — who can do what, and which team does it */}
       <div className="grid gap-4 xl:grid-cols-12">
-        <div className="min-w-0 xl:col-span-7">
+        <div className="min-w-0 xl:col-span-7" data-tour="admin-permissions">
           <SectionCard
             title="Permissions"
             subtitle="Derived from the rules the product enforces, not declared here"
@@ -627,7 +627,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
             <PermissionMatrix />
           </SectionCard>
         </div>
-        <div className="min-w-0 xl:col-span-5">
+        <div className="min-w-0 xl:col-span-5" data-tour="admin-departments">
           <SectionCard
             title="Departments"
             subtitle="Joined through the case owner — reassigning moves the work"
@@ -645,7 +645,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       </div>
 
       {/* Platform settings — three groups, read from the modules that own them */}
-      <div className="grid gap-4 xl:grid-cols-12">
+      <div className="grid gap-4 xl:grid-cols-12" data-tour="admin-settings">
         {settingsGroups.map((group, index) => (
           <div
             key={group.id}

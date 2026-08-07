@@ -150,12 +150,13 @@ export default async function ExecutiveDashboardPage() {
 
       {/* Flow verdict — one band, added rather than replacing anything. The
           full flow region lives in Execution Analytics. */}
-      <section aria-label="Backlog flow">
+      <section aria-label="Backlog flow" data-tour="dashboard-flow">
         <LiveFlowVerdict cases={caseBaseline} />
       </section>
 
       {/* Execution performance */}
       <section
+        data-tour="dashboard-execution-strip"
         aria-label="Execution performance"
         className="min-w-0 overflow-hidden rounded-lg border border-line bg-surface"
       >

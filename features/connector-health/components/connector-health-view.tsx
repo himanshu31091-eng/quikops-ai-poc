@@ -248,7 +248,9 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
             icon="Filter"
             className="h-full"
           >
+<div data-tour="connector-funnel">
             <IngestionFunnelPanel funnel={model.funnel} />
+            </div>
           </SectionCard>
         </div>
 
@@ -260,11 +262,13 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
             flush
             className="h-full"
           >
+<div data-tour="connector-deadletter">
             <DeadLetterTable
               rows={model.deadLetter}
               onReplay={api.replayMessage}
               onReplayAll={api.replayAll}
             />
+            </div>
           </SectionCard>
         </div>
       </div>

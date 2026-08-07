@@ -185,7 +185,9 @@ export function WorkManagerView({
 
       <FirstUseTip screen="work" />
 
-      <WorkKpiHeader kpis={manager.kpis} onToggle={manager.toggleKpi} />
+      <div data-tour="work-kpi-band">
+        <WorkKpiHeader kpis={manager.kpis} onToggle={manager.toggleKpi} />
+      </div>
 
       <div className="grid min-w-0 gap-4 2xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-3 2xl:col-span-9" data-tour="work-toolbar">

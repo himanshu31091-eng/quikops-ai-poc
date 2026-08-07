@@ -1064,6 +1064,57 @@ of every settings page is describing intent as though it were behaviour. Marking
 the five notification rules that have no transport yet is the difference between
 a configuration preview (D-56) and a lie with a toggle on it.
 
+### D-85 — A hidden anchor is not a found anchor
+`components/tour/tour-overlay.tsx`
+
+Six of the tour's steps point at navigation items, and the sidebar is
+`hidden lg:block`. Below 1024px those elements are in the DOM with a zero-size
+rect, and the old code took that at face value — drawing a spotlight of size
+zero at the top-left corner, which reads as a full-screen scrim with a dot in
+it. **Any laptop under 1024px broke on 40% of the steps.**
+
+`isMeasurable` now checks `offsetParent` (which catches `display: none` on the
+element or any ancestor) and a non-trivial size. An unresolvable anchor centres
+the card and says why, because the step still has something to say — the card is
+the content and the spotlight is the garnish.
+
+**Why it survived so long:** it is invisible at desktop width, which is where
+the tour was built and demoed. The class of bug worth remembering is a
+measurement that returns a *plausible* value rather than failing.
+
+### D-86 — Wait for an anchor; do not guess at it
+`components/tour/tour-overlay.tsx`
+
+Anchor lookup polls on animation frames until a 1.8-second deadline, replacing
+three fixed retries at 120/320/640ms.
+
+**Why:** a step can live on another route, and the old schedule lost the race
+whenever the destination was heavy — Analytics is the largest route in the
+product. A deadline plus frame polling resolves as soon as the element exists
+rather than on a cadence nobody can predict, and it reports a `waiting` state in
+the meantime so the card names the route it is opening instead of sitting blank.
+
+The tour also gained the focus trap and body-scroll lock every other overlay in
+the product already had. It was declared `role="dialog" aria-modal="true"` while
+letting Tab walk into the page behind the scrim.
+
+### D-87 — A tour step earns its place by saying what a label cannot
+`src/tour/tours.ts`
+
+Expanded from 15 steps to **33** across four role-based tours — executive 8,
+manager 9, operator 8, administrator 8 — covering the modules built after the
+tour was first written: the flow region, the knowledge layer, permissions,
+departments, platform settings and the ingestion funnel.
+
+**The writing rule:** a step that describes what a control is *called* teaches
+nothing, because the label already says that. Each body says what the thing is
+*for*, and where there is one, the trap it exists to avoid. `tip` carries the
+line worth quoting in a demo; `whenHidden` explains a step whose anchor is
+off-screen at the current width.
+
+Progress is a bar with a count rather than dots alone — twelve dots read as
+decoration, a bar reads as progress.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.
