@@ -29,6 +29,39 @@ and the portal was given an icon set.
 
 ## Completed Work
 
+### Sprints 3–5 (2026-08-07)
+
+**Sprint 2 needed no work.** Reports, Connector Health, Audit Log,
+Administration and Playbooks were all built in earlier sessions and build
+clean; they were verified, not rebuilt.
+
+**Sprint 3** — six of seven items existed. The missing one was **in-app tips**,
+which had been written once and deleted as dead code (D-63). Rebuilt as three
+distinct surfaces and wired into six screens in the same change (D-78).
+
+**Sprint 4** — two real gaps closed:
+
+- **High contrast** did not exist. `prefers-contrast: more` now restates a dozen
+  tokens; no component knows the mode exists (D-79). `forced-colors` handled too.
+- **The language selector was a dead control.** The four non-English catalogues
+  were verbatim copies of English, one catalogue key never matched its nav key,
+  and the layout never passed `initialMessages` so a reload rendered English
+  regardless. All three fixed; the navigation now renders in Japanese and German
+  from the server (D-80).
+
+**Sprint 5** — the capabilities that needed **no schema change**: customer
+exposure with concentration, escalation depth with age, and days-in-trouble
+banding (D-81). All derived from `customerCode`, `customerTier` and
+`escalationLevel`, which the case already carried.
+
+**Blocked, and why:** root-cause analytics, bottleneck/process-stage
+intelligence and department performance all need fields that do not exist in
+`OperationalCase`, plus fixture data authored across 29 cases under the
+no-invented-numbers rule (D-36, D-50). That is Wave 2 in the roadmap and it
+needs approval for the schema change, not just for the screens.
+
+---
+
 ### Wave 1 — Executive insights (2026-08-07)
 
 Approved after the partner-reference gap analysis, with Wave 0 (order entities)
@@ -260,6 +293,10 @@ including repairs to four doc sections that described code this pass deleted.
 | D-75 | The executive narrative is composed, and says so |
 | D-76 | The flow region reads the whole corpus, not the page filters |
 | D-77 | The frozen dashboard gains a band, not a redesign |
+| D-78 | A hint system is only real when a screen subscribes to it |
+| D-79 | High contrast is a token override, not a component concern |
+| D-80 | A language selector that changes nothing is a dead control |
+| D-81 | Age is not breach, and the product now says both |
 
 Also amended: **D-19** (placeholder modules — superseded, mechanism removed) and
 **D-60** (`localStorage` — now tour completion only).

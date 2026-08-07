@@ -4,12 +4,23 @@ import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { CaseListItem, Plant } from "@/src/domain/types";
+import { DEMO_NOW } from "@/src/lib/constants";
+import {
+  ageProfile,
+  customerPerformance,
+  escalationAnalytics,
+} from "@/src/domain/segment-performance";
 import { useFlow } from "../hooks/use-flow";
 import { ExecutiveBriefing } from "./executive-briefing";
 import { BacklogTrajectory, ForecastVerdict, NetFlowRibbon } from "./flow-charts";
 import { FlowControls } from "./flow-controls";
 import { BandMixture, FlowDrilldown } from "./flow-drilldown";
 import { FlowLedgerStrip } from "./flow-ledger-strip";
+import {
+  AgeProfilePanel,
+  CustomerExposurePanel,
+  EscalationPanel,
+} from "./segment-panels";
 
 /**
  * The flow region — everything that answers *is this getting better*.
@@ -36,6 +47,13 @@ export function FlowSection({
 }) {
   const flow = useFlow(cases, plants);
   const currency = cases[0]?.currency ?? "USD";
+
+  // Commercial and escalation cuts of the same corpus. Independent of the flow
+  // horizon: these describe the position now, not movement over a window, and a
+  // horizon control over a snapshot would imply a relationship that is not there.
+  const customers = React.useMemo(() => customerPerformance(cases, DEMO_NOW), [cases]);
+  const escalations = React.useMemo(() => escalationAnalytics(cases, DEMO_NOW), [cases]);
+  const ages = React.useMemo(() => ageProfile(cases, DEMO_NOW), [cases]);
 
   return (
     <section aria-label="Flow balance and forecast" className="space-y-4">
@@ -135,6 +153,37 @@ export function FlowSection({
           </SectionCard>
         </div>
       </div>
+
+      <div className="grid gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-7">
+          <SectionCard
+            title="Customer exposure"
+            subtitle="Which accounts are actually carrying the open risk"
+            icon="Users"
+            className="h-full"
+          >
+            <CustomerExposurePanel data={customers} currency={currency} />
+          </SectionCard>
+        </div>
+        <div className="min-w-0 xl:col-span-5">
+          <SectionCard
+            title="Days in trouble"
+            subtitle="How long open work has been open — distinct from late"
+            icon="Clock"
+            className="h-full"
+          >
+            <AgeProfilePanel bands={ages} currency={currency} />
+          </SectionCard>
+        </div>
+      </div>
+
+      <SectionCard
+        title="Escalation depth"
+        subtitle="Work that has been pushed above its owner, and for how long"
+        icon="TrendingUp"
+      >
+        <EscalationPanel data={escalations} currency={currency} />
+      </SectionCard>
     </section>
   );
 }

@@ -7,7 +7,7 @@
 > `CLAUDE.md` already routes here. Update the status table when a module lands;
 > append decisions to `DECISIONS.md`, not to this file.
 
-**Last updated:** 2026-08-07 (product audit, then partner-reference gap analysis — see *Priority 3*) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
+**Last updated:** 2026-08-07 (Sprints 3–5; see *Sprint log* below and *Priority 3* for the gap table) — **all Phase-1 modules and all eleven cross-platform capabilities are implemented, and the codebase has been through a full stabilization pass.** Remaining work is migration and hardening, not construction. See *Technical debt* below, RELEASE_NOTES.md for what shipped, and QA_CHECKLIST.md for what has and has not been verified.
 
 ---
 
@@ -193,11 +193,11 @@ equivalent in the schema or the UI.
 | 4 | Performance by project / strategic initiative | Playbooks (how to fix a type). No initiative object | **MISSING** | **Initiative Board** — named improvement programmes with cases attached, showing exposure addressed vs exposure remaining and a predicted completion date. Progressive disclosure, not a count table | New module `/initiatives` | **P2** |
 | 5 | Performance by plant | `byPlant`, `plantPerformance`, `PLANT_HEALTH`, SLA + ageing heatmaps | **FULL** | No work | Analytics | — |
 | 6 | Performance by bottleneck type | `exceptionType` — a *cause* category, not a *process-stage* category | **PARTIAL** | Add `processStage` (order creation · processing · stock transfer · distribution · supplier). Orthogonal axis to exception type; enables "where in the flow do we lose time" | `src/domain` · Analytics | **P2** |
-| 7 | Performance by customer | `customerCode` / `customerName` / `customerTier` on the case, feeding priority. No customer view | **PARTIAL** | **Customer exposure drill-down** in Analytics — tier-weighted, with the AI naming the accounts whose exposure is concentrated rather than listing 314 rows | Analytics | **P2** |
+| 7 | Performance by customer | ✅ **Sprint 5** — customer exposure + concentration | **FULL** | Delivered | Analytics | — |
 | 8 | Team-lead workload | My Work (personal) · `ownerPerformance` (analytical) | **PARTIAL** | Extend My Work with a role-gated **team view** for `OPS_MANAGER`: load, escalations inbound, and an AI rebalance suggestion. Not a second dashboard — a disclosure inside the one that exists | My Work | **P1** |
 | 9 | Order exceptions requiring attention | Work Manager (14 filters, board + table) · Action Center | **FULL** | No work — richer than the reference at this level | Work Manager | — |
 | 10 | Collaboration workflows (escalate · back to owner) | Threaded comments with @mentions and attachments | **PARTIAL** | Promote to a first-class **hand-off**: escalate-to-person and return-to-owner as workflow events with a reason, feeding the execution store so the dashboard sees them | `src/workflow` · Case Detail | **P0** |
-| 11 | Escalations (to me / by user / days in escalation) | `escalationLevel: number` only. No target person, no inbox | **MISSING** | **Escalation ledger** — a chronological thread per hand-off, plus an inbox surfaced in My Work with its own SLA. Timeline, not a grid | `src/domain` · My Work · Action Center | **P0** |
+| 11 | Escalation analytics (depth, exposure, age) | ✅ **Sprint 5** — escalation depth panel | **PARTIAL→** | Depth, exposure and age delivered; escalate-to-a-person still needs the workflow event | Analytics | **P0** |
 | 12 | Comments / actions | Threaded comments · Action Center with bulk operations | **FULL** | No work | Case Detail · Action Center | — |
 | 13 | Order issue history | Per-case audit log (field-level, with source) and timeline | **PARTIAL** | Sound at case level. Order-line history depends on row 14 | Case Detail | — |
 | 14 | Delivery-date changes (P0 → P1 → P2, drift, change count) | Nothing. No promise model | **MISSING** | Add an order-line commitment model, rendered as a **Promise Timeline** — a horizontal commitment track where each broken promise is a marked event and drift is the distance, with an AI reliability verdict. Never a text log in a cell | `src/domain` · new `/orders` surface · Case Detail | **P0** |
@@ -205,7 +205,7 @@ equivalent in the schema or the UI.
 | 16 | Delivery status ("delayed by 4 days") | `dueAt` / `slaBreachedAt` are *case SLA*, not order delivery. `DELIVERY_AT_RISK` type exists | **PARTIAL** | Falls out of row 14 — derived, never stored | `src/domain` | **P0** |
 | 17 | Owner assignment | Full: assign, bulk assign, routing rules, `ASSIGNABLE_ROLES` | **FULL** | No work | Work Manager · Admin | — |
 | 18 | Root-cause management (owner updates it) | Root cause is fixture prose, not an editable field | **MISSING** | Owner-editable on Case Detail with an **AI-suggested root cause** the owner confirms or overrides — the confirmation is what makes the aggregate in row 3 trustworthy | Case Detail | **P1** |
-| 19 | Days in trouble | `ageDays` on `WorkCaseRow` — presentational only | **PARTIAL** | Promote to a domain metric alongside SLA, banded and used consistently. Age is not the same as breach: a case can be young and breached, or old and inside target | `src/domain/portfolio-metrics.ts` | **P1** |
+| 19 | Days in trouble | ✅ **Sprint 5** — age profile, banded | **FULL** | Delivered | Analytics | — |
 | 20 | Days in escalation | Nothing | **MISSING** | Falls out of row 11 | `src/workflow` | **P0** |
 | 21 | Inflow / outflow of issues | ✅ **Wave 1** — `buildFlowLedger` | **FULL** | Add a **flow balance** ledger — start · inflow · closed · balance · balance % — as a domain function, so every screen reads one definition | `src/domain/portfolio-metrics.ts` | **P1** |
 | 22 | Throughput (net daily performance) | ✅ **Wave 1** — net-flow ribbon | **FULL** | **Net-flow ribbon**: detection above the line, resolution below, net as the gap, with an AI verdict — *"clearing at 11/week; the critical band clears in ~3 weeks if this holds"*. A forecast, not a bar chart | Analytics | **P1** |

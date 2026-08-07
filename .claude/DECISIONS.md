@@ -941,6 +941,88 @@ is pinned to the same horizon Analytics opens at, because a director who reads
 one rate here and a different one after clicking through has been given two
 figures for one question — and both screens now quote 4.3 cases per week.
 
+### D-78 — A hint system is only real when a screen subscribes to it
+`src/help/tips.ts` · `components/patterns/in-app-tip.tsx`
+
+Three surfaces — `TermHint` (hover help on a load-bearing word), `FirstUseTip`
+(one callout per screen, dismissed permanently), `ReleaseAnnouncement`
+(versioned). Wired into six screens and the dashboard metrics strip in the same
+change that created them.
+
+**Why the wiring is part of the decision:** the previous attempt at this
+(`FirstUseHint`) was written, never mounted, and deleted as dead code in D-63.
+Building the component was never the hard part. `resetAllTips` is called from
+the demo reset for the same reason D-64 exists — a presenter running the
+walkthrough twice needs the first-use tips back, and the alternative is asking
+them to clear site data mid-demo.
+
+`TermHint` is a popover, not a tooltip: the content is a paragraph, and tooltips
+are unreachable by touch and easy to miss by keyboard.
+
+### D-79 — High contrast is a token override, not a component concern
+`app/globals.css`
+
+`prefers-contrast: more` restates a dozen custom properties. No component knows
+the mode exists.
+
+**Why this works here:** every colour in the product is read through a semantic
+token (ARCHITECTURE §7), so there is exactly one place to change and nothing can
+be missed. Three things move and only three — borders darken, because structure
+in this design is carried by a 1px line rather than a shadow; tertiary text
+stops being tertiary, because #8794a5 on white is 3.5:1 and the product uses it
+on 11px metadata; the focus ring thickens without changing hue, so the
+one-ring-one-colour rule still holds.
+
+Subtle fills are left alone deliberately: pushing them toward the palette ends
+would recolour every status badge, and a status colour that means something
+different in one mode is worse than a slightly soft fill.
+
+### D-80 — A language selector that changes nothing is a dead control
+`src/i18n/messages/*.json` · `src/i18n/load.ts` · `components/shell/side-nav.tsx`
+
+The i18n architecture shipped complete and inert: provider mounted, selector
+wired, five catalogues — four of which were **verbatim copies of English**. The
+control moved a check mark and nothing else.
+
+Three defects, each of which alone would have been enough to break it:
+
+1. The four translations did not exist. All 35 keys are now genuinely
+   translated into Spanish, German, French and Japanese.
+2. The catalogue key `nav.myWork` never matched the nav key `my-work`, so that
+   item could not have resolved even once translated.
+3. The layout passed `initialLocale` but not `initialMessages`, so a reload
+   with a Japanese cookie rendered English until something called `setLocale`.
+   Catalogues now load on the server.
+
+**Why the navigation first:** it is the most visible surface in the product and
+its keys already existed. `t()` falls back to the config label, so the catalogue
+can be filled a module at a time rather than in one sweep — which is what makes
+the remaining ~900–1,400 strings a schedule rather than a blocker.
+
+### D-81 — Age is not breach, and the product now says both
+`src/domain/segment-performance.ts`
+
+*Days in trouble* is banded separately from SLA state.
+
+**Why they are not the same measure:** a low-band case can sit for three weeks
+inside its 720-hour target while a critical one is late in a day. A portfolio
+can be clean on breach and rotten on age, and reporting only the first is how
+avoided work stays invisible.
+
+Customer performance and escalation depth land in the same module because both
+are derivable from fields the case already carries — `customerCode`,
+`customerTier`, `escalationLevel` — so neither needed a schema change. Customer
+concentration is the finding rather than the customer list: the same exposure
+across forty accounts is a different position from the same exposure across
+three.
+
+**One honest limit, stated in the UI rather than hidden:** the corpus records
+that a case *is* escalated but not *when*, so time-in-escalation is measured
+from the SLA breach where there is one and from detection otherwise. Breaching
+is what escalates a case (`src/domain/sla.ts`), so it is the best available
+proxy — and it is a floor, not a measurement. A case raised by hand before it
+breached has been escalated for longer than the panel shows.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.
