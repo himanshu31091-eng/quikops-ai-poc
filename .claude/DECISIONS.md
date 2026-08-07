@@ -1115,6 +1115,32 @@ off-screen at the current width.
 Progress is a bar with a count rather than dots alone — twelve dots read as
 decoration, a bar reads as progress.
 
+### D-88 — A tour step is only fixed when Next is reachable
+`components/tour/tour-overlay.tsx` · `features/work-manager/components/work-manager-view.tsx`
+
+D-85 fixed the zero-size anchor and I reported the tour as working. It was not.
+On the Work Manager step the card was placed at `anchor.bottom + 12` with no
+bound, and the anchor wrapped the entire left column — toolbar, filters, toast
+and the whole table. The card landed below the fold, so **Next could not be
+clicked and the only way out was Escape.**
+
+Two fixes, one general and one specific:
+
+1. **The card is measured, then placed.** A layout effect reads its real height
+   and prefers below the anchor, flips above when there is no room, and clamps
+   into the viewport as a final guarantee. The body scrolls inside the card, so
+   a long step can never cost the footer either.
+2. **The Work Manager anchor was narrowed** to the toolbar itself. Spotlighting
+   an entire page highlights nothing.
+
+**The lesson, which is the reason this is a decision and not a bug fix:** the
+previous verification was a typecheck, a lint, and a screenshot of step one.
+None of those can see a button below the fold on step two. The audit now walks
+every step of every tour at two viewport widths and asserts that the advance
+button is inside the viewport *and* is the topmost element at its own centre —
+66 step renders, all passing. A feature that can be entered but not completed
+is worse than one that is absent, because it fails in front of the client.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.
