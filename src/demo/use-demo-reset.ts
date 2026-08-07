@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { resetAllTips } from "@/src/help/use-tips";
 import { useExecutionStore } from "@/src/workflow/execution-store";
 
 /**
@@ -46,6 +47,10 @@ export function useDemoReset(): DemoResetApi {
   const reset = React.useCallback(() => {
     resetStore();
     for (const listener of listeners) listener();
+    // First-use tips are part of what a fresh visitor sees. A presenter running
+    // the same walkthrough twice needs them back, and the alternative is asking
+    // them to clear site data between runs.
+    resetAllTips();
   }, [resetStore]);
 
   return { reset, isDirty };

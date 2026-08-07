@@ -1,6 +1,5 @@
 {
   "nav.dashboard": "Executive Dashboard",
-  "nav.myWork": "My Work",
   "nav.work": "Work Manager",
   "nav.actions": "Action Center",
   "nav.analytics": "Execution Analytics",
@@ -33,5 +32,6 @@
   "case.plant": "Plant",
   "demo.reset": "Reset demo",
   "demo.resetConfirm": "Discard every change made in this session and restore the seeded data?",
-  "demo.resetDone": "Demo data restored."
+  "demo.resetDone": "Demo data restored.",
+  "nav.my-work": "My Work"
 }

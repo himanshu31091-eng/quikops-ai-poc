@@ -5,6 +5,7 @@ import { ActionToast } from "@/components/patterns/action-toast";
 import { AssignMenu } from "@/components/patterns/assign-menu";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
 import type { ActionCenterData } from "@/src/data/queries/actions";
@@ -131,6 +132,8 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
           </Button>
         }
       />
+
+      <FirstUseTip screen="actions" />
 
       <ActionToolbar
         filters={api.filters}

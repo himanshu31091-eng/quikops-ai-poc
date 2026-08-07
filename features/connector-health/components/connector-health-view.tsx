@@ -5,6 +5,7 @@ import { ActionToast } from "@/components/patterns/action-toast";
 import { FilterMenu } from "@/components/patterns/filter-menu";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
 import type { ConnectorHealthData } from "@/src/data/queries/connectors";
@@ -151,6 +152,8 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
           </>
         }
       />
+
+      <FirstUseTip screen="connectors" />
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 print:hidden">

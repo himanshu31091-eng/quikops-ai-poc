@@ -4,6 +4,7 @@ import * as React from "react";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { AnalyticsData } from "@/src/data/queries/analytics";
 import { DEMO_NOW, OTIF_TARGET_PCT } from "@/src/lib/constants";
@@ -62,6 +63,8 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
           </>
         }
       />
+
+      <FirstUseTip screen="analytics" />
 
       <AnalyticsFilterBar
         filters={filters}

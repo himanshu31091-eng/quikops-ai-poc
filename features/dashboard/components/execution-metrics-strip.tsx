@@ -2,6 +2,7 @@ import { DeltaBadge } from "@/components/patterns/delta-badge";
 import { Icon } from "@/components/patterns/icon";
 import type { ExecutionMetrics } from "@/src/domain/types";
 import { formatHours, formatPercent } from "@/src/lib/format";
+import { TermHint } from "@/components/patterns/in-app-tip";
 
 /**
  * The four execution figures beneath the KPI row.
@@ -14,6 +15,8 @@ import { formatHours, formatPercent } from "@/src/lib/format";
 interface Metric {
   icon: string;
   label: string;
+  /** Key into TERM_TIPS, where the metric has a precise definition. */
+  term?: string;
   value: string;
   delta?: { value: number; unit: "pts" | "%" | "abs"; higherIsBetter: boolean };
   hint: string;
@@ -24,6 +27,7 @@ export function ExecutionMetricsStrip({ metrics }: { metrics: ExecutionMetrics }
     {
       icon: "Clock",
       label: "Mean time to resolve",
+      term: "sla",
       value: formatHours(metrics.mttrHours),
       delta: { value: metrics.mttrDeltaPct, unit: "%", higherIsBetter: false },
       hint: "Case open to verified",
@@ -31,6 +35,7 @@ export function ExecutionMetricsStrip({ metrics }: { metrics: ExecutionMetrics }
     {
       icon: "Target",
       label: "SLA adherence",
+      term: "sla",
       value: formatPercent(metrics.slaAdherencePct),
       delta: { value: metrics.slaAdherenceDeltaPts, unit: "pts", higherIsBetter: true },
       hint: "Resolved within band target",
@@ -38,18 +43,21 @@ export function ExecutionMetricsStrip({ metrics }: { metrics: ExecutionMetrics }
     {
       icon: "ShieldCheck",
       label: "Verification pass rate",
+      term: "verification",
       value: formatPercent(metrics.verificationPassRatePct),
       hint: "Approved on first submission",
     },
     {
       icon: "RefreshCw",
       label: "Recurrence rate",
+      term: "recurrence",
       value: formatPercent(metrics.recurrenceRatePct),
       hint: "Reopened within 30 days",
     },
     {
       icon: "Activity",
       label: "Throughput this week",
+      term: "flowBalance",
       value: `${metrics.casesClosedThisWeek} / ${metrics.casesOpenedThisWeek}`,
       hint: "Closed vs opened",
     },
@@ -62,6 +70,7 @@ export function ExecutionMetricsStrip({ metrics }: { metrics: ExecutionMetrics }
           <dt className="flex items-center gap-1.5 text-2xs font-medium text-content-tertiary">
             <Icon name={item.icon} size="xs" />
             {item.label}
+            {item.term ? <TermHint term={item.term} /> : null}
           </dt>
           <dd className="mt-1.5 flex items-baseline gap-2">
             <span className="text-lg font-semibold tabular-nums leading-6 tracking-[-0.016em] text-content">

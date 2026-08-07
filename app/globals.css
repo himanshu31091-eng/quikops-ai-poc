@@ -317,3 +317,67 @@
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------- Contrast */
+
+/*
+ * High contrast, expressed as token overrides rather than component rules.
+ *
+ * The whole product reads colour through the semantic tokens above, so raising
+ * contrast is a matter of restating a dozen values here — no component knows
+ * this mode exists, and none can be missed. That is the payoff of the
+ * single-source rule (ARCHITECTURE §7) rather than a claim about it.
+ *
+ * Three things change, and only three:
+ *
+ *  - **Structure gets darker.** Borders carry the layout in this product
+ *    (two elevation levels, no decorative shadow), so a 1px line at #e4e9ef is
+ *    the first thing to fail at low vision or on a projector.
+ *  - **Tertiary text stops being tertiary.** #8794a5 on white is 3.5:1 — fine
+ *    for the 4.5:1 large-text threshold, short of it for the 11px metadata this
+ *    product uses it on.
+ *  - **The focus ring thickens.** One ring, one colour, unchanged in hue —
+ *    only heavier, so the single-focus-style rule still holds.
+ *
+ * Subtle fills are left alone deliberately: pushing those toward the palette
+ * ends would recolour every status badge, and a status colour that means
+ * something different in one mode is worse than a slightly soft fill.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --color-line: #94a3b8;
+    --color-line-strong: #475569;
+    --color-content-secondary: #303a46;
+    --color-content-tertiary: #4a5565;
+    --color-content-inverse-secondary: #cbd5e1;
+    --color-chart-axis: #475569;
+    --color-chart-grid: #cbd5e1;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 2px;
+  }
+
+  /* A hairline divider disappears first; give it the stronger token. */
+  .divide-line > * + * {
+    border-color: var(--color-line-strong);
+  }
+}
+
+/*
+ * Forced colours (Windows high-contrast themes) replace the palette entirely.
+ * Nothing to restyle — the one thing that breaks is a border drawn with a
+ * custom property the OS has overridden away, so structure is re-asserted with
+ * the system keyword.
+ */
+@media (forced-colors: active) {
+  .skeleton::after {
+    display: none;
+  }
+
+  :focus-visible {
+    outline: 3px solid CanvasText;
+    outline-offset: 2px;
+  }
+}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/patterns/icon";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { PageHeader } from "@/components/patterns/page-header";
+import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import type { WorkPortfolioMetrics } from "@/src/data/queries/work";
 import type { CaseListItem, Plant, User } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
@@ -181,6 +182,8 @@ export function WorkManagerView({
           </>
         }
       />
+
+      <FirstUseTip screen="work" />
 
       <WorkKpiHeader kpis={manager.kpis} onToggle={manager.toggleKpi} />
 

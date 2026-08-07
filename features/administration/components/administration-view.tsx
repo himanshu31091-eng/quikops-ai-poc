@@ -9,6 +9,7 @@ import { KpiTileRow, type KpiTileModel } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { PageHeader } from "@/components/patterns/page-header";
+import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -228,6 +229,8 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
           </span>
         }
       />
+
+      <FirstUseTip screen="admin" />
 
       <KpiTileRow kpis={kpis} />
 

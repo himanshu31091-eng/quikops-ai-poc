@@ -6,6 +6,7 @@ import { Icon } from "@/components/patterns/icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP, NAVIGATION, type NavItem } from "@/src/config/app-config";
 import type { UserRole } from "@/src/domain/types";
+import { useTranslation } from "@/src/i18n/provider";
 import { cn } from "@/src/lib/cn";
 import { BrandMark } from "./brand-mark";
 
@@ -38,6 +39,12 @@ function NavRow({
   badgeCount: number;
   onNavigate?: () => void;
 }) {
+  const { t } = useTranslation();
+  // The config label is the fallback, so an untranslated key still renders the
+  // English name rather than `nav.reports`. That is what lets the catalogue be
+  // filled in a module at a time instead of all at once.
+  const label = t(`nav.${item.key}`, {}) === `nav.${item.key}` ? item.label : t(`nav.${item.key}`);
+
   const row = (
     <Link
       href={item.href}
@@ -59,7 +66,7 @@ function NavRow({
         size="md"
         className={active ? "text-accent" : "text-content-tertiary"}
       />
-      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
 
       {badgeCount > 0 ? (
         <span

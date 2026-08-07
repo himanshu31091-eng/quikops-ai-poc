@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { FirstUseTip, ReleaseAnnouncement } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
 import { getSessionUser } from "@/src/auth/session";
@@ -138,6 +139,9 @@ export default async function ExecutiveDashboardPage() {
           </>
         }
       />
+
+      <FirstUseTip screen="dashboard" />
+      <ReleaseAnnouncement />
 
       {/* KPI band */}
       <section aria-label="Headline indicators" data-tour="dashboard-kpi-band">

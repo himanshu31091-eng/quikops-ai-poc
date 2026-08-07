@@ -7,6 +7,7 @@ import { DEMO_PERSONAS, PLANTS, USER_BY_ID } from "@/src/data/fixtures/organisat
 import { NOTIFICATIONS } from "@/src/data/fixtures/intelligence";
 import { getNavBadgeCounts } from "@/src/data/queries/dashboard";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/src/i18n/config";
+import { loadMessages } from "@/src/i18n/load";
 import { I18nProvider } from "@/src/i18n/provider";
 import { TourProvider } from "@/src/tour/tour-store";
 import { ExecutionProvider } from "@/src/workflow/execution-store";
@@ -24,6 +25,8 @@ export default async function AppLayout({
 
   const localeCookie = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale = isLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;
+  // Resolved on the server so the first HTML is already in the right language.
+  const messages = await loadMessages(locale);
 
   const searchableCases = CASES.filter((c) =>
     ["NEW", "TRIAGED", "ASSIGNED", "IN_PROGRESS", "PENDING_VERIFY", "REOPENED"].includes(
@@ -42,7 +45,7 @@ export default async function AppLayout({
     // Providers are ordered outermost-first by lifetime: locale outlives a
     // session's work, the execution store outlives a single screen, and the
     // tour reads the signed-in role from above it.
-    <I18nProvider initialLocale={locale}>
+    <I18nProvider initialLocale={locale} initialMessages={messages}>
       <ExecutionProvider>
         <TourProvider role={user.role}>
           <AppShell
