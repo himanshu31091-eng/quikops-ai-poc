@@ -1023,6 +1023,47 @@ is what escalates a case (`src/domain/sla.ts`), so it is the best available
 proxy — and it is a floor, not a measurement. A case raised by hand before it
 breached has been escalated for longer than the panel shows.
 
+### D-82 — Permissions are derived from the rules, not declared beside them
+`src/domain/platform-settings.ts`
+
+The permission matrix is built from the capabilities the code already enforces —
+`ASSIGNABLE_ROLES`, `NAVIGATION[].roles`, `reviewerFor` — and every row names the
+file that enforces it.
+
+**Why:** a hand-written permission table is a second description of rules that
+already exist, and the moment the two disagree the table is the one people
+believe. An administrator's real question is *why can this role not verify*,
+which a grid of ticks cannot answer and a rationale can. Same argument as D-55,
+one layer up.
+
+### D-83 — Departments hang off the person, not the case
+`src/domain/platform-settings.ts` → `DEPARTMENTS`, `departmentForJobTitle`
+
+A case belongs to a person; that person belongs to a team. Department load is
+derived by joining through the owner, and the team is inferred from the job
+title the seeded organisation already states.
+
+**Why not a field on the case:** it would need authoring across 29 cases under
+the no-invented-numbers rule, and it would go stale the moment a case was
+reassigned. The join means a reassignment moves work between teams with nothing
+re-tagged.
+
+**The honest limit, stated in the UI:** an unowned case has no department. It is
+counted in the portfolio and absent from the split — which is the finding, not a
+gap in the data, and the panel says so rather than bucketing it as "unknown".
+
+### D-84 — A settings screen must not describe a system the code is not running
+`src/domain/platform-settings.ts` → `buildSettingsGroups`
+
+The AI, workflow and notification groups read their values from the modules that
+own them — `src/ai/config.ts`, the domain rules, the live `resolveMode()` — and
+each row marked *Phase 2* is one the product displays but does not yet enforce.
+
+**Why the enforced / not-enforced distinction sits on the row:** the failure mode
+of every settings page is describing intent as though it were behaviour. Marking
+the five notification rules that have no transport yet is the difference between
+a configuration preview (D-56) and a lie with a toggle on it.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

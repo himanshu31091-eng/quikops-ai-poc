@@ -3,6 +3,7 @@ import type { ExceptionType, OperationalCase, Plant, User } from "@/src/domain/t
 import { CASES } from "../fixtures/cases";
 import { reviewerFor } from "../fixtures/case-detail";
 import { PLANTS, USERS } from "../fixtures/organisation";
+import { resolveMode } from "@/src/ai/services/copilot-service";
 import { assignableUsers, toCaseListItem } from "./case-mapper";
 
 /**
@@ -35,6 +36,14 @@ export interface AdministrationData {
   routingRules: RoutingRule[];
   /** The raw corpus, for the configuration previews. */
   cases: OperationalCase[];
+  /**
+   * Whether the Copilot is running against the live API.
+   *
+   * Resolved here rather than in the component: the key is server-side only,
+   * so a client asking this question directly would have to be told, and the
+   * settings panel must not be the one screen that guesses.
+   */
+  isCopilotLive: boolean;
 }
 
 export async function getAdministrationData(): Promise<AdministrationData> {
@@ -81,5 +90,6 @@ export async function getAdministrationData(): Promise<AdministrationData> {
       (a, b) => a.plantName.localeCompare(b.plantName) || b.caseCount - a.caseCount,
     ),
     cases: CASES,
+    isCopilotLive: resolveMode() === "live",
   };
 }

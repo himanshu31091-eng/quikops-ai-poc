@@ -14,6 +14,29 @@ import { PriorityChip } from "@/components/patterns/priority-chip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
 import { FormField, FIELD_CLASS } from "@/components/patterns/form-field";
+import {
+  DepartmentPanel,
+  PermissionMatrix,
+  RoleLegend,
+  SettingsGroupPanel,
+  type DepartmentLoad,
+} from "./governance-panels";
+import {
+  buildSettingsGroups,
+  departmentForJobTitle,
+  DEPARTMENTS,
+} from "@/src/domain/platform-settings";
+import {
+  COPILOT_EFFORT,
+  COPILOT_MAX_TOKENS,
+  COPILOT_MODEL,
+  MAX_CONTEXT_CHARS,
+  MAX_HISTORY_TURNS,
+  MAX_QUESTION_CHARS,
+} from "@/src/ai/config";
+import { isOpenStatus } from "@/src/domain/case-status";
+import { hasBreachedSla } from "@/src/domain/portfolio-metrics";
+import { KPI_MEASUREMENT_WINDOW_DAYS } from "@/src/lib/constants";
 import { ROLE_META } from "@/src/config/app-config";
 import {
   previewSlaChange,
@@ -212,6 +235,66 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
     const timer = window.setTimeout(() => setNotice(null), 6_000);
     return () => window.clearTimeout(timer);
   }, [notice]);
+
+  /**
+   * Department load, joined through the case owner.
+   *
+   * Nothing is stored on the case: a person's job title places them in a team,
+   * and the cases they own follow. A reassignment therefore moves work between
+   * teams with nothing re-tagged — and an unowned case is deliberately absent
+   * from the split rather than bucketed as "unknown".
+   */
+  const departmentLoads = React.useMemo<DepartmentLoad[]>(() => {
+    const byId = new Map(data.users.map((user) => [user.id, user]));
+
+    return DEPARTMENTS.map((department) => {
+      const people = data.users.filter(
+        (user) =>
+          user.isActive && departmentForJobTitle(user.jobTitle)?.id === department.id,
+      );
+      const owned = data.cases.filter((item) => {
+        if (item.ownerId === null || !isOpenStatus(item.status)) return false;
+        const owner = byId.get(item.ownerId);
+        return owner ? departmentForJobTitle(owner.jobTitle)?.id === department.id : false;
+      });
+
+      return {
+        departmentId: department.id,
+        people,
+        openCases: owned.length,
+        openExposure: owned.reduce((sum, item) => sum + item.revenueAtRisk, 0),
+        breachedOpen: owned.filter((item) => hasBreachedSla(item, DEMO_NOW)).length,
+      };
+    });
+  }, [data.users, data.cases]);
+
+  const unowned = React.useMemo(() => {
+    const items = data.cases.filter(
+      (item) => isOpenStatus(item.status) && item.ownerId === null,
+    );
+    return {
+      count: items.length,
+      exposure: items.reduce((sum, item) => sum + item.revenueAtRisk, 0),
+    };
+  }, [data.cases]);
+
+  // Read from the modules that own them, so this screen cannot describe a
+  // configuration the product is not actually running.
+  const settingsGroups = React.useMemo(
+    () =>
+      buildSettingsGroups({
+        copilotModel: COPILOT_MODEL,
+        copilotEffort: COPILOT_EFFORT,
+        copilotMaxTokens: COPILOT_MAX_TOKENS,
+        maxQuestionChars: MAX_QUESTION_CHARS,
+        maxHistoryTurns: MAX_HISTORY_TURNS,
+        maxContextChars: MAX_CONTEXT_CHARS,
+        isLiveMode: data.isCopilotLive,
+        measurementWindowDays: KPI_MEASUREMENT_WINDOW_DAYS,
+        slaTargets: targets,
+      }),
+    [data.isCopilotLive, targets],
+  );
 
   const resetWeights = () => setWeights({ ...PRIORITY_WEIGHTS });
   const resetTargets = () => setTargets({ ...SLA_TARGET_HOURS });
@@ -530,6 +613,55 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
           }}
         />
       </SectionCard>
+
+      {/* Governance — who can do what, and which team does it */}
+      <div className="grid gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-7">
+          <SectionCard
+            title="Permissions"
+            subtitle="Derived from the rules the product enforces, not declared here"
+            icon="Lock"
+            className="h-full"
+            footer={<RoleLegend />}
+          >
+            <PermissionMatrix />
+          </SectionCard>
+        </div>
+        <div className="min-w-0 xl:col-span-5">
+          <SectionCard
+            title="Departments"
+            subtitle="Joined through the case owner — reassigning moves the work"
+            icon="Users"
+            className="h-full"
+          >
+            <DepartmentPanel
+              loads={departmentLoads}
+              unownedCases={unowned.count}
+              unownedExposure={unowned.exposure}
+              currency={data.cases[0]?.currency ?? "USD"}
+            />
+          </SectionCard>
+        </div>
+      </div>
+
+      {/* Platform settings — three groups, read from the modules that own them */}
+      <div className="grid gap-4 xl:grid-cols-12">
+        {settingsGroups.map((group, index) => (
+          <div
+            key={group.id}
+            className={cn("min-w-0", index === 0 ? "xl:col-span-5" : "xl:col-span-4")}
+          >
+            <SectionCard
+              title={group.title}
+              subtitle={group.subtitle}
+              icon={group.icon}
+              className="h-full"
+            >
+              <SettingsGroupPanel group={group} />
+            </SectionCard>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

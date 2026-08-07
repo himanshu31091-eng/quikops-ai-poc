@@ -31,6 +31,12 @@ and the portal was given an icon set.
 
 ### Sprints 3–5 (2026-08-07)
 
+**Administration completed** — the module was missing five of its eight named
+sub-features. Permissions (derived, D-82), Departments (joined through the
+owner, D-83), and AI / Workflow / Notification settings (read from the modules
+that own them, D-84). Verified rendering with real values including the live
+`claude-opus-5` mode.
+
 **Sprint 2 needed no work.** Reports, Connector Health, Audit Log,
 Administration and Playbooks were all built in earlier sessions and build
 clean; they were verified, not rebuilt.
@@ -297,6 +303,9 @@ including repairs to four doc sections that described code this pass deleted.
 | D-79 | High contrast is a token override, not a component concern |
 | D-80 | A language selector that changes nothing is a dead control |
 | D-81 | Age is not breach, and the product now says both |
+| D-82 | Permissions are derived from the rules, not declared beside them |
+| D-83 | Departments hang off the person, not the case |
+| D-84 | A settings screen must not describe a system the code is not running |
 
 Also amended: **D-19** (placeholder modules — superseded, mechanism removed) and
 **D-60** (`localStorage` — now tour completion only).
