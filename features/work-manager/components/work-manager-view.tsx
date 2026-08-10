@@ -167,7 +167,7 @@ export function WorkManagerView({
     <div className="space-y-4">
       <PageHeader
         title="Work Manager"
-        description="Every operational case Every Angle has detected, in one queue — triage it, own it, execute it, verify it."
+        description="Every detected operational case, in one queue — triage it, own it, execute it, verify it."
         docKey="work"
         meta={
           <>

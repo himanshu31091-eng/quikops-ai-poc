@@ -17,7 +17,7 @@ database: typed fixtures behind an async data-access layer.
 
 The one-line pitch, from the login screen:
 
-> Every Angle identifies operational bottlenecks.
+> Your enterprise data identifies operational bottlenecks.
 > QuikOps AI turns them into executed, verified outcomes.
 
 A detected signal becomes a case, which is scored, owned, worked, evidenced and

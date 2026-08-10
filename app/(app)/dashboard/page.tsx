@@ -119,7 +119,7 @@ export default async function ExecutiveDashboardPage() {
               Data as at {formatTimestamp(DEMO_NOW)} UTC
             </MetaChip>
             <MetaChip icon="PlugZap">
-              Every Angle · last sync 2h ago · 34 signals
+              Enterprise Data Platform · last sync 2h ago · 34 signals
             </MetaChip>
             <MetaChip icon="Building2">
               {user.plantScope.length} plants in scope
@@ -177,7 +177,7 @@ export default async function ExecutiveDashboardPage() {
             bodyClassName="p-2"
             footer={
               <p className="text-2xs text-content-tertiary">
-                KPI values are read from Every Angle and never recomputed here.
+                KPI values are read from connected enterprise data and never recomputed here.
               </p>
             }
           >

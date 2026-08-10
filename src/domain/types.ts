@@ -34,7 +34,7 @@ export const EXCEPTION_TYPES = [
 export type ExceptionType = (typeof EXCEPTION_TYPES)[number];
 
 /**
- * Where the case came from. Every Angle raises the overwhelming majority; the
+ * Where the case came from. The enterprise data platform raises the overwhelming majority; the
  * rest are opened by hand or by a playbook's own monitoring rule.
  */
 export const DETECTION_SOURCES = ["EVERY_ANGLE", "PLAYBOOK_MONITOR", "MANUAL"] as const;

@@ -31,7 +31,15 @@ and sequencing in `ROADMAP.md`.
 **Every portfolio figure is derived** by `src/domain/portfolio-metrics.ts`
 (D-48). Dashboard and Analytics report identical values — verified 11d / 62.1% /
 76.9% / 41.4%. Connector throughput derives from the case corpus the same way
-(D-51): 23 cases raised = 17 Every Angle + 6 playbook monitor, 6 manual, 29 total.
+(D-51): 23 cases raised = 17 data platform + 6 playbook monitor, 6 manual, 29 total.
+
+**The product is vendor-neutral (D-89, 2026-08-10).** No screen, export, prompt
+or notification names the upstream analytics vendor. Copy says *enterprise data
+platform*, *connected enterprise data*, or simply *detected*. The enum key
+`EVERY_ANGLE` remains as an internal identifier and is never rendered directly —
+display text comes from `AUDIT_SOURCE_LABEL` and `DETECTION_SOURCE_META` in
+`src/config/app-config.ts`. Verified: 0 brand occurrences in the rendered text of
+all 13 authenticated routes on the production build.
 
 ### Connector Health — what was built
 

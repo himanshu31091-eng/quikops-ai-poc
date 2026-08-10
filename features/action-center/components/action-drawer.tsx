@@ -9,6 +9,7 @@ import { PriorityChip } from "@/components/patterns/priority-chip";
 import { ProgressBar } from "@/components/patterns/progress-bar";
 import { StatusBadge } from "@/components/patterns/status-badge";
 import { Button } from "@/components/ui/button";
+import { AUDIT_SOURCE_LABEL } from "@/src/config/app-config";
 import type { ActionDrawerContext, ActionRecommendation } from "@/src/data/queries/actions";
 import { ACTION_SLA_META } from "@/src/domain/action-sla";
 import type { ActionStatus, User } from "@/src/domain/types";
@@ -398,7 +399,8 @@ export function ActionDrawer({
                             ) : null}
                           </p>
                           <p className="mt-0.5 text-2xs text-content-tertiary">
-                            {formatWhen(entry.at, DEMO_NOW)} · {entry.source.replace(/_/g, " ").toLowerCase()}
+                            {formatWhen(entry.at, DEMO_NOW)} ·{" "}
+                            {AUDIT_SOURCE_LABEL[entry.source].toLowerCase()}
                           </p>
                         </div>
                       </li>

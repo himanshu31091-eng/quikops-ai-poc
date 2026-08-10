@@ -20,7 +20,7 @@ const VALUE_POINTS = [
   {
     icon: "Zap",
     title: "Detection becomes execution",
-    body: "Every Angle exceptions arrive as owned cases with a due date, an owner and an audit trail.",
+    body: "Detected exceptions arrive as owned cases with a due date, an owner and an audit trail.",
   },
   {
     icon: "ShieldCheck",
@@ -62,7 +62,7 @@ export default function LoginPage() {
             The execution layer
           </p>
           <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.02em] text-content-inverse">
-            Every Angle identifies operational bottlenecks.
+            Your enterprise data identifies operational bottlenecks.
             <span className="block text-content-inverse-secondary">
               QuikOps AI turns them into executed, verified outcomes.
             </span>

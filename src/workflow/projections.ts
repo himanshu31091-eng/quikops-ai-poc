@@ -166,7 +166,7 @@ export function projectKpis(
           value: breachedAfter,
           deltaValue: breachedAfter - breachedBefore,
         };
-      // OTIF is measured by Every Angle over a window, not recomputed from the
+      // OTIF is measured by the data platform over a window, not recomputed from the
       // case list. Leaving it alone is the honest answer.
       default:
         return model;

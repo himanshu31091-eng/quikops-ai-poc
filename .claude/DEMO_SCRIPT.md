@@ -31,7 +31,7 @@ npm run dev          # http://localhost:3000
 
 The left panel carries the positioning before any credential UI:
 
-> **Every Angle identifies operational bottlenecks.
+> **Your enterprise data identifies operational bottlenecks.
 > QuikOps AI turns them into executed, verified outcomes.**
 
 Three value points sit under it: *detection becomes execution*, *verification
@@ -49,7 +49,7 @@ Click **Elena Vásquez — Chief Operating Officer**.
 `/dashboard`
 
 Opens on *"Good morning, Elena"* with provenance chips: data as at 09:12 UTC,
-**Every Angle · last sync 2h ago · 34 signals**, 4 plants in scope.
+**Enterprise Data Platform · last sync 2h ago · 34 signals**, 4 plants in scope.
 
 ### The KPI band — the numbers to say out loud
 
@@ -161,17 +161,17 @@ distinguishes what's recorded from what's inferred."
 
 Scroll to **Case Information**:
 
-- Detection rule **EA-R-VD-002 — Vendor confirmed date slip**
+- Detection rule **RULE-VD-002 — Vendor confirmed date slip**
 - *"Fires when a confirmed purchase order date moves out by more than 3 days, or
   the goods receipt is more than 2 days past the confirmed date, on a material
   with open demand inside the horizon."*
-- Signal ref **EA-2026-08-02-MX-004182** · **PO-77455** · Extrusion line 1
+- Signal ref **SIG-2026-08-02-MX-004182** · **PO-77455** · Extrusion line 1
 
 **Say:** "Every case can answer 'why was I raised' with the rule, the threshold,
 and the signal reference. Nothing here is a black box."
 
 The timeline currently shows four events, all machine-generated:
-`Every Angle detected the exception` → `Case created and scored` →
+`Enterprise Data Platform detected the exception` → `Case created and scored` →
 `Playbook applied` → `Escalated to level 1`.
 
 **Say:** "Four events, no humans yet. Watch what happens."
@@ -264,7 +264,7 @@ Only mention it if asked — it is a fallback, not a feature.
 | Session chip | shows the session is dirty |
 
 **Say:** "No refresh. One case, worked end to end on one screen, and the
-executive number moved. That's the loop: Every Angle detects it, QuikOps owns
+executive number moved. That's the loop: your data platform detects it, QuikOps owns
 it, someone independent verifies it, and the number that a board asks about
 changes as a direct consequence."
 

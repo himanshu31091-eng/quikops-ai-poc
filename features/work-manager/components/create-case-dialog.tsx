@@ -139,7 +139,7 @@ export function CreateCaseDialog({
               </DialogTitle>
               <DialogDescription className="mt-0.5 text-xs text-content-tertiary">
                 For work that no signal raised. Priority is scored by the same rule set
-                Every Angle cases run through — it is never entered by hand.
+                detected cases run through — it is never entered by hand.
               </DialogDescription>
             </div>
             <DialogClose asChild>

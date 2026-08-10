@@ -100,7 +100,7 @@ export const TERM_TIPS: Record<string, Tip> = {
     id: "term.detectionSource",
     kind: "term",
     title: "Detection source",
-    body: "Where the case came from — Every Angle for the overwhelming majority, a playbook's own monitoring rule, or opened by hand from the floor. It is how you tell an automated signal from a human judgement.",
+    body: "Where the case came from — the connected enterprise data platform for the overwhelming majority, a playbook's own monitoring rule, or opened by hand from the floor. It is how you tell an automated signal from a human judgement.",
     learnMoreHref: "/system/connectors",
   },
 };

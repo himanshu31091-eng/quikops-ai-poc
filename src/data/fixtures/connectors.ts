@@ -6,8 +6,8 @@ import { CASES } from "./cases";
  * The integration landscape behind QuikOps.
  *
  * Deliberately reconciled with the case corpus rather than invented alongside
- * it: the Every Angle signal connector reports exactly as many raised cases as
- * there are cases with `detectedBy: "EVERY_ANGLE"`, and the playbook monitor
+ * it: the enterprise data platform signal connector reports exactly as many
+ * raised cases as there are cases with `detectedBy: "EVERY_ANGLE"`, and the playbook monitor
  * reports the ones marked `PLAYBOOK_MONITOR`. Manual cases belong to no
  * connector, because a person opened them.
  *
@@ -64,8 +64,8 @@ export interface ConnectorDefinition {
 export const CONNECTORS: ConnectorDefinition[] = [
   {
     id: "conn_ea_signals",
-    name: "Every Angle — Exception Signals",
-    system: "Every Angle",
+    name: "Enterprise Data Platform — Exception Signals",
+    system: "Enterprise Data Platform",
     description:
       "Evaluates the operational rule set against plant data and raises a signal for every condition that holds. The primary source of cases.",
     direction: "INBOUND",
@@ -81,8 +81,8 @@ export const CONNECTORS: ConnectorDefinition[] = [
   },
   {
     id: "conn_ea_kpi",
-    name: "Every Angle — KPI Snapshots",
-    system: "Every Angle",
+    name: "Enterprise Data Platform — KPI Snapshots",
+    system: "Enterprise Data Platform",
     description:
       "Delivers measured OTIF, supplier OTD, schedule adherence and inventory coverage per plant. Read by the dashboard; never recomputed here.",
     direction: "INBOUND",
@@ -372,7 +372,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     // A replay cannot help — the transform has to learn the unit first.
     id: "dlq_010",
     connectorId: "conn_oracle_scm",
-    signalRef: "EA-2026-08-04-MX-004191",
+    signalRef: "SIG-2026-08-04-MX-004191",
     reason: "SCHEMA_MISMATCH",
     detail:
       "Unit of measure 'CS' is not in the mapped set. Oracle uses case-pack units at Querétaro that the transform does not yet translate.",
@@ -387,7 +387,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     // replay is actually for.
     id: "dlq_011",
     connectorId: "conn_oracle_scm",
-    signalRef: "EA-2026-08-04-IN-004192",
+    signalRef: "SIG-2026-08-04-IN-004192",
     reason: "MISSING_REFERENCE",
     detail:
       "Goods movement references work order WO-88214, which had not arrived when the movement was processed.",
@@ -399,7 +399,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
   {
     id: "dlq_001",
     connectorId: "conn_sap_master",
-    signalRef: "EA-2026-08-04-DE-004188",
+    signalRef: "SIG-2026-08-04-DE-004188",
     reason: "MISSING_REFERENCE",
     detail: "Material SA-1207 is referenced by the signal but absent from master data.",
     receivedAt: ago(9),
@@ -410,7 +410,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
   {
     id: "dlq_002",
     connectorId: "conn_sap_master",
-    signalRef: "EA-2026-08-04-DE-004189",
+    signalRef: "SIG-2026-08-04-DE-004189",
     reason: "MISSING_REFERENCE",
     detail: "Supplier V-9902 is not present in the supplier master.",
     receivedAt: ago(9),
@@ -421,7 +421,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
   {
     id: "dlq_003",
     connectorId: "conn_ea_signals",
-    signalRef: "EA-2026-08-04-MX-004190",
+    signalRef: "SIG-2026-08-04-MX-004190",
     reason: "VALIDATION_FAILED",
     detail: "revenueAtRisk was negative, which the priority rule set cannot score.",
     receivedAt: ago(14),
@@ -432,13 +432,13 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
   {
     id: "dlq_004",
     connectorId: "conn_ea_signals",
-    signalRef: "EA-2026-08-03-US-004191",
+    signalRef: "SIG-2026-08-03-US-004191",
     reason: "DUPLICATE_KEY",
     detail: "This signal reference was already ingested by the preceding run.",
     receivedAt: ago(28),
     attempts: 1,
     field: "signalRef",
-    payloadPreview: '{ "signalRef": "EA-2026-08-03-US-004191", … }',
+    payloadPreview: '{ "signalRef": "SIG-2026-08-03-US-004191", … }',
   },
   {
     id: "dlq_005",
@@ -489,7 +489,7 @@ export interface FieldMapping {
 }
 
 export const FIELD_MAPPINGS: FieldMapping[] = [
-  // Every Angle — Exception Signals
+  // Enterprise Data Platform — Exception Signals
   { connectorId: "conn_ea_signals", sourceField: "SIGNAL_ID", sourceType: "string", targetField: "signalRef", targetType: "string", required: true, transform: null },
   { connectorId: "conn_ea_signals", sourceField: "RULE_ID", sourceType: "string", targetField: "detectionRuleId", targetType: "string", required: true, transform: null },
   { connectorId: "conn_ea_signals", sourceField: "EXCEPTION_CLASS", sourceType: "string", targetField: "exceptionType", targetType: "ExceptionType", required: true, transform: "Mapped through the exception-class lookup" },
@@ -500,7 +500,7 @@ export const FIELD_MAPPINGS: FieldMapping[] = [
   { connectorId: "conn_ea_signals", sourceField: "PROMISED_DATE", sourceType: "date", targetField: "daysToPromisedDate", targetType: "number", required: true, transform: "Difference from ingestion date, in days" },
   { connectorId: "conn_ea_signals", sourceField: "DETECTION_COUNT", sourceType: "integer", targetField: "recurrenceCount", targetType: "number", required: true, transform: null },
 
-  // Every Angle — KPI Snapshots
+  // Enterprise Data Platform — KPI Snapshots
   { connectorId: "conn_ea_kpi", sourceField: "KPI_CODE", sourceType: "string", targetField: "kpiKey", targetType: "KpiKey", required: true, transform: "Mapped through the KPI code lookup" },
   { connectorId: "conn_ea_kpi", sourceField: "SCOPE_LEVEL", sourceType: "string", targetField: "scopeLevel", targetType: "string", required: true, transform: null },
   { connectorId: "conn_ea_kpi", sourceField: "MEASURED_VALUE", sourceType: "decimal", targetField: "value", targetType: "number", required: true, transform: null },

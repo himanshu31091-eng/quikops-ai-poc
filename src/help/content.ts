@@ -35,11 +35,11 @@ export const HELP_ARTICLES: HelpArticle[] = [
     summary: "What QuikOps AI is and the gap it closes.",
     icon: "BookMarked",
     category: "Overview",
-    keywords: ["what is", "introduction", "purpose", "every angle"],
+    keywords: ["what is", "introduction", "purpose", "enterprise data platform"],
     blocks: [
       {
         kind: "paragraph",
-        text: "Every Angle identifies operational bottlenecks. QuikOps AI turns them into executed, verified outcomes. A detected signal becomes a case, which is scored, owned, worked, evidenced and independently verified — and only then does its revenue exposure count as recovered.",
+        text: "Your enterprise data identifies operational bottlenecks. QuikOps AI turns them into executed, verified outcomes. A detected signal becomes a case, which is scored, owned, worked, evidenced and independently verified — and only then does its revenue exposure count as recovered.",
       },
       {
         kind: "paragraph",
@@ -58,7 +58,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       {
         kind: "steps",
         items: [
-          "Every Angle evaluates a rule against plant data and raises a signal.",
+          "The enterprise data platform evaluates a rule against plant data and raises a signal.",
           "QuikOps opens a case and scores it 0–100 on a deterministic rule set.",
           "The case is routed to an owner, who builds and executes a corrective plan.",
           "Evidence is attached against each action as it completes.",
@@ -86,7 +86,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
           "Action Center — the cross-case execution inbox: assigned work, SLA warnings, approvals and escalations.",
           "Execution Analytics — how the operation performs at closing what it detects.",
           "Reports — scheduled and on-demand reporting composed from the same figures.",
-          "Connector Health — the Every Angle integration, made inspectable.",
+          "Connector Health — the enterprise data integration, made inspectable.",
           "Audit Log — append-only record of every change.",
           "Playbooks — reusable corrective templates, with their measured effect.",
           "Administration — users, routing, SLA thresholds and priority weights.",
@@ -188,15 +188,15 @@ export const HELP_ARTICLES: HelpArticle[] = [
     summary: "Where each number comes from.",
     icon: "PlugZap",
     category: "Reference",
-    keywords: ["every angle", "sap", "erp", "connector", "ingestion"],
+    keywords: ["enterprise data platform", "sap", "erp", "connector", "ingestion"],
     blocks: [
       {
         kind: "paragraph",
-        text: "Operational cases arrive from Every Angle's exception signals or a playbook's own recurrence monitor; some are opened by hand. Reference data — materials, plants, suppliers, orders — comes from SAP.",
+        text: "Operational cases arrive from the enterprise data platform's exception signals or a playbook's own recurrence monitor; some are opened by hand. Reference data — materials, plants, suppliers, orders — comes from SAP.",
       },
       {
         kind: "paragraph",
-        text: "OTIF, inventory coverage and schedule adherence are measured by Every Angle over its own window. QuikOps reads them; it never recomputes them. Everything else — open counts, exposure, breaches, mean time to resolve, SLA adherence — is derived from the case corpus, which is why the dashboard, Analytics and the Copilot always agree.",
+        text: "OTIF, inventory coverage and schedule adherence are measured by the enterprise data platform over its own window. QuikOps reads them; it never recomputes them. Everything else — open counts, exposure, breaches, mean time to resolve, SLA adherence — is derived from the case corpus, which is why the dashboard, Analytics and the Copilot always agree.",
       },
       {
         kind: "paragraph",
@@ -255,7 +255,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
         kind: "list",
         items: [
           "0.9.0 — Reports, Audit Log, Administration and Playbooks added. Shared table, KPI and toolbar components extracted.",
-          "0.8.0 — Connector Health added; Every Angle ingestion made inspectable.",
+          "0.8.0 — Connector Health added; enterprise data ingestion made inspectable.",
           "0.7.0 — All portfolio figures reconciled to one derivation, so every screen agrees.",
           "0.6.0 — Action Center added: the cross-case execution inbox.",
           "0.5.0 — Execution Analytics added.",
@@ -288,7 +288,7 @@ export const SCREEN_DOCS: Record<string, ScreenDoc> = {
     businessValue:
       "Turns a monthly reporting cycle into a live position. Every figure is a link, so the gap between noticing a number and acting on it is one click.",
     kpisExplained: [
-      { label: "On-time in full", detail: "Measured by Every Angle against the 95% target. Read, never recomputed." },
+      { label: "On-time in full", detail: "Measured by the enterprise data platform against the 95% target. Read, never recomputed." },
       { label: "Revenue at risk", detail: "Confirmed demand that cannot be served if open conditions are not cleared. Exposure, not loss taken." },
       { label: "Open critical cases", detail: "Cases scoring 75 or above on the deterministic priority rule set." },
       { label: "SLA breaches", detail: "Open cases past their band's resolution target." },
@@ -388,7 +388,7 @@ export const SCREEN_DOCS: Record<string, ScreenDoc> = {
   connectors: {
     moduleKey: "connectors",
     title: "Connector Health",
-    purpose: "The Every Angle integration and its siblings, made inspectable.",
+    purpose: "The enterprise data integration and its siblings, made inspectable.",
     businessValue:
       "The product's whole claim rests on detection being real and monitored. This is the screen that proves it.",
     kpisExplained: [

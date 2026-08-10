@@ -10,7 +10,7 @@ import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { ROLE_META } from "@/src/config/app-config";
+import { AUDIT_SOURCE_LABEL, ROLE_META } from "@/src/config/app-config";
 import type { AuditEntryRow, AuditLogData } from "@/src/data/queries/audit";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { cn } from "@/src/lib/cn";
@@ -125,7 +125,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
               SOURCE_TONE[row.source] ?? SOURCE_TONE.CASE_DETAIL,
             )}
           >
-            {row.source.replace(/_/g, " ").toLowerCase()}
+            {AUDIT_SOURCE_LABEL[row.source].toLowerCase()}
           </span>
         ),
       },

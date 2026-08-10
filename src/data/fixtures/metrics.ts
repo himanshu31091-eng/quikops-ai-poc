@@ -128,7 +128,7 @@ export const SCHEDULE_ADHERENCE_SERIES_90D = buildSeries({
 /* ------------------------------------------------------------- Plant health */
 
 /**
- * On-time-in-full per plant, as measured by Every Angle.
+ * On-time-in-full per plant, as measured by the enterprise data platform.
  *
  * Genuinely external: OTIF is computed by the analytics platform over its own
  * window against confirmed delivery data QuikOps does not hold. Reading it is

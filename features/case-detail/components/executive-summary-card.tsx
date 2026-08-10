@@ -46,7 +46,7 @@ export const ExecutiveSummaryCard = React.memo(function ExecutiveSummaryCard({
         <p className="flex items-start gap-1.5 text-2xs leading-relaxed text-content-tertiary">
           <Icon name="Info" size="xs" className="mt-0.5 shrink-0" />
           <span>
-            <span className="font-medium text-content-secondary">Why Every Angle raised this.</span>{" "}
+            <span className="font-medium text-content-secondary">Why this was raised.</span>{" "}
             {summary.whyRaised}
           </span>
         </p>

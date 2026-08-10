@@ -101,61 +101,61 @@ const RISK_CATEGORY: Record<ExceptionType, string> = {
   OTHER: "Operational",
 };
 
-/** The Every Angle rule that raised each class of case. */
+/** The detection rule that raised each class of case. */
 const DETECTION_RULE: Record<
   ExceptionType,
   { id: string; name: string; detail: string }
 > = {
   VENDOR_DELAY: {
-    id: "EA-R-VD-002",
+    id: "RULE-VD-002",
     name: "Vendor confirmed date slip",
     detail:
       "Fires when a confirmed purchase order date moves out by more than 3 days, or the goods receipt is more than 2 days past the confirmed date, on a material with open demand inside the horizon.",
   },
   MATERIAL_SHORTAGE: {
-    id: "EA-R-MS-001",
+    id: "RULE-MS-001",
     name: "Coverage below safety stock",
     detail:
       "Fires when projected days of coverage fall below the material's safety stock policy with confirmed demand still open in the same window.",
   },
   CAPACITY_CONSTRAINT: {
-    id: "EA-R-CC-004",
+    id: "RULE-CC-004",
     name: "Load exceeds available capacity",
     detail:
       "Fires when confirmed order load on a work centre exceeds available capacity by more than 5% for two consecutive planning weeks.",
   },
   QUALITY_HOLD: {
-    id: "EA-R-QH-003",
+    id: "RULE-QH-003",
     name: "Inspection rejection with open demand",
     detail:
       "Fires when an inspection lot is rejected or a control characteristic breaches its tolerance band while the material has confirmed demand inside the horizon.",
   },
   INVENTORY_EXCESS: {
-    id: "EA-R-IE-002",
+    id: "RULE-IE-002",
     name: "Stock without forward demand",
     detail:
       "Fires when on-hand quantity exceeds forward demand across the full planning horizon and the carrying value crosses the write-down threshold.",
   },
   INVENTORY_STOCKOUT: {
-    id: "EA-R-IS-001",
+    id: "RULE-IS-001",
     name: "Projected balance turns negative",
     detail:
       "Fires when the projected available balance goes negative inside the replenishment lead time for a material with no qualified alternate.",
   },
   PLANNING_DEVIATION: {
-    id: "EA-R-PD-005",
+    id: "RULE-PD-005",
     name: "Plan diverges from executable reality",
     detail:
       "Fires when the released plan and the executable position diverge — a superseded component, an unrefreshed netting run, or a sequence that services lower-value demand first.",
   },
   DELIVERY_AT_RISK: {
-    id: "EA-R-DR-001",
+    id: "RULE-DR-001",
     name: "Shipment outside agreed window",
     detail:
       "Fires when a confirmed shipment's projected arrival falls outside the customer's agreed delivery window with no recovery booked.",
   },
   OTHER: {
-    id: "EA-R-GEN-001",
+    id: "RULE-GEN-001",
     name: "General operational exception",
     detail: "Fires on an operational condition outside the specialised rule set.",
   },
@@ -294,7 +294,7 @@ export function buildExecutiveSummary(item: CaseListItem): CaseExecutiveSummary 
       deviation > 0 ? `, a gap of ${formatPercent(deviation)}` : ""
     }. Closure is measured over a ${item.measurementWindowDays}-day window.`,
     detectionRule: `${rule.id} · ${rule.name}`,
-    whyRaised: `Every Angle evaluated ${rule.id} against the ${
+    whyRaised: `The enterprise data platform evaluated ${rule.id} against the ${
       item.plantCode
     } dataset and the condition held. ${rule.detail}${
       item.recurrenceCount > 1
@@ -323,7 +323,7 @@ export function buildCaseInformation(item: CaseListItem): CaseInformation {
     detectionRuleId: rule.id,
     detectionRuleName: rule.name,
     detectionRuleDetail: rule.detail,
-    signalRef: `EA-${signalDate}-${item.plant.countryCode}-${item.caseNo.slice(-6)}`,
+    signalRef: `SIG-${signalDate}-${item.plant.countryCode}-${item.caseNo.slice(-6)}`,
   };
 }
 
@@ -738,11 +738,11 @@ export function buildEvidence(
   evidence.push({
     id: `evd_${item.caseNo.slice(-6)}_signal`,
     caseId: item.id,
-    fileName: `${item.caseNo}-every-angle-extract.pdf`,
+    fileName: `${item.caseNo}-signal-extract.pdf`,
     kind: "PDF",
     sizeBytes: 132_664,
     uploadedById: "system",
-    uploadedByName: "Every Angle",
+    uploadedByName: "Enterprise Data Platform",
     uploadedAt: item.openedAt,
     description: `Signal extract for ${
       DETECTION_RULE[item.exceptionType].id
@@ -928,9 +928,9 @@ export function buildTimeline(
     kind: "DETECTED",
     at: item.lastDetectedAt < item.openedAt ? item.lastDetectedAt : item.openedAt,
     actorId: null,
-    actorName: "Every Angle",
+    actorName: "Enterprise Data Platform",
     actorRole: null,
-    title: "Every Angle detected the exception",
+    title: "Enterprise Data Platform detected the exception",
     detail: `${info.detectionRuleId} · ${info.detectionRuleName} evaluated true against the ${item.plantCode} dataset.`,
     facts: [
       { label: "Signal", value: info.signalRef },

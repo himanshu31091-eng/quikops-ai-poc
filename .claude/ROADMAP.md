@@ -342,8 +342,8 @@ report composition needs care to avoid duplicating Analytics.
 ### 2. Connector Health · `/system/connectors` — ✅ COMPLETE 2026-08-06
 
 **Purpose**
-The Every Angle integration story, made inspectable. The whole product
-positioning rests on "Every Angle detects, QuikOps executes" — this is the
+The enterprise data integration story, made inspectable. The whole product
+positioning rests on "the data platform detects, QuikOps executes" — this is the
 screen that proves the first half is real and monitored.
 
 **Key features**
@@ -352,7 +352,7 @@ screen that proves the first half is real and monitored.
 - Run history timeline per connector with duration and row counts
 - Signal ingestion funnel: received → deduplicated → cases raised → rejected
 - Dead-letter queue with failure reason and **replay** action
-- Field-mapping view (Every Angle field → QuikOps field)
+- Field-mapping view (source platform field → QuikOps field)
 - Health trend sparkline per connector
 
 **Architecture**
@@ -377,8 +377,8 @@ workflow event.
 **Data sources**
 `ConnectorStatus` **already exists** in `src/domain/types.ts:66`. Everything
 else is new fixture. Signal refs already appear on cases
-(`information.signalRef`, e.g. `EA-2026-08-02-MX-004182`) and detection rule IDs
-(`EA-R-VD-002`) — **seed the connector data so those existing references
+(`information.signalRef`, e.g. `SIG-2026-08-02-MX-004182`) and detection rule IDs
+(`RULE-VD-002`) — **seed the connector data so those existing references
 resolve**, or the two screens will contradict each other.
 
 **Dependencies**

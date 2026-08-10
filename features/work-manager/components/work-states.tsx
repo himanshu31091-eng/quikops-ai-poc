@@ -40,7 +40,7 @@ export function NoDataState({ onCreate }: { onCreate: () => void }) {
     <EmptyState
       icon="Inbox"
       title="No operational cases yet"
-      description="Nothing has been ingested from Every Angle and no case has been raised by hand. Cases appear here automatically as soon as the next connector run completes."
+      description="Nothing has been ingested from the connected enterprise data platform and no case has been raised by hand. Cases appear here automatically as soon as the next connector run completes."
       action={
         <div className="flex items-center gap-2">
           <Button variant="primary" size="md" onClick={onCreate}>

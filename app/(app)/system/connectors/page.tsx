@@ -5,7 +5,7 @@ import { ConnectorHealthView } from "@/features/connector-health/components/conn
 export const metadata = {
   title: "Connector Health",
   description:
-    "Every Angle ingestion status, run history, deduplication counts and dead-letter replay for failed signals.",
+    "Enterprise data ingestion status, run history, deduplication counts and dead-letter replay for failed signals.",
 };
 
 /**

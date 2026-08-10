@@ -4,30 +4,19 @@ import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { ROLE_META } from "@/src/config/app-config";
+import { AUDIT_SOURCE_LABEL, ROLE_META } from "@/src/config/app-config";
 import type { CaseAuditEntry } from "@/src/domain/types";
 import { formatTimestamp } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 import { recentClass, SectionEmpty } from "./primitives";
 
-const SOURCE_META: Record<CaseAuditEntry["source"], { label: string; className: string }> = {
-  EVERY_ANGLE: {
-    label: "Every Angle",
-    className: "border-accent-line bg-accent-subtle text-accent-content",
-  },
-  RULE_ENGINE: {
-    label: "Rule engine",
-    className: "border-status-verify-line bg-status-verify-subtle text-status-verify",
-  },
-  WORK_MANAGER: {
-    label: "Work Manager",
-    className: "border-line bg-surface-hover text-content-secondary",
-  },
-  CASE_DETAIL: {
-    label: "Case detail",
-    className: "border-line bg-surface-hover text-content-secondary",
-  },
-  API: { label: "API", className: "border-line bg-surface-hover text-content-secondary" },
+/** Tone only — the labels are the shared ones in `AUDIT_SOURCE_LABEL`. */
+const SOURCE_TONE: Record<CaseAuditEntry["source"], string> = {
+  EVERY_ANGLE: "border-accent-line bg-accent-subtle text-accent-content",
+  RULE_ENGINE: "border-status-verify-line bg-status-verify-subtle text-status-verify",
+  WORK_MANAGER: "border-line bg-surface-hover text-content-secondary",
+  CASE_DETAIL: "border-line bg-surface-hover text-content-secondary",
+  API: "border-line bg-surface-hover text-content-secondary",
 };
 
 const PAGE_SIZE = 12;
@@ -57,7 +46,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
 
   const sources = React.useMemo(() => {
     const present = new Set(entries.map((entry) => entry.source));
-    return (Object.keys(SOURCE_META) as CaseAuditEntry["source"][]).filter((key) =>
+    return (Object.keys(SOURCE_TONE) as CaseAuditEntry["source"][]).filter((key) =>
       present.has(key),
     );
   }, [entries]);
@@ -100,7 +89,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
                   : "text-content-tertiary hover:text-content",
               )}
             >
-              {SOURCE_META[key].label}
+              {AUDIT_SOURCE_LABEL[key]}
             </button>
           ))}
         </div>
@@ -185,10 +174,10 @@ export const AuditLogCard = React.memo(function AuditLogCard({
                       <span
                         className={cn(
                           "inline-flex rounded-sm border px-1.5 py-px text-2xs font-medium",
-                          SOURCE_META[entry.source].className,
+                          SOURCE_TONE[entry.source],
                         )}
                       >
-                        {SOURCE_META[entry.source].label}
+                        {AUDIT_SOURCE_LABEL[entry.source]}
                       </span>
                     </td>
                   </tr>

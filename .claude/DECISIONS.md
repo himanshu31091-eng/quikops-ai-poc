@@ -483,7 +483,7 @@ across 19, and a stored 86.4% adherence sat beside a tile counting nine live
 breaches.
 
 **Deliberately not derived:** OTIF, inventory days and schedule adherence are
-Every Angle measurements over its own window — reading them is correct,
+enterprise data platform measurements over its own window — reading them is correct,
 recomputing them would be inventing numbers. Period-over-period deltas need a
 prior period the snapshot does not contain, so they stay stored and are
 labelled as stored at their definition.
@@ -527,7 +527,7 @@ FNV-1a plus the murmur3 finalizer.
 ### D-51 — Connector throughput is derived from the case corpus
 `src/data/fixtures/connectors.ts` · `src/data/queries/connectors.ts`
 
-The Every Angle signal connector reports exactly as many raised cases as there
+The data platform signal connector reports exactly as many raised cases as there
 are cases with `detectedBy: "EVERY_ANGLE"` (17); the playbook monitor reports
 the `PLAYBOOK_MONITOR` ones (6). Manual cases belong to no connector.
 
@@ -1140,6 +1140,40 @@ every step of every tour at two viewport widths and asserts that the advance
 button is inside the viewport *and* is the topmost element at its own centre —
 66 step renders, all passing. A feature that can be entered but not completed
 is worse than one that is absent, because it fails in front of the client.
+
+### D-89 — The upstream analytics vendor is never named in the product
+`src/config/app-config.ts` · `src/help/content.ts` · `src/ai/prompts/business-context.ts` · fixtures
+
+Client feedback after the POC review: remove all visible references to the
+upstream analytics vendor and keep QuikOps AI vendor-neutral. Every
+customer-visible string now says **enterprise data platform**, **connected
+enterprise data**, or simply **detected** — 45 strings across UI copy, help
+content, the guided tour, notifications, exports and the Copilot's business
+context.
+
+**The internal enum key `EVERY_ANGLE` was kept.** It is an identifier, not
+copy: renaming it would touch the 17 fixture cases, the connector reconciliation
+in D-51, the audit source union and the Work Manager deep-link contract
+(`/work?detected=EVERY_ANGLE`) for no user-visible gain.
+
+**What that exposed, and is the reason this is a decision.** Four screens
+rendered the enum key *directly* as display text via
+`source.replace(/_/g, " ").toLowerCase()` — the Audit Log badge, its filter
+options and chips, its CSV export, the Action Center drawer and the case export.
+Those printed "every angle" to the user without the string ever appearing in the
+source. **De-underscoring an identifier is not a label.** Display text now comes
+from `AUDIT_SOURCE_LABEL` in `src/config/app-config.ts`, the single definition,
+which `features/case-detail/components/audit-log-card.tsx` also consumes — its
+local map keeps only the tone classes, which differ from the Audit Log's by
+design and were left alone.
+
+Signal refs (`EA-` → `SIG-`) and detection rule IDs (`EA-R-` → `RULE-`) were
+re-prefixed too. They are shown on Case Detail and Connector Health, and an
+orphan "EA" beside a renamed connector is the one tell a reader would still spot.
+
+`BUSINESS_CONTEXT` is a frozen prompt layer and changing it invalidates the
+cached prefix once. It stays free of interpolation, so caching re-establishes on
+the next call — the freeze protects the *shape*, not the words.
 
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file

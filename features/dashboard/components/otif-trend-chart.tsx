@@ -57,7 +57,7 @@ function renderTooltip(
           swatch: gap < 0 ? "var(--color-critical)" : "var(--color-success)",
         },
       ]}
-      footnote="Source: Every Angle · daily refresh"
+      footnote="Source: Connected Enterprise Data · daily refresh"
     />
   );
 }

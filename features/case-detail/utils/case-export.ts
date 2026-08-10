@@ -1,5 +1,10 @@
 import { format } from "date-fns";
-import { CASE_STATUS_META, PRIORITY_META } from "@/src/config/app-config";
+import {
+  AUDIT_SOURCE_LABEL,
+  CASE_STATUS_META,
+  DETECTION_SOURCE_META,
+  PRIORITY_META,
+} from "@/src/config/app-config";
 import type { CaseDetailModel } from "@/src/data/queries/case-detail";
 import { formatMoney } from "@/src/lib/format";
 import type { CaseSessionState } from "../types";
@@ -36,7 +41,7 @@ export function buildCaseMarkdown(
   lines.push(
     `**Revenue at risk** ${formatMoney(item.revenueAtRisk, item.currency)} · **Category** ${
       detail.exceptionLabel
-    } · **Detected by** ${item.detectedBy.replace(/_/g, " ").toLowerCase()}`,
+    } · **Detected by** ${DETECTION_SOURCE_META[item.detectedBy].label}`,
   );
   lines.push("");
 
@@ -152,7 +157,7 @@ export function buildCaseMarkdown(
     lines.push(
       `- ${stamp(entry.at)} · ${entry.actorName} · ${entry.action}${
         entry.field ? ` (${entry.field}: ${entry.fromValue ?? "—"} → ${entry.toValue ?? "—"})` : ""
-      } · ${entry.source.replace(/_/g, " ").toLowerCase()}`,
+      } · ${AUDIT_SOURCE_LABEL[entry.source].toLowerCase()}`,
     );
   }
 

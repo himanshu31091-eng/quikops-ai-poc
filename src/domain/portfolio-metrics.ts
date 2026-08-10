@@ -16,7 +16,7 @@ import type { ExecutionMetrics, OperationalCase, PriorityBand } from "./types";
  * Everything measurable from a case is computed here and nowhere else.
  *
  * What is deliberately *not* derived:
- *   - OTIF, inventory days and schedule adherence are measured by Every Angle
+ *   - OTIF, inventory days and schedule adherence are measured by the platform
  *     over its own window. QuikOps reads them; it does not recompute them.
  *   - Period-over-period deltas need a prior period. The corpus is a single
  *     snapshot, so deltas remain stored historical comparisons and are labelled

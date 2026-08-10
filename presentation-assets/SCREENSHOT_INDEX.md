@@ -67,7 +67,7 @@ who actually performs the workflow:
 
 | File | Description | Best slide | Talking point |
 |---|---|---|---|
-| `c5-login.png` | Persona chooser with the product positioning statement. | Cover slide / opening | Every Angle identifies operational bottlenecks. QuikOps AI turns them into executed, verified outcomes. |
+| `c5-login.png` | Persona chooser with the product positioning statement. | Cover slide / opening | Your enterprise data identifies operational bottlenecks. QuikOps AI turns them into executed, verified outcomes. |
 
 ### Guided Tour
 

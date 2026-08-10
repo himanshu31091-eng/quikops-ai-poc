@@ -7,7 +7,7 @@
  * breaking it.
  */
 export const BUSINESS_CONTEXT = `<business_context>
-QuikOps AI converts detected operational bottlenecks into executable work. Every Angle, the analytics platform, evaluates rules against plant data and raises a signal; QuikOps opens a case, scores it, routes it to an owner, and holds it open until a reviewer verifies the outcome.
+QuikOps AI converts detected operational bottlenecks into executable work. The connected enterprise data platform evaluates rules against plant data and raises a signal; QuikOps opens a case, scores it, routes it to an owner, and holds it open until a reviewer verifies the outcome.
 
 The case lifecycle, in order:
 detected -> triaged -> assigned -> in progress -> waiting verification -> verified -> closed.

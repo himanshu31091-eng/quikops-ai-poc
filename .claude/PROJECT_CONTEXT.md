@@ -13,17 +13,24 @@ presentation), implemented to production standards rather than as a mockup.
 
 The product's positioning, stated on the login screen in the codebase:
 
-> Every Angle identifies operational bottlenecks. QuikOps AI turns them into
-> executed, verified outcomes.
+> Your enterprise data identifies operational bottlenecks. QuikOps AI turns them
+> into executed, verified outcomes.
 
-**Every Angle** is the upstream analytics platform (a real, separate product).
-It evaluates rules against plant data and raises signals. QuikOps AI is the
+The **enterprise data platform** is the upstream analytics system. It evaluates
+rules against plant data and raises signals. QuikOps AI is the
 **execution layer** that sits after it: a signal becomes a case, the case gets
 scored, owned, worked, evidenced and independently verified, and only then does
 its revenue exposure count as recovered.
 
 The gap the product claims to close: analytics tells you a problem exists;
 nothing owns it, tracks it to closure, or proves the fix held.
+
+**The upstream platform is never named.** Customer feedback asked for
+vendor neutrality, so no screen, export, prompt or notification identifies a
+specific analytics vendor — see D-67. Copy says *enterprise data platform*,
+*connected enterprise data* or simply *detected*. The internal enum key stays
+`EVERY_ANGLE` because renaming it would rewrite the fixture corpus for no
+user-visible gain; it is never rendered directly.
 
 - Vendor: **MoreYeahs** (`APP.vendor` in `src/config/app-config.ts`)
 - Product name / tagline: **QuikOps AI — Operational Execution Platform**
@@ -88,7 +95,7 @@ Querétaro), Thomas Berger (Senior Production Planner, DE01), Aisha Okonkwo
 adherence, verification pass rate, recurrence, plant rollups and the dashboard's
 AI summary. Nothing is asserted separately, so no two screens can disagree
 (D-48). The exceptions are OTIF, inventory days and schedule adherence, which
-are Every Angle measurements, and quarter-on-quarter deltas, which need a prior
+are enterprise data platform measurements, and quarter-on-quarter deltas, which need a prior
 period the snapshot does not contain.
 
 ---
@@ -208,7 +215,7 @@ somewhere to go.
 | Real | Seeded / simulated |
 |---|---|
 | Anthropic Claude API integration (live, streaming) | All operational data — no database |
-| Priority scoring, health scoring, SLA maths | The Every Angle connector (no ingestion runs) |
+| Priority scoring, health scoring, SLA maths | The signal connector (no ingestion runs) |
 | Filtering, sorting, virtualisation, export | Authentication (cookie-based persona switch) |
 | Cross-module state propagation | Persistence — all mutations are session-scoped |
 

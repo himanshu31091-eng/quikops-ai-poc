@@ -35,7 +35,7 @@ by a second person before any value is claimed.
 
 ### Elevator pitch
 
-> Every Angle identifies operational bottlenecks.
+> Your enterprise data identifies operational bottlenecks.
 > **QuikOps AI turns them into executed, verified outcomes.**
 
 A detected signal becomes a case. The case is scored, owned, worked, evidenced
@@ -119,8 +119,8 @@ There are three layers in a manufacturing operations stack, and most
 organisations own two of them:
 
 1. **Systems of record** — SAP, Oracle, Dynamics. What is true.
-2. **Analytics and detection** — Every Angle, Power BI, custom reporting. What
-   is wrong.
+2. **Analytics and detection** — the enterprise data platform, Power BI, custom
+   reporting. What is wrong.
 3. **Execution** — *usually absent.* Who owns it, what was done, did it work.
 
 QuikOps AI is layer three. It consumes layer two and never replaces layer one.
@@ -172,7 +172,7 @@ commercially: nobody has to rip anything out to buy it.
 | **SAP S/4HANA** | Orders, demand, master data, the transactional truth | Ownership, execution state, verification and a case history the ERP has no place for |
 | **Oracle Fusion Cloud SCM** | Work orders, on-hand balances, goods movements | The same execution layer over a second ERP, normalised into one case shape |
 | **Microsoft Dynamics** | Same category as above | Same — the ingestion layer normalises rather than assuming a single source |
-| **Every Angle** | Evaluates the operational rule set and raises signals | Turns a signal into an owned, worked, verified outcome instead of a report line |
+| **Enterprise data platform** | Evaluates the operational rule set and raises signals | Turns a signal into an owned, worked, verified outcome instead of a report line |
 
 **The multi-ERP point is worth making in any technical conversation.** The
 demo estate runs SAP at the European and US sites and Oracle at the Mexican and
@@ -473,10 +473,10 @@ the definitions and the UI exist, the mail transport does not.)*
 failed.
 
 **Business value.** The screen a technical evaluator asks for. It is also the
-evidence that the case corpus is real: the Every Angle connector reports exactly
+evidence that the case corpus is real: the signal connector reports exactly
 as many raised cases as there are cases marked as detected by it.
 
-**Key features.** Seven connectors — Every Angle signals, Every Angle KPI
+**Key features.** Seven connectors — data platform signals, data platform KPI
 snapshots, playbook recurrence monitor, **SAP master data**, **SAP orders and
 demand**, **Oracle SCM plant operations**, notification gateway · health score
 and band per connector with drivers · run history (18 runs each, deterministic)
@@ -496,7 +496,7 @@ technical buyers notice.
 **Purpose.** An append-only record of every state change across every case.
 
 **Key features.** Timeline of entries with actor, entity, action, field-level
-from/to · **source attribution** (Every Angle, rule engine, case detail, work
+from/to · **source attribution** (data platform, rule engine, case detail, work
 manager, API) · user activity and AI activity · search · filters · four KPI
 tiles · CSV export · deep links to the case.
 
@@ -710,7 +710,7 @@ present and deliberately disabled.
 
 | KPI | Definition | Calculation | Why it matters |
 |---|---|---|---|
-| **On-time in full (OTIF)** | Share of orders delivered complete and on time | **Read from Every Angle, never recomputed** | The number the customer experiences. Measured against a 95% target. |
+| **On-time in full (OTIF)** | Share of orders delivered complete and on time | **Read from connected enterprise data, never recomputed** | The number the customer experiences. Measured against a 95% target. |
 | **Revenue at risk** | Value of confirmed demand that cannot be served if open conditions are not cleared | Sum of exposure across open cases | Exposure, **not a loss already taken**. This distinction matters in an executive conversation. |
 | **Open critical cases** | Cases scoring 75 or above on the priority rule set | Count of open cases in the critical band | The agreed order of work, not an opinion about it. |
 | **SLA breaches** | Open cases past their band's resolution target | Compared against band targets | Where execution is failing, as distinct from where risk is high. |
@@ -944,7 +944,7 @@ issues. **Use this case in every demo.**
 
 ### Integration estate
 
-**7 connectors** — Every Angle signals and KPI snapshots, playbook recurrence
+**7 connectors** — data platform signals and KPI snapshots, playbook recurrence
 monitor, SAP master data, SAP orders and demand, Oracle SCM plant operations,
 notification gateway. Each with 18 runs of deterministic history, a dead-letter
 queue and field mappings.

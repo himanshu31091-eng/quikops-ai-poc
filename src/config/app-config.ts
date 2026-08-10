@@ -1,5 +1,6 @@
 import type {
   ActionStatus,
+  CaseAuditEntry,
   CaseStatus,
   DetectionSource,
   ExceptionType,
@@ -256,10 +257,10 @@ export const DETECTION_SOURCE_META: Record<
   { label: string; shortLabel: string; icon: string; description: string }
 > = {
   EVERY_ANGLE: {
-    label: "Every Angle",
-    shortLabel: "Every Angle",
+    label: "Enterprise Data Platform",
+    shortLabel: "Data Platform",
     icon: "PlugZap",
-    description: "Raised automatically from an Every Angle signal",
+    description: "Raised automatically from an enterprise data platform signal",
   },
   PLAYBOOK_MONITOR: {
     label: "Playbook monitor",
@@ -273,6 +274,19 @@ export const DETECTION_SOURCE_META: Record<
     icon: "UserCog",
     description: "Opened by hand from the plant floor or a review meeting",
   },
+};
+
+/**
+ * What a user reads where an audit entry's source is shown. The enum keys are
+ * internal identifiers; deriving display text from them by de-underscoring
+ * leaked the upstream vendor's name into the Audit Log and its exports.
+ */
+export const AUDIT_SOURCE_LABEL: Record<CaseAuditEntry["source"], string> = {
+  EVERY_ANGLE: "Data platform",
+  RULE_ENGINE: "Rule engine",
+  WORK_MANAGER: "Work Manager",
+  CASE_DETAIL: "Case detail",
+  API: "API",
 };
 
 export const ACTION_STATUS_META: Record<ActionStatus, TokenSet> = {

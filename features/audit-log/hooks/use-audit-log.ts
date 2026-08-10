@@ -5,7 +5,8 @@ import type { FilterOption } from "@/components/patterns/filter-menu";
 import type { ToolbarChip } from "@/components/patterns/module-toolbar";
 import type { KpiTileModel } from "@/components/patterns/kpi-tile";
 import type { AuditEntryRow, AuditLogData } from "@/src/data/queries/audit";
-import { ROLE_META } from "@/src/config/app-config";
+import { AUDIT_SOURCE_LABEL, ROLE_META } from "@/src/config/app-config";
+import type { CaseAuditEntry } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { exportTableCsv, type CsvColumn } from "@/src/lib/export";
 import { useTableState } from "@/src/hooks/use-table-state";
@@ -52,7 +53,7 @@ const CSV_COLUMNS: CsvColumn<AuditEntryRow>[] = [
   { header: "Field", value: (row) => row.field ?? "" },
   { header: "From", value: (row) => row.fromValue ?? "" },
   { header: "To", value: (row) => row.toValue ?? "" },
-  { header: "Source", value: (row) => row.source },
+  { header: "Source", value: (row) => AUDIT_SOURCE_LABEL[row.source] },
 ];
 
 export function useAuditLog(data: AuditLogData) {
@@ -151,7 +152,7 @@ export function useAuditLog(data: AuditLogData) {
       })),
       sources: sources.map<FilterOption>((source) => ({
         value: source,
-        label: source.replace(/_/g, " ").toLowerCase(),
+        label: AUDIT_SOURCE_LABEL[source].toLowerCase(),
         count: count((entry) => entry.source === source),
       })),
       actions: data.actions.map<FilterOption>((action) => ({
@@ -224,7 +225,11 @@ export function useAuditLog(data: AuditLogData) {
     }
     for (const value of filters.actors) out.push({ id: `actors:${value}`, group: "Actor", label: value });
     for (const value of filters.sources) {
-      out.push({ id: `sources:${value}`, group: "Source", label: value.replace(/_/g, " ").toLowerCase() });
+      out.push({
+        id: `sources:${value}`,
+        group: "Source",
+        label: (AUDIT_SOURCE_LABEL[value as CaseAuditEntry["source"]] ?? value).toLowerCase(),
+      });
     }
     for (const value of filters.actions) out.push({ id: `actions:${value}`, group: "Action", label: value });
     for (const value of filters.plants) {

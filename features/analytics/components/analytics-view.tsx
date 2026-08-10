@@ -108,7 +108,8 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
             className="h-full"
             footer={
               <p className="text-2xs text-content-tertiary">
-                Read from Every Angle over the selected window and never recomputed here.
+                Read from connected operational data over the selected window and never
+                recomputed here.
               </p>
             }
           >
@@ -118,7 +119,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
               label="On-time in full"
               target={{ value: OTIF_TARGET_PCT, label: "Target 95%" }}
               emptyMessage="No OTIF readings in the selected window."
-              footnote="Source: Every Angle · daily refresh"
+              footnote="Source: Connected Enterprise Data · daily refresh"
             />
           </SectionCard>
         </div>

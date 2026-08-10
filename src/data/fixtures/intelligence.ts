@@ -168,7 +168,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
     actorRole: null,
     caseNo: "QO-2026-004182",
     summary:
-      "Every Angle detected vendor delay for RM-4471 at MX01 — third detection, appended to existing case",
+      "Enterprise Data Platform detected vendor delay for RM-4471 at MX01 — third detection, appended to existing case",
     at: ago(2 * HOUR_MS + 57 * MINUTE_MS),
   },
   {
@@ -177,7 +177,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
     actorName: null,
     actorRole: null,
     caseNo: "QO-2026-004168",
-    summary: "Case opened automatically from Every Angle signal EA-2026-08-05-US-000204",
+    summary: "Case opened automatically from enterprise data platform signal SIG-2026-08-05-US-000204",
     at: ago(3 * HOUR_MS + 12 * MINUTE_MS),
   },
   {
@@ -267,7 +267,8 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
     actorName: null,
     actorRole: null,
     caseNo: null,
-    summary: "Every Angle scheduled run completed — 34 signals received, 9 new cases, 25 deduplicated",
+    summary:
+      "Enterprise Data Platform scheduled run completed — 34 signals received, 9 new cases, 25 deduplicated",
     at: ago(27 * HOUR_MS + 3 * MINUTE_MS),
   },
 ];
@@ -396,7 +397,7 @@ export const NOTIFICATIONS = [
   },
   {
     id: "ntf_4",
-    title: "Every Angle run completed",
+    title: "Enterprise Data Platform run completed",
     body: "34 signals received · 9 cases created · 25 deduplicated",
     at: ago(27 * HOUR_MS + 3 * MINUTE_MS),
     unread: false,

@@ -283,7 +283,7 @@ const ADMIN_STEPS: TourStep[] = [
     id: "admin-connectors-nav",
     anchor: "nav-connectors",
     title: "Where the cases come from",
-    body: "Seven feeds — Every Angle signals and KPI snapshots, the recurrence monitor, SAP master data and orders, Oracle SCM, and the outbound notification gateway.",
+    body: "Seven feeds — enterprise data platform signals and KPI snapshots, the recurrence monitor, SAP master data and orders, Oracle SCM, and the outbound notification gateway.",
     route: "/system/connectors",
     placement: "right",
     whenHidden: NAV_HIDDEN,

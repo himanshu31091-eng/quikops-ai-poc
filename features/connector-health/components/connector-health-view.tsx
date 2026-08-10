@@ -114,7 +114,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
       <PageHeader
         docKey="connectors"
         title="Connector Health"
-        description="Every Angle ingestion status, run history, deduplication and dead-letter replay — the integration layer that turns signals into cases."
+        description="Enterprise data ingestion status, run history, deduplication and dead-letter replay — the integration layer that turns signals into cases."
         meta={
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">

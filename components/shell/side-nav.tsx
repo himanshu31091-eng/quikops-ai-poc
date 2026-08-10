@@ -155,7 +155,7 @@ export function SideNav({ role, badges, onNavigate }: SideNavProps) {
           <div className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-success" />
             <p className="text-2xs font-medium text-content-secondary">
-              Every Angle connected
+              Enterprise Data Platform connected
             </p>
           </div>
           <p className="mt-1 text-2xs leading-4 text-content-tertiary">
