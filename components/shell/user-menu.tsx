@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ROLE_META } from "@/src/config/app-config";
 import type { User } from "@/src/domain/types";
-import { switchPersona } from "@/src/auth/session-actions";
+import { signOut, switchPersona } from "@/src/auth/session-actions";
 import { initials } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
 
@@ -100,11 +100,17 @@ export function UserMenu({ user, personas }: UserMenuProps) {
         ))}
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <a href="/login">
-            <Icon name="LogOut" />
-            Sign out
-          </a>
+        {/* Clearing the cookie is the sign-out — a link to /login left the
+            previous session intact behind the chooser. */}
+        <DropdownMenuItem
+          onSelect={() =>
+            startTransition(async () => {
+              await signOut();
+            })
+          }
+        >
+          <Icon name="LogOut" />
+          Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

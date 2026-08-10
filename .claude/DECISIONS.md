@@ -1175,6 +1175,55 @@ orphan "EA" beside a renamed connector is the one tell a reader would still spot
 cached prefix once. It stays free of interpolation, so caching re-establishes on
 the next call — the freeze protects the *shape*, not the words.
 
+### D-90 — Sign-in redirects; sign-out clears; one guard for the whole tree
+`src/auth/session.ts` · `src/auth/session-actions.ts` · `src/config/app-config.ts` ·
+`app/page.tsx` · `app/(app)/layout.tsx` · `components/shell/persona-sign-in.tsx` ·
+`components/shell/user-menu.tsx`
+
+**The bug.** The login screen called `switchPersona`, which writes the cookie and
+revalidates — and nothing else. The server action succeeded, the session was
+real, and the browser stayed on `/login`. Sign-out was a plain
+`<a href="/login">`: it navigated but cleared nothing. Together those produced
+the reported symptom — after signing out, a persona card looked dead, because the
+only thing a click changed was a cookie the user could not see.
+
+**The decision.** Keep the fixture-based cookie mechanism exactly as it is and
+give it the three verbs it was missing, all in `session-actions.ts`:
+
+- `signInAsPersona` — write, then **redirect**. Sign-in ends somewhere.
+- `switchPersona` — write, stay. The in-demo role switch is unchanged; the
+  presenter changes who they are without leaving the screen.
+- `signOut` — delete, then redirect. Sign-out clears.
+
+No second authentication path was introduced, and the persona chooser is still
+the only way to get a session.
+
+**Why a landing table.** Sending every role to `/dashboard` makes sign-in a lie
+for three of the four personas. `ROLE_LANDING` in `src/config/app-config.ts` is
+the single role→route map, and every route in it is a `NAVIGATION` href the role
+can already reach — so it decides *which* screen a role opens with, never *what*
+a role can see. `ANALYST` shares the manager's landing: an analyst investigates
+from the same queue.
+
+**Why the layout guard.** Deleting the cookie is only half a sign-out while
+`getSessionUser()` silently falls back to the default persona — a back button
+would re-render Elena's dashboard for someone who had just signed out. The
+authenticated tree now has exactly one guard, in `app/(app)/layout.tsx`, reading
+the new `getActiveSessionUser()`. The fallback stays for the screens' benefit —
+their `User` is still non-nullable — but the guard makes it unreachable. `/` now
+resolves to the signed-in role's landing screen, or to `/login`.
+
+**Consequence, accepted:** "Skip to dashboard" became a button that signs in as
+the default persona rather than a link to `/dashboard`, which the guard would now
+bounce. Reaching the dashboard means holding a session; the link had been getting
+there without one.
+
+**Double-submit.** A sign-in redirects a beat after the click. All four cards
+disable for that beat, guarded by a ref rather than state, because two clicks can
+be dispatched before a re-render. A second click in that window would write a
+second cookie and race its own navigation — the one way a presenter lands in the
+wrong role in front of a client.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

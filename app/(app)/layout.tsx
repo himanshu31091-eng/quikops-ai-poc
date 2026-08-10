@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AppShell } from "@/components/shell/app-shell";
 import { TourInvitation, TourOverlay } from "@/components/tour/tour-overlay";
-import { getSessionUser } from "@/src/auth/session";
+import { getActiveSessionUser } from "@/src/auth/session";
 import { CASES } from "@/src/data/fixtures/cases";
 import { DEMO_PERSONAS, PLANTS, USER_BY_ID } from "@/src/data/fixtures/organisation";
 import { NOTIFICATIONS } from "@/src/data/fixtures/intelligence";
@@ -15,11 +16,13 @@ import { ExecutionProvider } from "@/src/workflow/execution-store";
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [user, badges, cookieStore] = await Promise.all([
-    getSessionUser(),
-    getNavBadgeCounts(),
-    cookies(),
-  ]);
+  // The one guard for the whole authenticated tree. Signing out clears the
+  // cookie, so a back-button return to a shell screen lands on the chooser
+  // instead of re-rendering the previous persona's work.
+  const user = await getActiveSessionUser();
+  if (!user) redirect("/login");
+
+  const [badges, cookieStore] = await Promise.all([getNavBadgeCounts(), cookies()]);
 
   const personas = DEMO_PERSONAS.map((id) => USER_BY_ID[id]!).filter(Boolean);
 

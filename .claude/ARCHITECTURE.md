@@ -436,8 +436,32 @@ cases behind it. Work Manager view state round-trips through the URL
 
 ## 10. Auth
 
-`src/auth/session.ts` reads a `qo_persona` cookie and returns a `User`.
-`session-actions.ts` is a server action that sets it and revalidates the layout.
+`src/auth/session.ts` reads the `qo_persona` cookie. Two readers, one cookie:
+
+| Function | Returns | Used by |
+|---|---|---|
+| `getActiveSessionUser()` | `User \| null` | route guards — `app/page.tsx`, `app/(app)/layout.tsx` |
+| `getSessionUser()` | `User` (falls back to the default persona) | screens |
+
+`session-actions.ts` holds the three writers, all `httpOnly` cookie writes
+followed by `revalidatePath("/", "layout")`:
+
+| Action | Behaviour |
+|---|---|
+| `signInAsPersona(userId)` | writes the session, then **redirects to `ROLE_LANDING[role]`** |
+| `switchPersona(userId)` | writes the session and stays on the current screen — the demo switcher |
+| `signOut()` | deletes the cookie, then redirects to `/login` |
+
+**The sign-in redirect is load-bearing.** Without it the cookie is set and the
+browser stays on `/login`, so the chooser looks dead while the session is real.
+
+`ROLE_LANDING` in `src/config/app-config.ts` is the only role→route table; every
+route in it is a `NAVIGATION` href the role can already reach.
+
+`app/(app)/layout.tsx` is the single guard for the authenticated tree: no valid
+cookie → `/login`. That is what makes `getSessionUser()`'s fallback unreachable
+from a screen, and what stops a back-button return after sign-out from
+re-rendering the previous persona's work.
 
 Production replaces this with an Entra ID OIDC session. Every consumer depends
 only on the returned `User`, so the swap is contained to those two files.

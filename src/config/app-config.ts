@@ -156,6 +156,22 @@ export const NAVIGATION: NavSection[] = [
   },
 ];
 
+/**
+ * Where a persona lands when they sign in.
+ *
+ * Every route here is a `NAVIGATION` href the role can already reach — this
+ * table only decides which of them the role opens the day with, so signing in
+ * as an owner does not drop them on an executive dashboard. `ANALYST` shares
+ * the manager's landing because an analyst investigates from the same queue.
+ */
+export const ROLE_LANDING: Record<UserRole, string> = {
+  EXECUTIVE: "/dashboard",
+  OPS_MANAGER: "/work",
+  TASK_OWNER: "/my-work",
+  ANALYST: "/work",
+  ADMINISTRATOR: "/admin",
+};
+
 /* ------------------------------------------------------------------- Labels */
 
 interface TokenSet {

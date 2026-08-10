@@ -150,7 +150,7 @@ Ordered by what would hurt first. None of it blocks the demo.
 | 6b | **Global search is hidden below `md`.** The ⌘K palette is keyboard-only, so a phone has no way to search. | S | Mobile is not the demo surface, but the top bar advertises a capability that is absent at that width. |
 | 6c | **Six modules hand-roll `<table>` markup** instead of using `DataTable`; three of them are frozen. | M | Sorting, pagination and `aria-sort` are re-implemented per module, so an improvement to the shared table does not reach them. |
 | 7 | **No persistence.** Only tour completion survives a reload. | L | Correct for a demo; the first thing a pilot would need. |
-| 8 | **No authentication or authorization.** Persona switching is a cookie write; role only filters navigation. | L | Blocks any deployment where the data is real. |
+| 8 | **No authentication or authorization.** Persona selection is a cookie write, and the `(app)` layout guard only checks that the cookie names a seeded user — it verifies nothing. Role filters navigation and the landing route; no route is authorized. | L | Blocks any deployment where the data is real. |
 
 ## Priority 3 — reference-parity capabilities (gap analysis 2026-08-07)
 

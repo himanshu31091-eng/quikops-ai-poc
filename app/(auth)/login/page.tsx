@@ -1,18 +1,23 @@
-import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { BrandMark } from "@/components/shell/brand-mark";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { switchPersona } from "@/src/auth/session-actions";
-import { APP, ROLE_META } from "@/src/config/app-config";
-import { DEMO_PERSONAS, USER_BY_ID } from "@/src/data/fixtures/organisation";
-import { initials } from "@/src/lib/format";
+import {
+  PersonaSignIn,
+  SkipToDefaultPersona,
+} from "@/components/shell/persona-sign-in";
+import { APP } from "@/src/config/app-config";
+import {
+  DEFAULT_SESSION_USER_ID,
+  DEMO_PERSONAS,
+  USER_BY_ID,
+} from "@/src/data/fixtures/organisation";
 
 /**
  * The sign-in screen.
  *
  * There is no authentication in this POC: choosing a persona writes the
- * session cookie through a server action. The screen exists because the demo
- * opens on it, and because persona is how role-based views are shown.
+ * session cookie through a server action, which then redirects to that role's
+ * landing screen. The screen exists because the demo opens on it, and because
+ * persona is how role-based views are shown.
  */
 export const metadata = { title: "Sign in" };
 
@@ -36,12 +41,6 @@ const VALUE_POINTS = [
 
 export default function LoginPage() {
   const personas = DEMO_PERSONAS.map((id) => USER_BY_ID[id]!).filter(Boolean);
-
-  async function signInAs(formData: FormData) {
-    "use server";
-    const userId = formData.get("userId");
-    if (typeof userId === "string") await switchPersona(userId);
-  }
 
   return (
     <div className="flex min-h-dvh">
@@ -133,44 +132,14 @@ export default function LoginPage() {
             <span className="h-px flex-1 bg-line" />
           </div>
 
-          <div className="space-y-2">
-            {personas.map((persona) => (
-              <form key={persona.id} action={signInAs}>
-                <input type="hidden" name="userId" value={persona.id} />
-                <button
-                  type="submit"
-                  className="group flex w-full items-center gap-3 rounded-md border border-line bg-surface px-3 py-2.5 text-left transition-colors duration-150 hover:border-accent-line hover:bg-accent-subtle"
-                >
-                  <Avatar className="size-8">
-                    <AvatarFallback>{initials(persona.name)}</AvatarFallback>
-                  </Avatar>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-content">
-                      {persona.name}
-                    </span>
-                    <span className="block truncate text-2xs text-content-tertiary">
-                      {persona.jobTitle}
-                    </span>
-                  </span>
-                  <span className="shrink-0 rounded-sm border border-line bg-surface-subtle px-1.5 py-0.5 text-2xs font-medium text-content-secondary">
-                    {ROLE_META[persona.role].short}
-                  </span>
-                  <Icon
-                    name="ArrowRight"
-                    size="sm"
-                    className="shrink-0 text-content-tertiary transition-colors duration-150 group-hover:text-accent"
-                  />
-                </button>
-              </form>
-            ))}
-          </div>
+          <PersonaSignIn personas={personas} />
 
           <p className="mt-7 text-2xs leading-relaxed text-content-tertiary">
             Persona selection exists for demonstration only and is removed from
             production builds. All data in this environment is synthetic.{" "}
-            <Link href="/dashboard" className="text-accent hover:underline">
+            <SkipToDefaultPersona userId={DEFAULT_SESSION_USER_ID}>
               Skip to dashboard
-            </Link>
+            </SkipToDefaultPersona>
           </p>
         </div>
       </main>
