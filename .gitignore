@@ -12,6 +12,10 @@ out/
 # Build
 *.tsbuildinfo
 
+# Packaged presentation assets. The PNGs themselves are tracked in
+# presentation-assets/; a zip of them is a distributable, not a source.
+presentation-assets-final.zip
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
