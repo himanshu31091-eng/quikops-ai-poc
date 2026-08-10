@@ -24,7 +24,14 @@ const SEGMENT_LABELS: Record<string, string> = {
   "my-work": "My Work",
 };
 
+/**
+ * A record identifier — a case number like `QO-2026-004144`. Its hyphens are
+ * part of the value, not word separators, so it must survive `toTitle` intact.
+ */
+const RECORD_ID = /^[A-Z]{2,}-\d[\d-]*$/;
+
 function toTitle(segment: string): string {
+  if (RECORD_ID.test(segment)) return segment;
   return (
     SEGMENT_LABELS[segment] ??
     segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
