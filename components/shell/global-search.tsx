@@ -101,7 +101,10 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search by case number, title, plant or material…"
-            className="h-11 flex-1 bg-transparent text-sm text-content outline-none placeholder:text-content-tertiary"
+            // An input carries an intrinsic min-width of about 20 characters,
+            // so without min-w-0 it refuses to shrink and pushes the ESC key
+            // out of the dialog at narrow widths.
+            className="h-11 min-w-0 flex-1 bg-transparent text-sm text-content outline-none placeholder:text-content-tertiary"
           />
           <kbd className="rounded border border-line bg-surface-subtle px-1.5 py-0.5 font-mono text-2xs text-content-tertiary">
             ESC
@@ -127,7 +130,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
                   onClick={close}
                   className="flex items-center gap-3 rounded-md px-2.5 py-2 transition-colors duration-150 hover:bg-surface-hover"
                 >
-                  <span className="font-mono text-2xs text-content-tertiary">
+                  <span className="shrink-0 font-mono text-2xs text-content-tertiary">
                     {result.caseNo}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm text-content">

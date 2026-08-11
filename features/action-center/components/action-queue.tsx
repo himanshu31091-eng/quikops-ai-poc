@@ -191,7 +191,7 @@ const ActionQueueRow = React.memo(function ActionQueueRow({
       <td className="px-3 py-2">
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-2xs font-medium",
+            "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-sm border px-1.5 py-0.5 text-2xs font-medium",
             sla.className,
           )}
         >

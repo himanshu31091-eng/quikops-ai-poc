@@ -45,8 +45,11 @@ const COLUMNS: ColumnSpec[] = [
   { key: "title", label: "Title", width: null, sortKey: "title" },
   { key: "plant", label: "Plant", width: 74, sortKey: "plant" },
   { key: "category", label: "Category", width: 132, sortKey: "category" },
-  { key: "priority", label: "Priority", width: 122, sortKey: "priority" },
-  { key: "status", label: "Status", width: 138, sortKey: "status" },
+  // Sized to the widest label each column can hold on one line — "Critical 78.5"
+  // and "Pending verification". At the previous 122/138 the status badge did not
+  // fit its cell and wrapped out of its own fixed height.
+  { key: "priority", label: "Priority", width: 130, sortKey: "priority" },
+  { key: "status", label: "Status", width: 158, sortKey: "status" },
   { key: "owner", label: "Owner", width: 140, sortKey: "owner" },
   { key: "revenue", label: "Revenue impact", width: 116, sortKey: "revenue", align: "right" },
   { key: "due", label: "Due date", width: 108, sortKey: "due" },

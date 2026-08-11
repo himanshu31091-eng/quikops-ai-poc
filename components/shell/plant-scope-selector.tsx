@@ -34,7 +34,8 @@ export function PlantScopeSelector({ plants }: { plants: Plant[] }) {
           className="flex h-8 items-center gap-2 rounded-md border border-line bg-surface px-2.5 text-sm text-content transition-colors duration-150 hover:border-line-strong hover:bg-surface-hover"
         >
           <Icon name="Factory" size="sm" className="text-content-tertiary" />
-          <span className="font-medium">
+          {/* Fixed-height trigger: "MX01 · Querétaro" must not wrap out of it. */}
+          <span className="whitespace-nowrap font-medium">
             {current ? `${current.code} · ${current.name}` : "All plants"}
           </span>
           <Icon name="ChevronsUpDown" size="xs" className="text-content-tertiary" />

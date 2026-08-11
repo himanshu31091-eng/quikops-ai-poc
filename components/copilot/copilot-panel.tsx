@@ -309,7 +309,7 @@ export function CopilotPanel({
               {copilot.messages.map((message) =>
                 message.role === "user" ? (
                   <li key={message.id} className="flex justify-end gap-2.5">
-                    <div className="max-w-[85%] rounded-lg rounded-br-sm border border-accent-line bg-accent-subtle px-3 py-2">
+                    <div className="max-w-[85%] break-words rounded-lg rounded-br-sm border border-accent-line bg-accent-subtle px-3 py-2">
                       <p className="text-xs leading-relaxed text-accent-content">
                         {message.content}
                       </p>
@@ -321,7 +321,13 @@ export function CopilotPanel({
                     <span className="flex size-6 shrink-0 items-center justify-center rounded-full border border-line bg-surface-subtle text-accent">
                       <Icon name="Sparkles" size="xs" />
                     </span>
-                    <div className="min-w-0 flex-1 rounded-lg rounded-bl-sm border border-line bg-surface px-3 py-2">
+                    {/*
+                      `min-w-0` lets the bubble shrink; `break-words` is what
+                      handles the thing a model can emit that a case title
+                      cannot — an unbroken token longer than the panel, which
+                      wraps at no space and would otherwise overflow it.
+                    */}
+                    <div className="min-w-0 flex-1 break-words rounded-lg rounded-bl-sm border border-line bg-surface px-3 py-2">
                       {message.content === "" && message.streaming ? (
                         <p className="flex items-center gap-1.5 text-xs text-content-tertiary">
                           <span className="flex gap-0.5">

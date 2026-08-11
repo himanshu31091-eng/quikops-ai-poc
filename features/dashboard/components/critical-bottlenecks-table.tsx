@@ -19,18 +19,27 @@ import { cn } from "@/src/lib/cn";
  * that moves between rows defeats that.
  */
 const HEADERS = [
-  { key: "case", label: "Case", className: "w-[40%]" },
-  { key: "plant", label: "Plant", className: "w-[8%]" },
-  { key: "priority", label: "Priority", className: "w-[12%]" },
-  { key: "status", label: "Status", className: "w-[14%]" },
-  { key: "owner", label: "Owner", className: "w-[14%]" },
+  // Percentages resolve against the table's min-width, so they are what decides
+  // whether a badge fits. At 14% of 760px the status cell offered 82px to a
+  // 132px "Pending verification" badge, which wrapped out of its fixed height.
+  { key: "case", label: "Case", className: "w-[33%]" },
+  { key: "plant", label: "Plant", className: "w-[7%]" },
+  { key: "priority", label: "Priority", className: "w-[15%]" },
+  { key: "status", label: "Status", className: "w-[18%]" },
+  { key: "owner", label: "Owner", className: "w-[15%]" },
   { key: "risk", label: "At risk", className: "w-[12%] text-right whitespace-nowrap" },
 ] as const;
 
 export function CriticalBottlenecksTable({ cases }: { cases: CaseListItem[] }) {
   return (
     <div className="w-full min-w-0 overflow-x-auto">
-      <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
+      {/*
+        Raised from 760px: the percentages above resolve against this, and at
+        760 the status and priority columns were narrower than the badges they
+        hold. The wrapper already scrolls horizontally below the minimum, so
+        this widens the scroll threshold rather than introducing scrolling.
+      */}
+      <table className="w-full min-w-[880px] table-fixed border-collapse text-left">
         <thead>
           <tr className="border-b border-line bg-surface-subtle">
             {HEADERS.map((header) => (

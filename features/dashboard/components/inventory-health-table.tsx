@@ -117,7 +117,8 @@ export function InventoryHealthTable({ rows }: { rows: InventoryHealthRow[] }) {
                 <td className="px-3 py-2.5">
                   <span
                     className={cn(
-                      "inline-flex h-[18px] items-center rounded-sm border px-1.5 text-2xs font-medium",
+                      // Fixed height, so the label cannot be allowed to wrap.
+                      "inline-flex h-[18px] shrink-0 items-center whitespace-nowrap rounded-sm border px-1.5 text-2xs font-medium",
                       status.className,
                     )}
                   >

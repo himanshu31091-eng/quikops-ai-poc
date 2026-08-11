@@ -36,18 +36,24 @@ export function UserMenu({ user, personas }: UserMenuProps) {
         <button
           type="button"
           className={cn(
-            "flex h-8 items-center gap-2 rounded-md pl-1 pr-2 transition-colors duration-150 hover:bg-surface-hover",
+            "flex h-8 max-w-[220px] items-center gap-2 rounded-md pl-1 pr-2 transition-colors duration-150 hover:bg-surface-hover",
             isPending && "opacity-60",
           )}
         >
           <Avatar className="size-6">
             <AvatarFallback>{initials(user.name)}</AvatarFallback>
           </Avatar>
-          <span className="hidden text-left lg:block">
-            <span className="block text-xs font-medium leading-3.5 text-content">
+          {/*
+            `min-w-0` is the whole fix. A flex child defaults to min-width:auto,
+            so this block refused to shrink below the width of "Marcus
+            Reinhardt" over "Operations Manager" and pushed the chevron out of
+            the header instead. Same shape as OwnerAvatar, which had it right.
+          */}
+          <span className="hidden min-w-0 text-left lg:block">
+            <span className="block truncate text-xs font-medium leading-3.5 text-content">
               {user.name}
             </span>
-            <span className="block text-2xs leading-3.5 text-content-tertiary">
+            <span className="block truncate text-2xs leading-3.5 text-content-tertiary">
               {ROLE_META[user.role].label}
             </span>
           </span>

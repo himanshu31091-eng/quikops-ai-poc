@@ -33,7 +33,9 @@ export function PriorityChip({
   const chip = (
     <span
       className={cn(
-        "anim-status inline-flex items-center gap-1.5 rounded-sm border font-medium",
+        // Same contract as StatusBadge: fixed height, so the band and its score
+        // must stay on one line whatever the column width.
+        "anim-status inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-sm border font-medium",
         size === "sm" ? "h-[18px] px-1.5 text-2xs" : "h-[22px] px-2 text-xs",
         meta.className,
         factors?.length ? "cursor-help hover:brightness-[0.97]" : "",
