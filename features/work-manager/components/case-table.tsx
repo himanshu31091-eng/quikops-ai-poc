@@ -43,7 +43,11 @@ const COLUMNS: ColumnSpec[] = [
   { key: "select", label: "", width: 40 },
   { key: "caseNo", label: "Case ID", width: 118, sortKey: "caseNo" },
   { key: "title", label: "Title", width: null, sortKey: "title" },
-  { key: "plant", label: "Plant", width: 74, sortKey: "plant" },
+  // Plant, age and revenue are sized to their content, which is a four-character
+  // code, "38d" and "$248,000". The 28px they give back is exactly what widening
+  // status and priority took, so the flexible Title column — the column a reader
+  // actually needs — is no narrower than before.
+  { key: "plant", label: "Plant", width: 60, sortKey: "plant" },
   { key: "category", label: "Category", width: 132, sortKey: "category" },
   // Sized to the widest label each column can hold on one line — "Critical 78.5"
   // and "Pending verification". At the previous 122/138 the status badge did not
@@ -51,9 +55,9 @@ const COLUMNS: ColumnSpec[] = [
   { key: "priority", label: "Priority", width: 130, sortKey: "priority" },
   { key: "status", label: "Status", width: 158, sortKey: "status" },
   { key: "owner", label: "Owner", width: 140, sortKey: "owner" },
-  { key: "revenue", label: "Revenue impact", width: 116, sortKey: "revenue", align: "right" },
+  { key: "revenue", label: "Revenue impact", width: 108, sortKey: "revenue", align: "right" },
   { key: "due", label: "Due date", width: 108, sortKey: "due" },
-  { key: "age", label: "Age", width: 58, sortKey: "age" },
+  { key: "age", label: "Age", width: 52, sortKey: "age" },
   { key: "detected", label: "Detected", width: 116, sortKey: "detected" },
   { key: "actions", label: "", width: 48, align: "right" },
 ];
@@ -139,7 +143,11 @@ export function CaseTable({
                       type="button"
                       onClick={() => onSort(column.sortKey!)}
                       className={cn(
-                        "inline-flex items-center gap-1 rounded-sm transition-colors duration-150 hover:text-content",
+                        // `items-start`, not `items-center`: "Revenue impact"
+                        // wraps to two lines in its column, and a centred sort
+                        // arrow floats in the gap beside it instead of reading
+                        // as part of the header. Identical for one-line labels.
+                        "inline-flex items-start gap-1 rounded-sm transition-colors duration-150 hover:text-content",
                         column.align === "right" ? "flex-row-reverse" : "",
                         isSorted ? "text-content" : "",
                       )}
