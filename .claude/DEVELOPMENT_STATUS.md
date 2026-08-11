@@ -224,33 +224,32 @@ Ordered by how likely they are to matter.
     but it does not generalise beyond the nine intents; anything else falls back
     to a grounded overview.
 
-### 4a. Data defects found 2026-08-06
+### 4a. Data defects found 2026-08-06 — ALL FIXED
 
-Found while gathering real numbers for `DEMO_SCRIPT.md`. All are **visible in
-the demo path** and none are fixed.
+Found while gathering real numbers for `DEMO_SCRIPT.md`. **All three were
+fixed in a later session; this section is kept as the record.** Re-verified
+against the source on 2026-08-11.
 
-**The seeded dashboard AI summary contradicts the computed data.**
-`EXECUTIVE_SUMMARY` in `src/data/fixtures/intelligence.ts` was written
-independently of `computePriority()` and has drifted:
+**The seeded dashboard AI summary contradicted the computed data.** It claimed
+two unassigned criticals at Querétaro, "11 of the 24 open cases" and 89.2% OTIF,
+against a computed reality of zero unassigned criticals, both criticals assigned
+at DE01, 19 open cases and 88.5%.
 
-| Summary claims | Computed reality |
-|---|---|
-| "Two critical cases at Querétaro are unassigned, together carrying $227,800" | Both criticals are at **DE01**, and **both are assigned**. Unassigned-critical count is **0**. |
-| "11 of the 24 open cases" | **19** cases are open (24 total, 5 terminal) |
-| "closed the week at 89.2%" | KPI band computes **88.5%** |
-| "largest single exposure … $180,000 at Querétaro" | Largest is **QO-2026-004176 · $224,500 · DE01** |
+**Fixed by derivation, not by rewriting the copy.** `EXECUTIVE_SUMMARY` in
+`src/data/fixtures/intelligence.ts` is now
+`buildPortfolioSummary()` — paragraphs, callouts and citations are all composed
+from the same corpus the KPI band reads, so the summary cannot drift from the
+tiles beneath it again. The callouts branch on the real counts (the
+unassigned-critical sentence only appears when there *are* unassigned criticals),
+and the cited cases are chosen by exposure, so the chips always point at the
+cases the paragraphs discuss.
 
-Fixing means rewriting the summary copy against the computed figures, or
-deriving the callouts. Either is a fixture change, not a component change.
+**Both cosmetic defects on the golden case `QO-2026-004182` are also fixed:**
 
-**Two cosmetic defects on the golden case `QO-2026-004182`:**
-
-- `buildComments` in `src/data/fixtures/case-detail.ts` renders **"the 3th
-  detection"** — naive ordinal suffixing.
-- `scoreCaseHealth` renders **"Past SLA: 0 days beyond the resolution target"**
-  when a case is hours rather than days past due (`Math.round(hours/24)` → 0).
-
-Both are one-line fixes and both qualify as bug fixes under the module freeze.
+- `ordinal()` in `src/data/fixtures/case-detail.ts` handles the 11–13 exception
+  and the 1/2/3 suffixes — "the 3th detection" now reads "the 3rd detection".
+- `formatOverrun()` in `src/domain/case-health.ts` reports hours below a day, so
+  a case hours past due no longer reads "0 days beyond the resolution target".
 
 ### 4b. Verified reference figures (2026-08-06)
 

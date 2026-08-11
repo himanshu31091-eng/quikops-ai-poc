@@ -95,6 +95,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
       <PageHeader
         title="My Work"
         description="Everything assigned to you, ordered by priority and due date."
+        docKey="my-work"
         meta={
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">

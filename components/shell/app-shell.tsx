@@ -5,6 +5,7 @@ import { Icon } from "@/components/patterns/icon";
 import type { Plant, User } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 import { Breadcrumbs } from "./breadcrumbs";
+import { DemoModeBadge } from "./demo-mode-badge";
 import { GlobalSearch, type SearchableCase } from "./global-search";
 import { NotificationTray, type NotificationModel } from "./notification-tray";
 import { PlantScopeSelector } from "./plant-scope-selector";
@@ -121,6 +122,7 @@ export function AppShell({
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <DemoModeBadge />
             <div className="hidden xl:block">
               <PlantScopeSelector plants={plants} />
             </div>

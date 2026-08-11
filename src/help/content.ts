@@ -307,6 +307,32 @@ export const SCREEN_DOCS: Record<string, ScreenDoc> = {
       { label: "Execution Analytics", href: "/analytics" },
     ],
   },
+  "my-work": {
+    moduleKey: "my-work",
+    title: "My Work",
+    purpose:
+      "The cases you personally own, ordered so the next thing to do is at the top.",
+    businessValue:
+      "Work Manager is the queue for the operation; this is the queue for one person. An owner who has to filter a portfolio to find their own cases will eventually stop looking.",
+    kpisExplained: [
+      { label: "Assigned to me", detail: "Open cases where you are the recorded owner. Ownership is assigned in Work Manager or on the case itself." },
+      { label: "Overdue", detail: "Your cases past the resolution target for their priority band." },
+      { label: "Awaiting my verification", detail: "Cases where you are the reviewer. You cannot verify work you submitted yourself." },
+    ],
+    workflow: [
+      "Read the overdue count first — those are already late.",
+      "Open a case to record corrective action and evidence.",
+      "Request verification once the work is done; a reviewer decides, not you.",
+    ],
+    bestPractices: [
+      "Ownership is not the same as verification. A case you own is a case someone else has to sign off.",
+      "If a case is not moving, escalate it rather than letting the SLA clock run.",
+    ],
+    relatedScreens: [
+      { label: "Work Manager", href: "/work" },
+      { label: "Action Center", href: "/actions" },
+    ],
+  },
   work: {
     moduleKey: "work",
     title: "Work Manager",

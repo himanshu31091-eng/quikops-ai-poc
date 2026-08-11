@@ -114,6 +114,22 @@ export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
     quick: true,
   },
   {
+    id: "otif-decline",
+    label: "Why is OTIF declining?",
+    prompt:
+      "Why is on-time-in-full declining? Work from the per-plant OTIF movement and the open cases behind it, and say which plants are carrying the decline.",
+    icon: "TrendingDown",
+    quick: true,
+  },
+  {
+    id: "recurrence",
+    label: "Which exceptions are recurring?",
+    prompt:
+      "Which conditions have been detected more than once, and what does that say about whether the previous corrective action held? Name the cases and their detection counts.",
+    icon: "History",
+    quick: false,
+  },
+  {
     id: "supplier-pattern",
     label: "Any supplier patterns?",
     prompt:
