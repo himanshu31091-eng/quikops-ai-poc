@@ -138,6 +138,22 @@ export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
     quick: true,
   },
   {
+    id: "overdue-actions",
+    label: "What actions are overdue?",
+    prompt:
+      "Which corrective actions are past their due date, who owns them, and which cases do they belong to? Say where the execution is stalling rather than just listing them.",
+    icon: "ListChecks",
+    quick: true,
+  },
+  {
+    id: "this-week",
+    label: "What changed this week?",
+    prompt:
+      "What moved in the last seven days — opened, verified, closed, and anything that passed its resolution target? Tell me whether the week was net positive.",
+    icon: "History",
+    quick: false,
+  },
+  {
     id: "board-brief",
     label: "Brief me for the board",
     prompt:

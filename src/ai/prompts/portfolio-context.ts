@@ -173,6 +173,50 @@ export function buildPortfolioContext(snapshot: PortfolioSnapshot): string {
     ].join("\n"),
   );
 
+  // Cases say what is wrong; actions say what is being done about it. Without
+  // this the assistant can describe a portfolio it cannot say is being worked.
+  const execution = snapshot.actionExecution;
+  sections.push(
+    [
+      "CORRECTIVE ACTION EXECUTION",
+      line("Open corrective actions", execution.openActions),
+      line("Overdue", execution.overdue),
+      line("Due today", execution.dueToday),
+      line("Blocked", execution.blocked),
+      ...(execution.overdueDetail.length > 0
+        ? [
+            "",
+            `Overdue actions, longest overdue first${
+              execution.overdue > execution.overdueDetail.length
+                ? ` (showing ${execution.overdueDetail.length} of ${execution.overdue})`
+                : ""
+            }:`,
+            ...execution.overdueDetail.map(
+              (action) =>
+                `- ${action.title} — ${action.caseNo} (${action.caseTitle}), ${action.plantCode}, ${action.priorityBand.toLowerCase()} priority, owner ${action.ownerName}, ${action.hoursOverdue}h overdue, ${action.completionPct}% complete`,
+            ),
+          ]
+        : ["", "No corrective action is past its due date."]),
+    ].join("\n"),
+  );
+
+  const movement = snapshot.recentMovement;
+  const movementLine = (label: string, cases: typeof movement.opened) =>
+    cases.length === 0
+      ? `${label}: none`
+      : `${label} (${cases.length}): ${cases
+          .map((item) => `${item.caseNo} — ${item.title} (${item.plantCode})`)
+          .join("; ")}`;
+
+  sections.push(
+    [
+      `RECENT MOVEMENT — the last ${movement.windowDays} days`,
+      movementLine("Opened", movement.opened),
+      movementLine("Resolved — verified or closed", movement.resolved),
+      movementLine("Passed their resolution target", movement.newlyBreached),
+    ].join("\n"),
+  );
+
   const detailed = snapshot.openCases.slice(0, DETAILED_CASES);
   const remainder = snapshot.openCases.length - detailed.length;
 
