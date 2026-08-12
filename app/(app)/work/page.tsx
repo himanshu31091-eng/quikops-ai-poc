@@ -1,3 +1,4 @@
+import { getPlantScope } from "@/src/scope/plant-scope";
 import { getSessionUser } from "@/src/auth/session";
 import { getWorkManagerData } from "@/src/data/queries/work";
 import { WorkManagerView } from "@/features/work-manager/components/work-manager-view";
@@ -26,7 +27,7 @@ export default async function WorkManagerPage({
   const [params, user, data] = await Promise.all([
     searchParams,
     getSessionUser(),
-    getWorkManagerData(),
+    getWorkManagerData(await getPlantScope()),
   ]);
 
   const initialState = parseWorkParams(params, {

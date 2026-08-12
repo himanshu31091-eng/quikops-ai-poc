@@ -1,3 +1,4 @@
+import { ALL_PLANTS, scopeCases, type PlantScope } from "@/src/scope/plant-scope";
 import type {
   ActionItem,
   ActivityEvent,
@@ -41,7 +42,9 @@ import {
  * changes when persistence goes live.
  */
 
-const openCases = () => CASES.filter((c) => isOpenStatus(c.status));
+/** Every dashboard figure narrows through here, so scope cannot be applied twice or missed. */
+const scoped = (scope: PlantScope) => scopeCases(CASES, scope);
+const openCases = (scope: PlantScope) => scoped(scope).filter((c) => isOpenStatus(c.status));
 
 function tail(series: TrendPoint[], count = SPARKLINE_POINTS): TrendPoint[] {
   return series.slice(-count);
@@ -49,8 +52,8 @@ function tail(series: TrendPoint[], count = SPARKLINE_POINTS): TrendPoint[] {
 
 /* ------------------------------------------------------------------ KPI band */
 
-export async function getHeadlineKpis(): Promise<KpiCardModel[]> {
-  const open = openCases();
+export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<KpiCardModel[]> {
+  const open = openCases(scope);
   const revenueAtRisk = open.reduce((sum, c) => sum + c.revenueAtRisk, 0);
   const criticalOpen = open.filter((c) => c.priorityBand === "CRITICAL").length;
   const breaches = open.filter((c) => c.slaBreachedAt !== null).length;
@@ -119,8 +122,8 @@ export async function getExecutiveSummary(): Promise<AiExecutiveSummary> {
   return EXECUTIVE_SUMMARY;
 }
 
-export async function getCriticalCases(limit = 5): Promise<CaseListItem[]> {
-  return openCases()
+export async function getCriticalCases(limit = 5, scope: PlantScope = ALL_PLANTS): Promise<CaseListItem[]> {
+  return openCases(scope)
     .filter((c) => c.priorityBand === "CRITICAL" || c.priorityBand === "HIGH")
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, limit)
@@ -150,8 +153,8 @@ export async function getActivityFeed(limit = 8): Promise<ActivityEvent[]> {
   return ACTIVITY_FEED.slice(0, limit);
 }
 
-export async function getPriorityDistribution(): Promise<PriorityDistributionSlice[]> {
-  const open = openCases();
+export async function getPriorityDistribution(scope: PlantScope = ALL_PLANTS): Promise<PriorityDistributionSlice[]> {
+  const open = openCases(scope);
   return PRIORITY_BANDS.map((band) => {
     const matching = open.filter((c) => c.priorityBand === band);
     return {
@@ -178,14 +181,14 @@ export async function getExecutionMetrics(): Promise<ExecutionMetrics> {
  * The stored case list, used by the dashboard's reactive shell to re-derive
  * headline numbers against work done in the current session.
  */
-export async function getCaseBaseline(): Promise<CaseListItem[]> {
-  return CASES.map(toCaseListItem);
+export async function getCaseBaseline(scope: PlantScope = ALL_PLANTS): Promise<CaseListItem[]> {
+  return scoped(scope).map(toCaseListItem);
 }
 
 /* ------------------------------------------------------------- Shell badges */
 
-export async function getNavBadgeCounts(): Promise<Record<string, number>> {
-  const open = openCases();
+export async function getNavBadgeCounts(scope: PlantScope = ALL_PLANTS): Promise<Record<string, number>> {
+  const open = openCases(scope);
   return {
     unassigned: open.filter((c) => c.ownerId === null).length,
     myOpen: TODAYS_ACTIONS.filter((a) => a.status !== "DONE").length,

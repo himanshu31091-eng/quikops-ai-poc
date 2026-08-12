@@ -1,3 +1,4 @@
+import { ALL_PLANTS, scopeCases, type PlantScope } from "@/src/scope/plant-scope";
 import { EXCEPTION_META } from "@/src/config/app-config";
 import { isOpenStatus } from "@/src/domain/case-status";
 import { isOpenAction } from "@/src/domain/action-sla";
@@ -191,8 +192,8 @@ function buildRecommendation(
   };
 }
 
-export async function getActionCenterData(): Promise<ActionCenterData> {
-  const all = CASES.map(toCaseListItem);
+export async function getActionCenterData(scope: PlantScope = ALL_PLANTS): Promise<ActionCenterData> {
+  const all = scopeCases(CASES, scope).map(toCaseListItem);
 
   const actions: CorrectiveAction[] = [];
   const contextByCaseNo: Record<string, ActionCaseContext> = {};

@@ -1,3 +1,4 @@
+import { getPlantScope } from "@/src/scope/plant-scope";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
@@ -62,6 +63,7 @@ function MetaChip({ icon, children }: { icon: string; children: React.ReactNode 
 }
 
 export default async function ExecutiveDashboardPage() {
+  const scope = await getPlantScope();
   const [
     user,
     kpis,
@@ -79,19 +81,19 @@ export default async function ExecutiveDashboardPage() {
     portfolio,
   ] = await Promise.all([
     getSessionUser(),
-    getHeadlineKpis(),
+    getHeadlineKpis(scope),
     getExecutiveSummary(),
     getPlantHealth(),
     getOtifTrend(),
-    getPriorityDistribution(),
-    getCriticalCases(6),
+    getPriorityDistribution(scope),
+    getCriticalCases(6, scope),
     getTodaysActions(5),
     getRevenueImpact(),
     getActivityFeed(7),
     getInventoryHealth(),
     getExecutionMetrics(),
-    getCaseBaseline(),
-    getPortfolioSnapshot(),
+    getCaseBaseline(scope),
+    getPortfolioSnapshot(scope),
   ]);
 
   const firstName = user.name.split(" ")[0] ?? user.name;

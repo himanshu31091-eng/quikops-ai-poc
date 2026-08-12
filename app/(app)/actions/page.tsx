@@ -1,3 +1,4 @@
+import { getPlantScope } from "@/src/scope/plant-scope";
 import { getSessionUser } from "@/src/auth/session";
 import { getActionCenterData } from "@/src/data/queries/actions";
 import { ActionCenterView } from "@/features/action-center/components/action-center-view";
@@ -14,6 +15,7 @@ export const metadata = {
  * locally so a filter change costs one memoised pass rather than a round trip.
  */
 export default async function ActionCenterPage() {
-  const [data, user] = await Promise.all([getActionCenterData(), getSessionUser()]);
+  const scope = await getPlantScope();
+  const [data, user] = await Promise.all([getActionCenterData(scope), getSessionUser()]);
   return <ActionCenterView data={data} sessionUser={user} />;
 }

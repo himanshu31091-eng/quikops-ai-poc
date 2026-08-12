@@ -141,7 +141,6 @@ const PLANT_OTIF: Record<string, { otifPct: number; otifDeltaPts: number }> = {
   VP01: { otifPct: 87.0, otifDeltaPts: -4.1 },
   HY01: { otifPct: 91.4, otifDeltaPts: -1.2 },
   RK01: { otifPct: 94.6, otifDeltaPts: 0.9 },
-  CH01: { otifPct: 94.1, otifDeltaPts: 1.4 },
 };
 
 /**
@@ -226,15 +225,6 @@ export const INVENTORY_HEALTH: InventoryHealthRow[] = [
     stockoutRiskSkus: 2,
     excessValue: 481_200,
     status: "WATCH",
-  },
-  {
-    plantCode: "CH01",
-    plantName: "Chennai",
-    inventoryDays: 31.8,
-    targetDays: 30,
-    stockoutRiskSkus: 1,
-    excessValue: 196_700,
-    status: "HEALTHY",
   },
 ];
 

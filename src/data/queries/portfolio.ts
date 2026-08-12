@@ -1,3 +1,4 @@
+import { ALL_PLANTS, scopeCases, type PlantScope } from "@/src/scope/plant-scope";
 import { actionSlaState, isOpenAction } from "@/src/domain/action-sla";
 import { isOpenStatus, statusGroupOf } from "@/src/domain/case-status";
 import { resolvedAtOf } from "@/src/domain/portfolio-metrics";
@@ -214,8 +215,8 @@ function buildRecentMovement(all: CaseListItem[]): RecentMovement {
   };
 }
 
-export async function getPortfolioSnapshot(): Promise<PortfolioSnapshot> {
-  const all = CASES.map(toCaseListItem);
+export async function getPortfolioSnapshot(scope: PlantScope = ALL_PLANTS): Promise<PortfolioSnapshot> {
+  const all = scopeCases(CASES, scope).map(toCaseListItem);
   const open = all
     .filter((item) => isOpenStatus(item.status))
     .sort((a, b) => b.priorityScore - a.priorityScore);

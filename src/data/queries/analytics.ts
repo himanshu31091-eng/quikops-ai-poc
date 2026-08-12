@@ -1,3 +1,4 @@
+import { ALL_PLANTS, scopeCases, type PlantScope } from "@/src/scope/plant-scope";
 import type {
   CaseListItem,
   Plant,
@@ -45,8 +46,8 @@ export interface AnalyticsData {
   slaBreachSeries: TrendPoint[];
 }
 
-export async function getAnalyticsData(): Promise<AnalyticsData> {
-  const cases = CASES.map(toCaseListItem);
+export async function getAnalyticsData(scope: PlantScope = ALL_PLANTS): Promise<AnalyticsData> {
+  const cases = scopeCases(CASES, scope).map(toCaseListItem);
 
   return {
     cases,

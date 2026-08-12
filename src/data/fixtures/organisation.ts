@@ -34,21 +34,13 @@ export const PLANTS: Plant[] = [
     countryCode: "IN",
     timezone: "Asia/Kolkata",
   },
-  {
-    id: "plt_ch01",
-    code: "CH01",
-    name: "Chennai",
-    country: "India",
-    countryCode: "IN",
-    timezone: "Asia/Kolkata",
-  },
 ];
 
 export const PLANT_BY_CODE: Record<string, Plant> = Object.fromEntries(
   PLANTS.map((p) => [p.code, p]),
 );
 
-const ALL_SITES = ["VP01", "RK01", "HY01", "CH01"];
+const ALL_SITES = ["VP01", "RK01", "HY01"];
 
 export const USERS: User[] = [
   {
@@ -111,7 +103,7 @@ export const USERS: User[] = [
     name: "Meera Pillai",
     role: "TASK_OWNER",
     jobTitle: "Logistics Lead",
-    plantScope: ["CH01", "HY01"],
+    plantScope: ["HY01"],
     isActive: true,
   },
   {

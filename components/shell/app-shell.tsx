@@ -27,6 +27,8 @@ interface AppShellProps {
   personas: User[];
   plants: Plant[];
   badges: Record<string, number>;
+  /** Resolved on the server so the control and the data never disagree. */
+  plantScope: string;
   notifications: NotificationModel[];
   searchableCases: SearchableCase[];
   children: React.ReactNode;
@@ -37,6 +39,7 @@ export function AppShell({
   personas,
   plants,
   badges,
+  plantScope,
   notifications,
   searchableCases,
   children,
@@ -124,7 +127,7 @@ export function AppShell({
           <div className="ml-auto flex items-center gap-2">
             <DemoModeBadge />
             <div className="hidden xl:block">
-              <PlantScopeSelector plants={plants} />
+              <PlantScopeSelector plants={plants} scope={plantScope} />
             </div>
             <PlatformControls />
             <NotificationTray items={notifications} />

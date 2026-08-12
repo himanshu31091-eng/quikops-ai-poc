@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/shell/app-shell";
 import { TourInvitation, TourOverlay } from "@/components/tour/tour-overlay";
 import { getActiveSessionUser } from "@/src/auth/session";
+import { getPlantScope } from "@/src/scope/plant-scope";
 import { CASES } from "@/src/data/fixtures/cases";
 import { DEMO_PERSONAS, PLANTS, USER_BY_ID } from "@/src/data/fixtures/organisation";
 import { NOTIFICATIONS } from "@/src/data/fixtures/intelligence";
@@ -22,7 +23,11 @@ export default async function AppLayout({
   const user = await getActiveSessionUser();
   if (!user) redirect("/login");
 
-  const [badges, cookieStore] = await Promise.all([getNavBadgeCounts(), cookies()]);
+  const [badges, cookieStore, plantScope] = await Promise.all([
+    getNavBadgeCounts(),
+    cookies(),
+    getPlantScope(),
+  ]);
 
   const personas = DEMO_PERSONAS.map((id) => USER_BY_ID[id]!).filter(Boolean);
 
@@ -56,6 +61,7 @@ export default async function AppLayout({
             personas={personas}
             plants={PLANTS}
             badges={badges}
+            plantScope={plantScope}
             notifications={NOTIFICATIONS}
             searchableCases={searchableCases}
           >

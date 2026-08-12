@@ -1,3 +1,4 @@
+import { ALL_PLANTS, scopeCases, type PlantScope } from "@/src/scope/plant-scope";
 import type { CaseListItem, Plant, User } from "@/src/domain/types";
 import { CASES } from "../fixtures/cases";
 import { PLANTS } from "../fixtures/organisation";
@@ -32,8 +33,8 @@ export interface WorkManagerData {
   portfolio: WorkPortfolioMetrics;
 }
 
-export async function getWorkManagerData(): Promise<WorkManagerData> {
-  const cases = CASES.map(toCaseListItem).sort((a, b) => b.priorityScore - a.priorityScore);
+export async function getWorkManagerData(scope: PlantScope = ALL_PLANTS): Promise<WorkManagerData> {
+  const cases = scopeCases(CASES, scope).map(toCaseListItem).sort((a, b) => b.priorityScore - a.priorityScore);
 
   return {
     cases,
