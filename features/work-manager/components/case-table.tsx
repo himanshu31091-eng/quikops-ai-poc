@@ -41,20 +41,24 @@ interface ColumnSpec {
  */
 const COLUMNS: ColumnSpec[] = [
   { key: "select", label: "", width: 40 },
-  { key: "caseNo", label: "Case ID", width: 118, sortKey: "caseNo" },
+  // 142, not 118: the Perma case-number format (QO-PA-2026-00421) is four
+  // characters longer than the one this column was sized for and wrapped onto a
+  // second line, inflating every row. Funded from Category and Owner, both of
+  // which truncate gracefully and had slack.
+  { key: "caseNo", label: "Case ID", width: 142, sortKey: "caseNo" },
   { key: "title", label: "Title", width: null, sortKey: "title" },
   // Plant, age and revenue are sized to their content, which is a four-character
   // code, "38d" and "$248,000". The 28px they give back is exactly what widening
   // status and priority took, so the flexible Title column — the column a reader
   // actually needs — is no narrower than before.
   { key: "plant", label: "Plant", width: 60, sortKey: "plant" },
-  { key: "category", label: "Category", width: 132, sortKey: "category" },
+  { key: "category", label: "Category", width: 120, sortKey: "category" },
   // Sized to the widest label each column can hold on one line — "Critical 78.5"
   // and "Pending verification". At the previous 122/138 the status badge did not
   // fit its cell and wrapped out of its own fixed height.
   { key: "priority", label: "Priority", width: 130, sortKey: "priority" },
   { key: "status", label: "Status", width: 158, sortKey: "status" },
-  { key: "owner", label: "Owner", width: 140, sortKey: "owner" },
+  { key: "owner", label: "Owner", width: 128, sortKey: "owner" },
   { key: "revenue", label: "Revenue impact", width: 108, sortKey: "revenue", align: "right" },
   { key: "due", label: "Due date", width: 108, sortKey: "due" },
   { key: "age", label: "Age", width: 52, sortKey: "age" },

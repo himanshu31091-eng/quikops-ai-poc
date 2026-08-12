@@ -1,5 +1,22 @@
 # SCREENSHOT INDEX
 
+> **Partially regenerated 2026-08-15 against the Perma Construction Aids build.**
+>
+> 16 of the 41 assets were recaptured from the running application. The other 25
+> still show the previous organisation (Northbridge Industrial, four plants, 29
+> cases, USD) and are **stale** — they depict data that no longer exists. They
+> were not regenerated because each requires an interaction the capture harness
+> does not script: a Copilot answer mid-stream, an opened drawer, a selected tab,
+> a Board toggle, or a full-page capture, which exceeds Chrome's limit at 2x on a
+> tall page.
+>
+> **Do not present a stale asset beside a live screen.** The company name, plant
+> names, case numbers and currency all differ.
+>
+> Regenerated: 11, 13, 21, 31, 40, 51, 60, 70, 81, 90, a0, b0, c0, c5, plus two
+> new responsive frames d0 and d1 at 768px.
+
+
 **41 screenshots**, recaptured from the running application on **2026-08-10**,
 after the vendor-neutrality pass. Every file replaces its predecessor under the
 **same filename**, so an existing deck picks them up without relinking.
