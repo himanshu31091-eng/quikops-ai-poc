@@ -141,5 +141,11 @@ export const DEMO_PERSONAS = [
   "usr_rmenon",
   "usr_ndeshpande",
   "usr_aiyer",
+  // The reviewer has to be presentable, not just named. `reviewerFor()` routes a
+  // Vapi case to its plant manager, and the verification card tells the reader
+  // "only Sunil Joshi can record the decision — switch persona to review it". A
+  // reviewer absent from this list makes that instruction impossible to follow
+  // and strands the demo one step before the decision it exists to show.
+  "usr_sjoshi",
   "usr_pnair",
 ] as const;
