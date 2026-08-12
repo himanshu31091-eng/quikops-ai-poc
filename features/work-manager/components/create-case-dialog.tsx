@@ -330,7 +330,7 @@ export function CreateCaseDialog({
                     size="sm"
                   />
                   <span className="truncate text-2xs text-content-tertiary">
-                    {formatMoney(revenue, "USD")} · resolve within{" "}
+                    {formatMoney(revenue, undefined)} · resolve within{" "}
                     {formatHours(SLA_TARGET_HOURS[preview.band])}
                   </span>
                 </>

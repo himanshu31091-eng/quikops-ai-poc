@@ -15,8 +15,8 @@ export type NumberFormat = "percent" | "currency-compact" | "currency" | "count"
 
 const FORMATTERS: Record<NumberFormat, (value: number) => string> = {
   percent: (value) => formatPercent(value),
-  "currency-compact": (value) => formatMoney(value, "USD", { forceCompact: true }),
-  currency: (value) => formatMoney(value, "USD", { forceFull: true }),
+  "currency-compact": (value) => formatMoney(value, undefined, { forceCompact: true }),
+  currency: (value) => formatMoney(value, undefined, { forceFull: true }),
   count: (value) => formatNumber(Math.round(value)),
 };
 

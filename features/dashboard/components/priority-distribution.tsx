@@ -115,7 +115,7 @@ export function PriorityDistribution({
       <div className="flex items-baseline justify-between border-t border-line pt-2.5">
         <span className="text-2xs text-content-tertiary">Total exposure</span>
         <span className="text-sm font-semibold tabular-nums text-content">
-          {formatMoney(totalRisk, "USD", { forceCompact: true })}
+          {formatMoney(totalRisk, undefined, { forceCompact: true })}
         </span>
       </div>
     </div>

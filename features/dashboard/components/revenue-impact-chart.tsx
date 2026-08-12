@@ -43,12 +43,12 @@ function renderTooltip(
       data={[
         {
           label: "Still at risk",
-          value: formatMoney(row.atRisk, "USD", { forceCompact: true }),
+          value: formatMoney(row.atRisk, undefined, { forceCompact: true }),
           swatch: AT_RISK_COLOR,
         },
         {
           label: "Recovered",
-          value: formatMoney(row.recovered, "USD", { forceCompact: true }),
+          value: formatMoney(row.recovered, undefined, { forceCompact: true }),
           swatch: RECOVERED_COLOR,
         },
       ]}
@@ -85,12 +85,12 @@ export function RevenueImpactChart({ data }: { data: RevenueImpactBucket[] }) {
             {
               label: "Still at risk",
               color: AT_RISK_COLOR,
-              value: formatMoney(totalAtRisk, "USD", { forceCompact: true }),
+              value: formatMoney(totalAtRisk, undefined, { forceCompact: true }),
             },
             {
               label: "Recovered after execution",
               color: RECOVERED_COLOR,
-              value: formatMoney(totalRecovered, "USD", { forceCompact: true }),
+              value: formatMoney(totalRecovered, undefined, { forceCompact: true }),
             },
           ]}
         />
@@ -114,7 +114,7 @@ export function RevenueImpactChart({ data }: { data: RevenueImpactBucket[] }) {
               {...AXIS_DEFAULTS}
               tickMargin={6}
               tickFormatter={(value: number) =>
-                formatMoney(value, "USD", { forceCompact: true })
+                formatMoney(value, undefined, { forceCompact: true })
               }
             />
             <YAxis

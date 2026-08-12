@@ -5,6 +5,7 @@ import type {
   DetectionSource,
   ExceptionType,
   PriorityBand,
+  KpiKey,
   UserRole,
 } from "@/src/domain/types";
 
@@ -331,6 +332,22 @@ export const ACTION_STATUS_META: Record<ActionStatus, TokenSet> = {
     className: "bg-surface text-content-tertiary border-line",
     dotClassName: "bg-content-tertiary",
   },
+};
+
+/**
+ * What a KPI is called where a user reads it.
+ *
+ * The enum keys are identifiers, not copy. De-underscoring one produced
+ * "otif pct" on the verification card — the same defect class as deriving an
+ * audit source label from its key. Display text comes from here.
+ */
+export const KPI_LABEL: Record<KpiKey, string> = {
+  OTIF_PCT: "on-time in full",
+  REVENUE_AT_RISK: "revenue at risk",
+  INVENTORY_DAYS: "inventory days of cover",
+  SUPPLIER_OTD_PCT: "supplier on-time delivery",
+  SCHEDULE_ADHERENCE_PCT: "schedule adherence",
+  FORECAST_ACCURACY_PCT: "forecast accuracy",
 };
 
 export const ROLE_META: Record<UserRole, { label: string; short: string }> = {

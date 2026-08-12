@@ -513,7 +513,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
                             key: "risk",
                             label: "At risk",
                             align: "right",
-                            render: (r) => formatMoney(r.revenueAtRisk, "USD", { forceCompact: true }),
+                            render: (r) => formatMoney(r.revenueAtRisk, undefined, { forceCompact: true }),
                           },
                           {
                             key: "sla",
@@ -543,7 +543,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
                             key: "r",
                             label: "At risk",
                             align: "right",
-                            render: (r) => formatMoney(r.revenueAtRisk, "USD", { forceCompact: true }),
+                            render: (r) => formatMoney(r.revenueAtRisk, undefined, { forceCompact: true }),
                           },
                           { key: "rec", label: "Worst recurrence", align: "right", render: (r) => r.maxRecurrence },
                         ]}

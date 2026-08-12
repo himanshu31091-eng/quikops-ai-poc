@@ -284,10 +284,10 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     description:
       "Obtain written confirmation from Bharat Packaging Industries on a 9-day lead time for 4,000 pails.",
     ownerId: "usr_aiyer",
-    status: "IN_PROGRESS",
+    status: "DONE",
     origin: "AI_SUGGESTED",
     dueAt: new Date(DEMO_NOW.getTime() + 6 * HOUR_MS).toISOString(),
-    completedAt: null,
+    completedAt: new Date(DEMO_NOW.getTime() - 2 * 24 * HOUR_MS).toISOString(),
     priorityBand: "CRITICAL",
     plantCode: "VP01",
   },

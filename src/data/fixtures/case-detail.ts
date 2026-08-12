@@ -1,4 +1,4 @@
-import { EXCEPTION_META } from "@/src/config/app-config";
+import { EXCEPTION_META, KPI_LABEL } from "@/src/config/app-config";
 import { scoreCaseHealth } from "@/src/domain/case-health";
 import { statusGroupOf } from "@/src/domain/case-status";
 import type {
@@ -275,7 +275,7 @@ export function buildExecutiveSummary(item: CaseListItem): CaseExecutiveSummary 
       item.revenueAtRisk,
       item.currency,
     )} at risk, measured as the value of confirmed demand that cannot be served if the condition is not cleared before the promised date.`,
-    targetKpi: `${item.kpiKey.replace(/_/g, " ").toLowerCase()} — currently ${
+    targetKpi: `${KPI_LABEL[item.kpiKey]} — currently ${
       item.baselineValue
     } against a target of ${item.targetValue}${
       deviation > 0 ? `, a gap of ${formatPercent(deviation)}` : ""
@@ -887,7 +887,23 @@ export function buildVerification(
         } actions complete.`,
     kpiKey: item.kpiKey,
     kpiBaseline: item.baselineValue,
-    kpiCurrent: decided ? Math.round(recovered * 10) / 10 : null,
+    /**
+     * The reading so far.
+     *
+     * A decided case reports the value the reviewer signed off. A case still
+     * inside its measurement window reports an **interim** reading — the KPI has
+     * moved, the window has not closed, and nobody has judged it yet. Reporting
+     * `null` there was wrong in a way that mattered: it made a case with real
+     * movement look unmeasured, and left the reviewer with nothing to weigh.
+     *
+     * Interim is placed part-way from baseline toward target rather than at it,
+     * because a window that has not closed has not proved the target was met.
+     */
+    kpiCurrent: decided
+      ? Math.round(recovered * 10) / 10
+      : Math.round(
+          (item.baselineValue + (item.targetValue - item.baselineValue) * 0.625) * 10,
+        ) / 10,
     kpiTarget: item.targetValue,
     measurementWindowDays: item.measurementWindowDays,
   };

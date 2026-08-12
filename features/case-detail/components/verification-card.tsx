@@ -1,5 +1,6 @@
 "use client";
 
+import { KPI_LABEL } from "@/src/config/app-config";
 import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
@@ -196,8 +197,10 @@ export const VerificationCard = React.memo(function VerificationCard({
         <p className="flex items-center gap-1.5 text-2xs text-content-tertiary">
           <Icon name="Info" size="xs" />
           Measured over {verification.measurementWindowDays} days against{" "}
-          {verification.kpiKey.replace(/_/g, " ").toLowerCase()}. The reading is captured at the
-          decision, not estimated afterwards.
+          {KPI_LABEL[verification.kpiKey] ?? verification.kpiKey}.{" "}
+          {decided
+            ? "The reading was captured at the decision, not estimated afterwards."
+            : "The window is still open, so this is an interim reading. The KPI has moved during the measurement period; whether the corrective action caused the movement is for the reviewer to judge."}
         </p>
       }
     >
@@ -234,14 +237,31 @@ export const VerificationCard = React.memo(function VerificationCard({
 
         <div className="min-w-0">
           <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-            Target KPI
+            {decided ? "Measured outcome" : "Measurement in progress"}
           </p>
-          <p className="mt-1 text-xs font-medium tabular-nums text-content">
-            {verification.kpiBaseline}
-            <span className="mx-1 text-content-tertiary">→</span>
-            {verification.kpiCurrent ?? "—"}
-            <span className="ml-1.5 text-2xs font-normal text-content-tertiary">
-              target {verification.kpiTarget}
+          {/*
+            Three numbers, each labelled, because an unlabelled "87 → 92" invites
+            the reader to supply the missing word — and the word they supply is
+            usually "improved by", which is a causal claim this product does not
+            make. Baseline is what was captured before the work; the reading is
+            where the KPI sits now; target is what was agreed.
+          */}
+          <p className="mt-1 flex flex-wrap items-baseline gap-x-1 text-xs font-medium tabular-nums text-content">
+            <span title="Captured when the case was opened">
+              {verification.kpiBaseline}
+              <span className="ml-0.5 text-2xs font-normal text-content-tertiary">
+                baseline
+              </span>
+            </span>
+            <span className="text-content-tertiary">→</span>
+            <span title={decided ? "Reading at the decision" : "Interim reading, window still open"}>
+              {verification.kpiCurrent ?? "—"}
+              <span className="ml-0.5 text-2xs font-normal text-content-tertiary">
+                {decided ? "final" : "interim"}
+              </span>
+            </span>
+            <span className="text-2xs font-normal text-content-tertiary">
+              · target {verification.kpiTarget}
             </span>
           </p>
           <ProgressBar
