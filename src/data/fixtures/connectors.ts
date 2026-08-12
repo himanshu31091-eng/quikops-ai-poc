@@ -471,7 +471,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     receivedAt: ago(19),
     attempts: 2,
     field: null,
-    payloadPreview: '{ "playbookId": "pb_vendor_delay", "caseNo": "QO-2026-004151", … }',
+    payloadPreview: '{ "playbookId": "pb_vendor_delay", "caseNo": "QO-PA-2026-00313", … }',
   },
 ];
 

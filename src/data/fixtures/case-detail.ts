@@ -63,30 +63,17 @@ const PRODUCTION_LINE: Record<string, string> = {
  * sales order, that number is used verbatim so the two never disagree.
  */
 const ORDER_REF: Record<string, { ref: string; type: CaseInformation["orderType"] }> = {
-  "QO-2026-004182": { ref: "PO-77455", type: "PURCHASE_ORDER" },
-  "QO-2026-004179": { ref: "PO-78012", type: "PURCHASE_ORDER" },
-  "QO-2026-004176": { ref: "WO-33218", type: "WORK_ORDER" },
-  "QO-2026-004174": { ref: "PO-77903", type: "PURCHASE_ORDER" },
-  "QO-2026-004171": { ref: "PO-78204", type: "PURCHASE_ORDER" },
-  "QO-2026-004168": { ref: "SO-448120", type: "SALES_ORDER" },
-  "QO-2026-004165": { ref: "WO-33190", type: "WORK_ORDER" },
-  "QO-2026-004162": { ref: "PO-77341", type: "PURCHASE_ORDER" },
-  "QO-2026-004159": { ref: "WO-33144", type: "WORK_ORDER" },
-  "QO-2026-004155": { ref: "WO-33102", type: "WORK_ORDER" },
-  "QO-2026-004151": { ref: "PO-77088", type: "PURCHASE_ORDER" },
-  "QO-2026-004148": { ref: "WO-33076", type: "WORK_ORDER" },
-  "QO-2026-004144": { ref: "PO-77890", type: "PURCHASE_ORDER" },
-  "QO-2026-004141": { ref: "SO-448133", type: "SALES_ORDER" },
-  "QO-2026-004137": { ref: "WO-33041", type: "WORK_ORDER" },
-  "QO-2026-004133": { ref: "PO-77712", type: "PURCHASE_ORDER" },
-  "QO-2026-004129": { ref: "PO-77120", type: "PURCHASE_ORDER" },
-  "QO-2026-004124": { ref: "PO-76980", type: "PURCHASE_ORDER" },
-  "QO-2026-004120": { ref: "PO-77664", type: "PURCHASE_ORDER" },
-  "QO-2026-004115": { ref: "WO-32988", type: "WORK_ORDER" },
-  "QO-2026-004110": { ref: "WO-32944", type: "WORK_ORDER" },
-  "QO-2026-004104": { ref: "SO-448190", type: "SALES_ORDER" },
-  "QO-2026-004098": { ref: "SO-448077", type: "SALES_ORDER" },
-  "QO-2026-004091": { ref: "PO-76802", type: "PURCHASE_ORDER" },
+  // Keyed to the current corpus. The hero case reuses the purchase order it was
+  // raised from, so the order reference on Case Information and the source record
+  // on the lineage panel are the same document rather than two numbers.
+  "QO-PA-2026-00421": { ref: "PO-PA-45821", type: "PURCHASE_ORDER" },
+  "QO-PA-2026-00418": { ref: "PO-PA-45903", type: "PURCHASE_ORDER" },
+  "QO-PA-2026-00412": { ref: "PO-PA-45774", type: "PURCHASE_ORDER" },
+  "QO-PA-2026-00406": { ref: "WO-PA-11255", type: "WORK_ORDER" },
+  "QO-PA-2026-00400": { ref: "PO-PA-45610", type: "PURCHASE_ORDER" },
+  "QO-PA-2026-00367": { ref: "PO-PA-45688", type: "PURCHASE_ORDER" },
+  "QO-PA-2026-00313": { ref: "PO-PA-45402", type: "PURCHASE_ORDER" },
+  "QO-PA-2026-00292": { ref: "WO-PA-11090", type: "WORK_ORDER" },
 };
 
 const RISK_CATEGORY: Record<ExceptionType, string> = {
