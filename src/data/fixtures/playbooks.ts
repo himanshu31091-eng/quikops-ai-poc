@@ -80,33 +80,61 @@ export const PLAYBOOK_LIBRARY: PlaybookDefinition[] = [
   },
   {
     id: "pb_material_shortage",
-    name: "Material shortage",
+    name: "Critical raw material shortage response",
     exceptionType: "MATERIAL_SHORTAGE",
     description:
-      "Buy time on the current build, then fix the threshold that let coverage fall inside the horizon.",
-    version: "v2",
-    updatedAt: ago(41),
+      "Written from the polymer-resin case at Vapi. The first time this was worked it was an improvement action; this is the standard way of responding to it, so the second time is not improvised.",
+    version: "v3",
+    updatedAt: ago(2),
     steps: [
       {
-        title: "Release available safety stock against the current build",
+        title: "Escalate to procurement and confirm the exposure",
         description:
-          "Confirm on-hand and allocated quantities, and release what is available to protect the nearest promised date.",
+          "Procurement takes the case, confirms which purchase order is affected and states the shortfall in days of coverage against the current build.",
         ownerRole: "TASK_OWNER",
         dueOffsetDays: 0,
       },
       {
-        title: "Confirm alternate supply in writing",
+        title: "Obtain written supplier confirmation of the revised date",
         description:
-          "Obtain written lead-time confirmation from an approved alternate source for the affected material.",
+          "A revised dispatch date and quantity split, in writing, with the name of the person at the supplier who gave it. A verbal assurance is not evidence.",
         ownerRole: "TASK_OWNER",
+        dueOffsetDays: 1,
+      },
+      {
+        title: "Reserve a priority quality-release slot for the incoming lot",
+        description:
+          "Quality books the inspection ahead of routine sampling so the receipt does not clear the gate and then wait. A material delay followed by a release delay is the pattern that turns a supply slip into a missed delivery.",
+        ownerRole: "TASK_OWNER",
+        dueOffsetDays: 1,
+      },
+      {
+        title: "Re-sequence production to protect committed orders",
+        description:
+          "Production reorders the schedule around the confirmed receipt so that the orders closest to their promised date are built first.",
+        ownerRole: "OPS_MANAGER",
         dueOffsetDays: 2,
       },
       {
-        title: "Reset the reorder threshold",
+        title: "Assess and communicate customer delivery risk",
         description:
-          "Raise the safety-stock level so the detection rule fires with enough lead time to act next cycle.",
+          "Identify which customer orders remain exposed after re-sequencing and agree what, if anything, is told to the customer. Tier-one accounts are told early.",
+        ownerRole: "OPS_MANAGER",
+        dueOffsetDays: 2,
+      },
+      {
+        title: "Measure the KPI against the captured baseline",
+        description:
+          "Read OTIF for the affected plant against the baseline captured when the case opened, over the agreed window. Record the reading; do not attribute the movement to this case while other cases are open in the same period.",
         ownerRole: "ANALYST",
-        dueOffsetDays: 5,
+        dueOffsetDays: 7,
+      },
+      {
+        title: "Independent verification and close",
+        description:
+          "A reviewer who did not do the work confirms the evidence and the measured outcome. Only then does the exposure count as recovered.",
+        ownerRole: "OPS_MANAGER",
+        dueOffsetDays: 9,
       },
     ],
   },

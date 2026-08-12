@@ -91,9 +91,9 @@ export const COPILOT_PROMPTS: CopilotPromptSpec[] = [
 export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
   {
     id: "worst-plant",
-    label: "Which plant is hurting us most?",
+    label: "Why does Vapi need attention?",
     prompt:
-      "Which plant is hurting us most right now, and what is actually driving it? Be specific about the cases behind your answer.",
+      "Which plant needs attention first, and what is actually driving it? Be specific about the cases behind your answer and name the source records where you have them.",
     icon: "Factory",
     quick: true,
   },
@@ -107,7 +107,7 @@ export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
   },
   {
     id: "biggest-risk",
-    label: "Where is the biggest revenue risk?",
+    label: "What is driving revenue at risk?",
     prompt:
       "Where is our biggest revenue exposure concentrated, and what is the single action that would reduce it most?",
     icon: "DollarSign",
@@ -131,7 +131,7 @@ export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
   },
   {
     id: "supplier-pattern",
-    label: "Any supplier patterns?",
+    label: "Which suppliers are behind this?",
     prompt:
       "Are there patterns across suppliers I should be treating commercially rather than case by case? Name the suppliers and the cases.",
     icon: "TruckElectric",
@@ -151,6 +151,22 @@ export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
     prompt:
       "What moved in the last seven days — opened, verified, closed, and anything that passed its resolution target? Tell me whether the week was net positive.",
     icon: "History",
+    quick: false,
+  },
+  {
+    id: "kpi-moved",
+    label: "Did OTIF move after the corrective action?",
+    prompt:
+      "Has on-time-in-full moved against the baseline captured when the polymer-resin case opened? Say what the reading is and whether the measurement window has closed — do not tell me the action caused it.",
+    icon: "Target",
+    quick: false,
+  },
+  {
+    id: "related-kpis",
+    label: "What related KPIs should I review?",
+    prompt:
+      "If delivery performance is improving, what else should management be watching for pressure — inventory coverage, changeovers, quality holds? Name the indicators and the open cases sitting behind them.",
+    icon: "Gauge",
     quick: false,
   },
   {
