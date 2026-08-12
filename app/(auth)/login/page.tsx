@@ -136,7 +136,13 @@ export default function LoginPage() {
 
           <p className="mt-7 text-2xs leading-relaxed text-content-tertiary">
             Persona selection exists for demonstration only and is removed from
-            production builds. All data in this environment is synthetic.{" "}
+            production builds. This environment models{" "}
+            <span className="font-medium text-content-secondary">
+              Perma Construction Aids
+            </span>
+            , a representative Indian construction-chemicals manufacturer — an
+            illustrative scenario rather than a QuikOps customer. All data is
+            synthetic.{" "}
             <SkipToDefaultPersona userId={DEFAULT_SESSION_USER_ID}>
               Skip to dashboard
             </SkipToDefaultPersona>

@@ -22,6 +22,7 @@ import { CorrectiveActionsCard } from "./corrective-actions-card";
 import { EvidenceCard } from "./evidence-card";
 import { ExecutionTimeline } from "./execution-timeline";
 import { ExecutiveSummaryCard } from "./executive-summary-card";
+import { RelatedIndicatorsCard } from "./related-indicators-card";
 import { VerificationCard } from "./verification-card";
 
 /**
@@ -279,6 +280,12 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
               onDecide={api.decideVerification}
             />
             </div>
+          </div>
+
+          {/* Reads immediately after verification: the KPI moved, and here is
+              what else moved beside it. Additive; nothing above was changed. */}
+          <div id="case-section-indicators" className="scroll-mt-20">
+            <RelatedIndicatorsCard indicators={detail.relatedIndicators} />
           </div>
 
           <div id="case-section-audit" className="scroll-mt-20">

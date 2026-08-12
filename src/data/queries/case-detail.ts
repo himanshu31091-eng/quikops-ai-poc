@@ -1,4 +1,5 @@
 import { EXCEPTION_META } from "@/src/config/app-config";
+import { INVENTORY_HEALTH } from "../fixtures/metrics";
 import { isOpenStatus } from "@/src/domain/case-status";
 import type {
   CaseAiInsight,
@@ -200,6 +201,91 @@ function buildAiInsights(
   return insights;
 }
 
+/**
+ * An indicator moving in the same plant during the same window as the case.
+ *
+ * Deliberately *not* called a consequence. Improving one measure often puts
+ * pressure on another — protecting delivery dates by expediting and
+ * re-sequencing tends to show up in inventory and changeover time — but whether
+ * this case caused this movement is a question for the operational team, not
+ * for a data-access layer. These are surfaced so management can ask; the
+ * platform does not answer.
+ */
+export interface RelatedIndicator {
+  label: string;
+  reading: string;
+  target: string;
+  /** Which way the reading has gone against its target. */
+  direction: "PRESSURE" | "STABLE";
+  /** Why it is on this panel at all — the open cases behind it. */
+  context: string;
+}
+
+/**
+ * Indicators worth watching alongside this case: inventory coverage at the same
+ * plant, and any open capacity or inventory cases raised there. Everything is
+ * read from the same corpus the rest of the product reads.
+ */
+function buildRelatedIndicators(
+  item: CaseListItem,
+  all: CaseListItem[],
+): RelatedIndicator[] {
+  const indicators: RelatedIndicator[] = [];
+
+  const inventory = INVENTORY_HEALTH.find((row) => row.plantCode === item.plantCode);
+  if (inventory) {
+    const under = inventory.inventoryDays < inventory.targetDays;
+    indicators.push({
+      label: "Finished-goods coverage",
+      reading: `${inventory.inventoryDays} days`,
+      target: `${inventory.targetDays}-day policy`,
+      direction: under ? "PRESSURE" : "STABLE",
+      context: under
+        ? `${inventory.stockoutRiskSkus} SKUs at stockout risk at ${inventory.plantName}. Expediting protects a delivery date; it does not rebuild coverage.`
+        : `Coverage is at or above policy at ${inventory.plantName}.`,
+    });
+  }
+
+  const samePlantOpen = all.filter(
+    (entry) =>
+      entry.plantCode === item.plantCode &&
+      entry.caseNo !== item.caseNo &&
+      isOpenStatus(entry.status),
+  );
+
+  const capacity = samePlantOpen.filter(
+    (entry) => entry.exceptionType === "CAPACITY_CONSTRAINT",
+  );
+  if (capacity.length > 0) {
+    indicators.push({
+      label: "Production capacity",
+      reading: `${capacity.length} open case${capacity.length === 1 ? "" : "s"}`,
+      target: "no open constraint",
+      direction: "PRESSURE",
+      context:
+        "Re-sequencing to protect committed orders changes what the line runs and when. These are the capacity cases already open at this plant during the same window.",
+    });
+  }
+
+  const excess = samePlantOpen.filter(
+    (entry) =>
+      entry.exceptionType === "INVENTORY_EXCESS" ||
+      entry.exceptionType === "INVENTORY_STOCKOUT",
+  );
+  if (excess.length > 0) {
+    indicators.push({
+      label: "Inventory position",
+      reading: `${excess.length} open case${excess.length === 1 ? "" : "s"}`,
+      target: "within policy band",
+      direction: "PRESSURE",
+      context:
+        "Excess and stockout cases open at this plant in the same period. Both move when supply is expedited.",
+    });
+  }
+
+  return indicators;
+}
+
 export interface CaseDetailModel {
   case: CaseListItem;
   reviewer: User;
@@ -215,6 +301,8 @@ export interface CaseDetailModel {
   supplierIssues: RelatedCaseRef[];
   insights: CaseAiInsight[];
   health: CaseHealth;
+  /** Indicators to weigh alongside the outcome. Surfaced, never attributed. */
+  relatedIndicators: RelatedIndicator[];
   /** Reference data the editable sections need. */
   assignableUsers: User[];
   plants: Plant[];
@@ -247,6 +335,7 @@ export async function getCaseDetail(caseNo: string): Promise<CaseDetailModel | n
     audit: buildAuditLog(item, timeline, verification),
     verification,
     related: buildRelatedCases(item, all),
+    relatedIndicators: buildRelatedIndicators(item, all),
     supplierIssues,
     insights: buildAiInsights(item, supplierIssues, actions),
     health: buildCaseHealth(item, actions),
