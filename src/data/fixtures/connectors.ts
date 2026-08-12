@@ -148,8 +148,8 @@ export const CONNECTORS: ConnectorDefinition[] = [
     minutesSinceLastRun: 41,
   },
   {
-    // The second ERP. Northbridge runs SAP at the European and US sites and
-    // Oracle at Querétaro and Pune following an acquisition — which is the
+    // The second ERP. Perma Construction Aids runs SAP at the European and US sites and
+    // Oracle at Roorkee and Vapi following an acquisition — which is the
     // ordinary situation and the reason the ingestion layer normalises rather
     // than assuming one source. It is the least stable feed in the estate
     // because it crosses a network the group does not operate.
@@ -157,7 +157,7 @@ export const CONNECTORS: ConnectorDefinition[] = [
     name: "Oracle SCM — Plant Operations",
     system: "Oracle Fusion Cloud SCM",
     description:
-      "Work orders, on-hand balances and goods movements for Querétaro and Pune. The Oracle side of the estate, normalised into the same signal shape as SAP.",
+      "Work orders, on-hand balances and goods movements for Roorkee and Vapi. The Oracle side of the estate, normalised into the same signal shape as SAP.",
     direction: "INBOUND",
     cadenceMinutes: 90,
     isEnabled: true,
@@ -375,11 +375,11 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     signalRef: "SIG-2026-08-04-MX-004191",
     reason: "SCHEMA_MISMATCH",
     detail:
-      "Unit of measure 'CS' is not in the mapped set. Oracle uses case-pack units at Querétaro that the transform does not yet translate.",
+      "Unit of measure 'CS' is not in the mapped set. Oracle uses case-pack units at Roorkee that the transform does not yet translate.",
     receivedAt: ago(14),
     attempts: 2,
     field: "unitOfMeasure",
-    payloadPreview: '{ "unitOfMeasure": "CS", "quantity": 48, "plantCode": "MX01", … }',
+    payloadPreview: '{ "unitOfMeasure": "CS", "quantity": 48, "plantCode": "RK01", … }',
   },
   {
     // A timing failure rather than a contract one: the movement referenced a
@@ -394,7 +394,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     receivedAt: ago(6),
     attempts: 1,
     field: "workOrderRef",
-    payloadPreview: '{ "workOrderRef": "WO-88214", "plantCode": "IN01", … }',
+    payloadPreview: '{ "workOrderRef": "WO-88214", "plantCode": "VP01", … }',
   },
   {
     id: "dlq_001",
@@ -405,7 +405,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     receivedAt: ago(9),
     attempts: 3,
     field: "materialCode",
-    payloadPreview: '{ "materialCode": "SA-1207", "plantCode": "DE01", … }',
+    payloadPreview: '{ "materialCode": "SA-1207", "plantCode": "HY01", … }',
   },
   {
     id: "dlq_002",
@@ -416,7 +416,7 @@ export const DEAD_LETTER: DeadLetterMessage[] = [
     receivedAt: ago(9),
     attempts: 3,
     field: "supplierCode",
-    payloadPreview: '{ "supplierCode": "V-9902", "plantCode": "DE01", … }',
+    payloadPreview: '{ "supplierCode": "V-9902", "plantCode": "HY01", … }',
   },
   {
     id: "dlq_003",

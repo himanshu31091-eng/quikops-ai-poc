@@ -26,8 +26,8 @@ const ago = (ms: number): string => new Date(DEMO_NOW.getTime() - ms).toISOStrin
  * The dashboard's AI executive summary, composed from the live corpus.
  *
  * Previously hand-authored, and every figure in it had drifted: it claimed two
- * unassigned critical cases at Querétaro when there were none and both criticals
- * sat at Ingolstadt, "11 of the 24 open cases" when 19 were open, 89.2% OTIF
+ * unassigned critical cases at Roorkee when there were none and both criticals
+ * sat at Hyderabad, "11 of the 24 open cases" when 19 were open, 89.2% OTIF
  * against a computed 88.5%, and named the wrong largest exposure. Once the
  * Copilot went live it read those same fixtures and contradicted them out loud.
  *
@@ -74,7 +74,7 @@ function buildPortfolioSummary(): AiExecutiveSummary {
     .filter((item) => item.ownerId === null)
     .reduce((sum, item) => sum + item.revenueAtRisk, 0);
 
-  const money = (value: number) => formatMoney(value, "USD");
+  const money = (value: number) => formatMoney(value);
 
   // What is actually driving the worst site, rather than an assumed cause: the
   // most common exception type among its open cases, and whether that work is
@@ -168,7 +168,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
     actorRole: null,
     caseNo: "QO-2026-004182",
     summary:
-      "Enterprise Data Platform detected vendor delay for RM-4471 at MX01 — third detection, appended to existing case",
+      "Enterprise Data Platform detected vendor delay for RM-4471 at RK01 — third detection, appended to existing case",
     at: ago(2 * HOUR_MS + 57 * MINUTE_MS),
   },
   {
@@ -183,7 +183,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_003",
     kind: "VERIFICATION_APPROVED",
-    actorName: "Marcus Reinhardt",
+    actorName: "Neha Deshpande",
     actorRole: "OPS_MANAGER",
     caseNo: "QO-2026-004155",
     summary: "Verified corrective action on surface finish deviation — evidence accepted",
@@ -192,7 +192,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_004",
     kind: "ACTION_COMPLETED",
-    actorName: "Carlos Mendoza",
+    actorName: "Arun Iyer",
     actorRole: "TASK_OWNER",
     caseNo: "QO-2026-004179",
     summary: "Completed 'Confirm expedited air freight booking' with 2 attachments",
@@ -210,16 +210,16 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_006",
     kind: "CASE_ASSIGNED",
-    actorName: "Priya Sharma",
+    actorName: "Sunil Joshi",
     actorRole: "OPS_MANAGER",
     caseNo: "QO-2026-004171",
-    summary: "Assigned to Carlos Mendoza with a 24-hour target",
+    summary: "Assigned to Arun Iyer with a 24-hour target",
     at: ago(8 * HOUR_MS + 45 * MINUTE_MS),
   },
   {
     id: "act_007",
     kind: "PLAYBOOK_APPLIED",
-    actorName: "Priya Sharma",
+    actorName: "Sunil Joshi",
     actorRole: "OPS_MANAGER",
     caseNo: "QO-2026-004115",
     summary: "Applied playbook 'Capacity constraint — changeover reduction' (3 actions)",
@@ -228,7 +228,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_008",
     kind: "VERIFICATION_REJECTED",
-    actorName: "Marcus Reinhardt",
+    actorName: "Neha Deshpande",
     actorRole: "OPS_MANAGER",
     caseNo: "QO-2026-004148",
     summary: "Verification returned — cycle-time evidence did not cover a full shift",
@@ -237,7 +237,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_009",
     kind: "COMMENT_ADDED",
-    actorName: "Daniel Kim",
+    actorName: "Ananya Gupta",
     actorRole: "ANALYST",
     caseNo: "QO-2026-004137",
     summary: "Noted the same forecast bias appears on two adjacent programmes",
@@ -246,7 +246,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_010",
     kind: "CASE_CLOSED",
-    actorName: "Marcus Reinhardt",
+    actorName: "Neha Deshpande",
     actorRole: "OPS_MANAGER",
     caseNo: "QO-2026-004151",
     summary: "Closed after 14-day measurement window — OTIF recovered to 94.6%",
@@ -255,7 +255,7 @@ export const ACTIVITY_FEED: ActivityEvent[] = [
   {
     id: "act_011",
     kind: "VERIFICATION_SUBMITTED",
-    actorName: "Aisha Okonkwo",
+    actorName: "Meera Pillai",
     actorRole: "TASK_OWNER",
     caseNo: "QO-2026-004174",
     summary: "Submitted for verification with supplier disposition report attached",
@@ -283,13 +283,13 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     title: "Confirm alternate supplier lead time in writing",
     description:
       "Obtain written confirmation from Carolina Precision on a 9-day lead time for 4,000 units.",
-    ownerId: "usr_cmendoza",
+    ownerId: "usr_aiyer",
     status: "IN_PROGRESS",
     origin: "AI_SUGGESTED",
     dueAt: new Date(DEMO_NOW.getTime() + 6 * HOUR_MS).toISOString(),
     completedAt: null,
     priorityBand: "CRITICAL",
-    plantCode: "US01",
+    plantCode: "CH01",
   },
   {
     id: "actn_102",
@@ -299,13 +299,13 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     title: "Escalate to Kaltenbach account management",
     description:
       "Raise the repeat miss with the vendor's commercial lead and request a capacity commitment.",
-    ownerId: "usr_mreinhardt",
+    ownerId: "usr_ndeshpande",
     status: "TODO",
     origin: "PLAYBOOK",
     dueAt: new Date(DEMO_NOW.getTime() + 2 * HOUR_MS).toISOString(),
     completedAt: null,
     priorityBand: "CRITICAL",
-    plantCode: "DE01",
+    plantCode: "HY01",
   },
   {
     id: "actn_103",
@@ -315,13 +315,13 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     title: "Model a weekend shift against the week 33 shortfall",
     description:
       "Quantify the capacity recovered by adding a Saturday shift and the incremental labour cost.",
-    ownerId: "usr_tberger",
+    ownerId: "usr_vrane",
     status: "IN_PROGRESS",
     origin: "AI_SUGGESTED",
     dueAt: new Date(DEMO_NOW.getTime() - 3 * HOUR_MS).toISOString(),
     completedAt: null,
     priorityBand: "CRITICAL",
-    plantCode: "DE01",
+    plantCode: "HY01",
   },
   {
     id: "actn_104",
@@ -330,13 +330,13 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     caseTitle: "Stockout risk — neodymium magnet segments",
     title: "Raise expedite request against PO-78204",
     description: "Request a 7-day pull-in on the open purchase order and confirm freight mode.",
-    ownerId: "usr_cmendoza",
+    ownerId: "usr_aiyer",
     status: "TODO",
     origin: "PLAYBOOK",
     dueAt: new Date(DEMO_NOW.getTime() + 14 * HOUR_MS).toISOString(),
     completedAt: null,
     priorityBand: "HIGH",
-    plantCode: "IN01",
+    plantCode: "VP01",
   },
   {
     id: "actn_105",
@@ -345,13 +345,13 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     caseTitle: "Extrusion line changeover time above standard",
     title: "Run a changeover time study on both shifts",
     description: "Capture five changeovers per shift and isolate the variance drivers.",
-    ownerId: "usr_psharma",
+    ownerId: "usr_sjoshi",
     status: "TODO",
     origin: "PLAYBOOK",
     dueAt: new Date(DEMO_NOW.getTime() + 30 * HOUR_MS).toISOString(),
     completedAt: null,
     priorityBand: "HIGH",
-    plantCode: "MX01",
+    plantCode: "RK01",
   },
   {
     id: "actn_106",
@@ -360,13 +360,13 @@ export const TODAYS_ACTIONS: ActionItem[] = [
     caseTitle: "Safety stock breach on PA66-GF30 resin",
     title: "Reconcile yield loss against the standard scrap rate",
     description: "Determine whether the yield loss is a process shift or a one-off event.",
-    ownerId: "usr_tberger",
+    ownerId: "usr_vrane",
     status: "BLOCKED",
     origin: "MANUAL",
     dueAt: new Date(DEMO_NOW.getTime() - 20 * HOUR_MS).toISOString(),
     completedAt: null,
     priorityBand: "HIGH",
-    plantCode: "DE01",
+    plantCode: "HY01",
   },
 ];
 
@@ -390,7 +390,7 @@ export const NOTIFICATIONS = [
   {
     id: "ntf_3",
     title: "Verification approved",
-    body: "Marcus Reinhardt verified QO-2026-004155",
+    body: "Neha Deshpande verified QO-2026-004155",
     at: ago(4 * HOUR_MS + 38 * MINUTE_MS),
     unread: true,
     tone: "success" as const,

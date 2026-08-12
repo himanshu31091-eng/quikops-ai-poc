@@ -4,7 +4,7 @@ import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { CaseListItem, Plant } from "@/src/domain/types";
-import { DEMO_NOW } from "@/src/lib/constants";
+import { DEMO_NOW, DEFAULT_CURRENCY } from "@/src/lib/constants";
 import {
   ageProfile,
   customerPerformance,
@@ -46,7 +46,7 @@ export function FlowSection({
   onAskCopilot?: () => void;
 }) {
   const flow = useFlow(cases, plants);
-  const currency = cases[0]?.currency ?? "USD";
+  const currency = cases[0]?.currency ?? DEFAULT_CURRENCY;
 
   // Commercial and escalation cuts of the same corpus. Independent of the flow
   // horizon: these describe the position now, not movement over a window, and a

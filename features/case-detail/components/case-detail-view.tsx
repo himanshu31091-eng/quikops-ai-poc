@@ -15,6 +15,7 @@ import { AssignmentCard } from "./assignment-card";
 import { AuditLogCard } from "./audit-log-card";
 import { CaseHeader } from "./case-header";
 import { CaseInformationCard } from "./case-information-card";
+import { DataLineageCard } from "./data-lineage-card";
 import { CaseSidePanel } from "./case-side-panel";
 import { CommentsCard } from "./comments-card";
 import { CorrectiveActionsCard } from "./corrective-actions-card";
@@ -188,6 +189,16 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
       <div className="grid min-w-0 gap-4 xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-4 xl:col-span-8">
           <ExecutiveSummaryCard detail={detail} />
+
+          {/* Additive: where the case came from, before what was done about it. */}
+          <div id="case-section-lineage" className="scroll-mt-20">
+            <DataLineageCard
+              item={detail.case}
+              detectionRule={`${detail.information.detectionRuleId} · ${detail.information.detectionRuleName}`}
+              signalRef={detail.information.signalRef}
+              ownerName={api.owner?.name ?? "Unassigned"}
+            />
+          </div>
 
           <div id="case-section-timeline" className="scroll-mt-20">
             <ExecutionTimeline events={session.timeline} recentIds={api.recentIds} />

@@ -9,7 +9,7 @@ import type {
   RevenueImpactBucket,
 } from "@/src/domain/types";
 import { PRIORITY_BANDS } from "@/src/domain/types";
-import { DEMO_NOW } from "@/src/lib/constants";
+import { DEMO_NOW, DEFAULT_CURRENCY } from "@/src/lib/constants";
 import { buildCorrectiveActions } from "../fixtures/case-detail";
 import { CASES } from "../fixtures/cases";
 import {
@@ -241,7 +241,7 @@ export async function getPortfolioSnapshot(): Promise<PortfolioSnapshot> {
       totalCases: all.length,
       openCases: open.length,
       revenueAtRisk: open.reduce((sum, item) => sum + item.revenueAtRisk, 0),
-      currency: open[0]?.currency ?? "USD",
+      currency: open[0]?.currency ?? DEFAULT_CURRENCY,
       criticalOpen: open.filter((item) => item.priorityBand === "CRITICAL").length,
       highOpen: open.filter((item) => item.priorityBand === "HIGH").length,
       breachedOpen: open.filter((item) => item.slaBreachedAt !== null).length,

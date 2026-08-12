@@ -17,7 +17,16 @@ export const PRIORITY_WEIGHTS = {
   escalation: 4,
 } as const;
 
-const REVENUE_SATURATION = 250_000;
+/**
+ * The exposure at which the revenue factor is fully weighted — ₹40 lakh, the exposure at which a case is unarguably a management item.
+ *
+ * Currency-denominated, so it moves with the operating currency: at the old
+ * 250,000 every rupee-denominated case saturated instantly and 26 of 36 open
+ * cases scored HIGH or above, which collapsed the band distribution and, with
+ * it, SLA adherence — a HIGH case carries a 72-hour target where a MEDIUM one
+ * carries 240.
+ */
+const REVENUE_SATURATION = 4_000_000;
 const KPI_DEVIATION_SATURATION_PTS = 12;
 const RECURRENCE_SATURATION = 6;
 
@@ -70,7 +79,7 @@ export function computePriority(input: PriorityInput): PriorityResult {
   const factors: PriorityFactor[] = [
     {
       factor: "Revenue at risk",
-      raw: formatMoney(input.revenueAtRisk, "USD"),
+      raw: formatMoney(input.revenueAtRisk),
       weighted: round1(revenueRatio * PRIORITY_WEIGHTS.revenueAtRisk),
     },
     {

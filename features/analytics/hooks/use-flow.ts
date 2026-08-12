@@ -22,7 +22,7 @@ import {
   type FlowHorizon,
 } from "@/src/domain/flow-balance";
 import type { CaseListItem, ExceptionType, Plant, PriorityBand } from "@/src/domain/types";
-import { DEMO_NOW } from "@/src/lib/constants";
+import { DEMO_NOW, DEFAULT_CURRENCY } from "@/src/lib/constants";
 import { formatMoney } from "@/src/lib/format";
 
 /**
@@ -69,7 +69,7 @@ export function useFlow(cases: CaseListItem[], plants: Plant[]): FlowApi {
   const [dimension, setDimensionState] = React.useState<FlowDimension>("plant");
   const [selectedKey, setSelectedKey] = React.useState<string | null>(null);
 
-  const currency = cases[0]?.currency ?? "USD";
+  const currency = cases[0]?.currency ?? DEFAULT_CURRENCY;
 
   // The narrative and the recommendation cards quote money inside a sentence.
   // They take a formatter rather than a currency code so the notation matches

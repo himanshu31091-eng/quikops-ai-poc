@@ -136,10 +136,12 @@ export const SCHEDULE_ADHERENCE_SERIES_90D = buildSeries({
  * Everything else on the plant-health row *is* derived — see below.
  */
 const PLANT_OTIF: Record<string, { otifPct: number; otifDeltaPts: number }> = {
-  MX01: { otifPct: 87.4, otifDeltaPts: -3.1 },
-  US01: { otifPct: 92.1, otifDeltaPts: -1.4 },
-  DE01: { otifPct: 91.7, otifDeltaPts: 0.8 },
-  IN01: { otifPct: 94.2, otifDeltaPts: 1.6 },
+  // Vapi is the site the demo is about: worst OTIF, worst movement, and the
+  // plant carrying the polymer-resin exposure.
+  VP01: { otifPct: 87.0, otifDeltaPts: -4.1 },
+  HY01: { otifPct: 91.4, otifDeltaPts: -1.2 },
+  RK01: { otifPct: 94.6, otifDeltaPts: 0.9 },
+  CH01: { otifPct: 94.1, otifDeltaPts: 1.4 },
 };
 
 /**
@@ -199,8 +201,8 @@ export const REVENUE_IMPACT: RevenueImpactBucket[] = EXCEPTION_TYPES.map((except
 
 export const INVENTORY_HEALTH: InventoryHealthRow[] = [
   {
-    plantCode: "IN01",
-    plantName: "Pune",
+    plantCode: "VP01",
+    plantName: "Vapi",
     inventoryDays: 4.1,
     targetDays: 12,
     stockoutRiskSkus: 7,
@@ -208,8 +210,8 @@ export const INVENTORY_HEALTH: InventoryHealthRow[] = [
     status: "AT_RISK",
   },
   {
-    plantCode: "DE01",
-    plantName: "Ingolstadt",
+    plantCode: "HY01",
+    plantName: "Hyderabad",
     inventoryDays: 8.6,
     targetDays: 10,
     stockoutRiskSkus: 4,
@@ -217,8 +219,8 @@ export const INVENTORY_HEALTH: InventoryHealthRow[] = [
     status: "WATCH",
   },
   {
-    plantCode: "MX01",
-    plantName: "Querétaro",
+    plantCode: "RK01",
+    plantName: "Roorkee",
     inventoryDays: 26.4,
     targetDays: 28,
     stockoutRiskSkus: 2,
@@ -226,8 +228,8 @@ export const INVENTORY_HEALTH: InventoryHealthRow[] = [
     status: "WATCH",
   },
   {
-    plantCode: "US01",
-    plantName: "Greenville",
+    plantCode: "CH01",
+    plantName: "Chennai",
     inventoryDays: 31.8,
     targetDays: 30,
     stockoutRiskSkus: 1,

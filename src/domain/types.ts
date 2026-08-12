@@ -97,6 +97,17 @@ export interface OperationalCase {
   description: string;
   exceptionType: ExceptionType;
   detectedBy: DetectionSource;
+  /**
+   * The enterprise system the signal came from, and the record inside it.
+   *
+   * QuikOps holds neither: an operational case is raised *about* a purchase
+   * order, a batch or a delivery that continues to live in the system of
+   * record. Carrying the pair on the case is what lets a reader trace a
+   * QuikOps case back to the ERP row it was raised from, and is why the
+   * product can say it consumes operational signals rather than inventing them.
+   */
+  sourceSystem: string;
+  sourceRecord: string;
   status: CaseStatus;
   priorityBand: PriorityBand;
   priorityScore: number;

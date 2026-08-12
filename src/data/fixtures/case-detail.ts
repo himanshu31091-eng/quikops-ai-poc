@@ -187,7 +187,7 @@ export function reviewerFor(item: CaseListItem): User {
       user.plantScope[0] === item.plantCode &&
       user.id !== item.ownerId,
   );
-  const fallback = USER_BY_ID.usr_mreinhardt!;
+  const fallback = USER_BY_ID.usr_ndeshpande!;
   if (plantManager) return plantManager;
   return item.ownerId === fallback.id
     ? (USERS.find((u) => u.role === "OPS_MANAGER" && u.id !== item.ownerId) ?? fallback)
@@ -323,7 +323,7 @@ export function buildCaseInformation(item: CaseListItem): CaseInformation {
     detectionRuleId: rule.id,
     detectionRuleName: rule.name,
     detectionRuleDetail: rule.detail,
-    signalRef: `SIG-${signalDate}-${item.plant.countryCode}-${item.caseNo.slice(-6)}`,
+    signalRef: `SIG-${signalDate}-${item.plant.countryCode}-${item.caseNo.split("-").pop()}`,
   };
 }
 
@@ -622,7 +622,7 @@ export function buildCorrectiveActions(item: CaseListItem): CorrectiveAction[] {
   const seeded = TODAYS_ACTIONS.filter((action) => action.caseId === item.id);
   const steps = PLAYBOOK_STEPS[item.exceptionType];
   const openTarget = item.openActionCount;
-  const owner = item.ownerId ?? "usr_cmendoza";
+  const owner = item.ownerId ?? "usr_aiyer";
 
   const actions: CorrectiveAction[] = [];
 
@@ -779,7 +779,7 @@ export function buildEvidence(
 export function buildComments(item: CaseListItem): CaseComment[] {
   const owner = item.ownerId ? USER_BY_ID[item.ownerId] : null;
   const reviewer = reviewerFor(item);
-  const analyst = USER_BY_ID.usr_dkim!;
+  const analyst = USER_BY_ID.usr_agupta!;
   const group = statusGroupOf(item.status);
   const comments: CaseComment[] = [];
 

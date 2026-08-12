@@ -203,10 +203,18 @@ export function worstPlantCode(items: OperationalCase[], plantCodes: string[], n
   const ranked = plantCodes
     .map((code) => ({ code, ...computePlantRollup(items, code, now) }))
     .filter((entry) => entry.openCases > 0)
+    // Critical count leads, then adherence, then exposure.
+    //
+    // Adherence used to lead, and it named a site with no critical cases as the
+    // one needing attention while the plant panel beside it — which ranks on
+    // OTIF — named a different one. Two definitions of "worst" on one screen is
+    // the contradiction a client spots first. Criticals lead because an
+    // unresolved critical case is a management item in a way that a percentage
+    // point of adherence is not.
     .sort(
       (a, b) =>
-        a.slaAdherencePct - b.slaAdherencePct ||
         b.criticalCases - a.criticalCases ||
+        a.slaAdherencePct - b.slaAdherencePct ||
         b.revenueAtRisk - a.revenueAtRisk,
     );
   return ranked[0]?.code ?? null;

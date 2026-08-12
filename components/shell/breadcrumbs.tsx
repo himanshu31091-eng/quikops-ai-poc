@@ -25,10 +25,12 @@ const SEGMENT_LABELS: Record<string, string> = {
 };
 
 /**
- * A record identifier — a case number like `QO-2026-004144`. Its hyphens are
+ * A record identifier — a case number like `QO-PA-2026-00421`. Its hyphens are
  * part of the value, not word separators, so it must survive `toTitle` intact.
  */
-const RECORD_ID = /^[A-Z]{2,}-\d[\d-]*$/;
+// Allows the customer prefix in `QO-PA-2026-00421` as well as the older
+// `QO-2026-004144`: any run of uppercase segments, ending in a numeric one.
+const RECORD_ID = /^[A-Z]{2,}(?:-[A-Z0-9]+)*-\d[\d-]*$/;
 
 function toTitle(segment: string): string {
   if (RECORD_ID.test(segment)) return segment;

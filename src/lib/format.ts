@@ -1,22 +1,29 @@
 import { formatDistanceStrict, differenceInCalendarDays, format } from "date-fns";
+import { CURRENCY_LOCALE, DEFAULT_CURRENCY } from "./constants";
 
-const FULL_CURRENCY_THRESHOLD = 1_000_000;
+const FULL_CURRENCY_THRESHOLD = 10_000_000;
 const RELATIVE_DATE_WINDOW_DAYS = 7;
 
 /**
- * Money. Compact above 1M ($1.2M), full below ($180,000).
- * Never renders a fractional cent — executives read magnitude, not precision.
+ * Money, in the reader's own convention.
+ *
+ * The locale is what makes this Indian rather than merely rupee-denominated:
+ * `en-IN` groups by lakh and crore, so 18,000,000 reads ₹1.8Cr and 4,500,000
+ * reads ₹45,00,000 — the way a plant manager in Vapi would write it. The
+ * compact threshold sits at one crore for the same reason.
+ *
+ * Never renders a fractional unit — executives read magnitude, not precision.
  */
 export function formatMoney(
   amount: number,
-  currency = "USD",
+  currency = DEFAULT_CURRENCY,
   options?: { forceCompact?: boolean; forceFull?: boolean },
 ): string {
   const compact =
     options?.forceCompact ??
     (options?.forceFull ? false : Math.abs(amount) >= FULL_CURRENCY_THRESHOLD);
 
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(CURRENCY_LOCALE, {
     style: "currency",
     currency,
     notation: compact ? "compact" : "standard",

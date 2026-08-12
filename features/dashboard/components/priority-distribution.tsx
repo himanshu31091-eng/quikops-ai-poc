@@ -37,7 +37,7 @@ function renderTooltip(
         { label: "Open cases", value: formatNumber(slice.count) },
         {
           label: "Revenue at risk",
-          value: formatMoney(slice.revenueAtRisk, "USD", { forceCompact: true }),
+          value: formatMoney(slice.revenueAtRisk, undefined, { forceCompact: true }),
         },
       ]}
     />
@@ -105,7 +105,7 @@ export function PriorityDistribution({
                 {share.toFixed(0)}%
               </span>
               <span className="w-16 text-right text-2xs font-medium tabular-nums text-content-secondary">
-                {formatMoney(slice.revenueAtRisk, "USD", { forceCompact: true })}
+                {formatMoney(slice.revenueAtRisk, undefined, { forceCompact: true })}
               </span>
             </li>
           );

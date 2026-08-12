@@ -36,7 +36,7 @@ import {
 } from "@/src/ai/config";
 import { isOpenStatus } from "@/src/domain/case-status";
 import { hasBreachedSla } from "@/src/domain/portfolio-metrics";
-import { KPI_MEASUREMENT_WINDOW_DAYS } from "@/src/lib/constants";
+import { KPI_MEASUREMENT_WINDOW_DAYS, DEFAULT_CURRENCY } from "@/src/lib/constants";
 import { ROLE_META } from "@/src/config/app-config";
 import {
   previewSlaChange,
@@ -638,7 +638,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
               loads={departmentLoads}
               unownedCases={unowned.count}
               unownedExposure={unowned.exposure}
-              currency={data.cases[0]?.currency ?? "USD"}
+              currency={data.cases[0]?.currency ?? DEFAULT_CURRENCY}
             />
           </SectionCard>
         </div>

@@ -129,6 +129,9 @@ export function buildCaseFromDraft(
       "Raised manually from the Work Manager. No detection signal is attached.",
     exceptionType: draft.exceptionType,
     detectedBy: "MANUAL",
+    // Raised by hand on the floor, so there is no upstream record to trace to.
+    sourceSystem: "Manual entry",
+    sourceRecord: "—",
     status: owner ? "ASSIGNED" : "NEW",
     priorityBand: priority.band,
     priorityScore: priority.score,

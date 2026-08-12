@@ -1,38 +1,43 @@
 import type { Plant, User } from "@/src/domain/types";
 
 /**
- * Seeded organisation. Modelled on a tier-one automotive and aerospace
- * components manufacturer with four production sites.
+ * Seeded organisation — **Perma Construction Aids**, an Indian
+ * construction-chemicals manufacturer with four production sites.
+ *
+ * Product lines: waterproofing chemicals, concrete admixtures, repair
+ * chemicals and tile adhesives. Every site runs the same functional model —
+ * procurement, production, quality, supply chain, logistics and customer
+ * service — which is why one exception type reads the same way at any of them.
  */
 export const PLANTS: Plant[] = [
   {
-    id: "plt_mx01",
-    code: "MX01",
-    name: "Querétaro",
-    country: "Mexico",
-    countryCode: "MX",
-    timezone: "America/Mexico_City",
+    id: "plt_vp01",
+    code: "VP01",
+    name: "Vapi",
+    country: "India",
+    countryCode: "IN",
+    timezone: "Asia/Kolkata",
   },
   {
-    id: "plt_us01",
-    code: "US01",
-    name: "Greenville",
-    country: "United States",
-    countryCode: "US",
-    timezone: "America/New_York",
+    id: "plt_rk01",
+    code: "RK01",
+    name: "Roorkee",
+    country: "India",
+    countryCode: "IN",
+    timezone: "Asia/Kolkata",
   },
   {
-    id: "plt_de01",
-    code: "DE01",
-    name: "Ingolstadt",
-    country: "Germany",
-    countryCode: "DE",
-    timezone: "Europe/Berlin",
+    id: "plt_hy01",
+    code: "HY01",
+    name: "Hyderabad",
+    country: "India",
+    countryCode: "IN",
+    timezone: "Asia/Kolkata",
   },
   {
-    id: "plt_in01",
-    code: "IN01",
-    name: "Pune",
+    id: "plt_ch01",
+    code: "CH01",
+    name: "Chennai",
     country: "India",
     countryCode: "IN",
     timezone: "Asia/Kolkata",
@@ -43,77 +48,88 @@ export const PLANT_BY_CODE: Record<string, Plant> = Object.fromEntries(
   PLANTS.map((p) => [p.code, p]),
 );
 
+const ALL_SITES = ["VP01", "RK01", "HY01", "CH01"];
+
 export const USERS: User[] = [
   {
-    id: "usr_evasquez",
-    email: "elena.vasquez@northbridge-industrial.com",
-    name: "Elena Vásquez",
+    id: "usr_rmenon",
+    email: "rajesh.menon@permaconstructionaids.com",
+    name: "Rajesh Menon",
     role: "EXECUTIVE",
-    jobTitle: "Chief Operating Officer",
-    plantScope: ["MX01", "US01", "DE01", "IN01"],
+    jobTitle: "Supply Chain Head",
+    plantScope: ALL_SITES,
     isActive: true,
   },
   {
-    id: "usr_mreinhardt",
-    email: "marcus.reinhardt@northbridge-industrial.com",
-    name: "Marcus Reinhardt",
+    id: "usr_ndeshpande",
+    email: "neha.deshpande@permaconstructionaids.com",
+    name: "Neha Deshpande",
     role: "OPS_MANAGER",
-    jobTitle: "VP Global Operations",
-    plantScope: ["MX01", "US01", "DE01", "IN01"],
+    jobTitle: "Head of Operations",
+    plantScope: ALL_SITES,
     isActive: true,
   },
   {
-    id: "usr_psharma",
-    email: "priya.sharma@northbridge-industrial.com",
-    name: "Priya Sharma",
+    id: "usr_sjoshi",
+    email: "sunil.joshi@permaconstructionaids.com",
+    name: "Sunil Joshi",
     role: "OPS_MANAGER",
-    jobTitle: "Plant Operations Manager — Querétaro",
-    plantScope: ["MX01"],
+    jobTitle: "Plant Operations Manager — Vapi",
+    plantScope: ["VP01"],
     isActive: true,
   },
   {
-    id: "usr_cmendoza",
-    email: "carlos.mendoza@northbridge-industrial.com",
-    name: "Carlos Mendoza",
+    id: "usr_aiyer",
+    email: "arun.iyer@permaconstructionaids.com",
+    name: "Arun Iyer",
     role: "TASK_OWNER",
-    jobTitle: "Procurement Manager — Americas",
-    plantScope: ["MX01", "US01"],
+    jobTitle: "Procurement Manager",
+    plantScope: ["VP01", "RK01"],
     isActive: true,
   },
   {
-    id: "usr_tberger",
-    email: "thomas.berger@northbridge-industrial.com",
-    name: "Thomas Berger",
+    id: "usr_kbhatt",
+    email: "kavita.bhatt@permaconstructionaids.com",
+    name: "Kavita Bhatt",
     role: "TASK_OWNER",
-    jobTitle: "Senior Production Planner",
-    plantScope: ["DE01"],
+    jobTitle: "Quality Manager",
+    plantScope: ["VP01", "HY01"],
     isActive: true,
   },
   {
-    id: "usr_aokonkwo",
-    email: "aisha.okonkwo@northbridge-industrial.com",
-    name: "Aisha Okonkwo",
+    id: "usr_vrane",
+    email: "vikram.rane@permaconstructionaids.com",
+    name: "Vikram Rane",
+    role: "TASK_OWNER",
+    jobTitle: "Production Manager — Vapi",
+    plantScope: ["VP01"],
+    isActive: true,
+  },
+  {
+    id: "usr_mpillai",
+    email: "meera.pillai@permaconstructionaids.com",
+    name: "Meera Pillai",
     role: "TASK_OWNER",
     jobTitle: "Logistics Lead",
-    plantScope: ["MX01", "US01"],
+    plantScope: ["CH01", "HY01"],
     isActive: true,
   },
   {
-    id: "usr_dkim",
-    email: "daniel.kim@northbridge-industrial.com",
-    name: "Daniel Kim",
+    id: "usr_agupta",
+    email: "ananya.gupta@permaconstructionaids.com",
+    name: "Ananya Gupta",
     role: "ANALYST",
     jobTitle: "Supply Chain Analyst",
-    plantScope: ["MX01", "US01", "DE01", "IN01"],
+    plantScope: ALL_SITES,
     isActive: true,
   },
   {
-    id: "usr_swhitfield",
-    email: "sandra.whitfield@northbridge-industrial.com",
-    name: "Sandra Whitfield",
+    id: "usr_pnair",
+    email: "prakash.nair@permaconstructionaids.com",
+    name: "Prakash Nair",
     role: "ADMINISTRATOR",
     jobTitle: "Platform Administrator",
-    plantScope: ["MX01", "US01", "DE01", "IN01"],
+    plantScope: ALL_SITES,
     isActive: true,
   },
 ];
@@ -122,13 +138,16 @@ export const USER_BY_ID: Record<string, User> = Object.fromEntries(
   USERS.map((u) => [u.id, u]),
 );
 
-/** The persona the demo signs in as by default. */
-export const DEFAULT_SESSION_USER_ID = "usr_evasquez";
+/** The persona the demo signs in as by default — the walkthrough opens on the
+ *  Supply Chain Head, because the story starts with "which plant needs me?". */
+export const DEFAULT_SESSION_USER_ID = "usr_rmenon";
 
-/** Personas offered on the login screen and in the role switcher. */
+/** Personas offered on the login screen and in the role switcher. One per
+ *  role in the demo narrative: who asks, who triages, who executes, who runs
+ *  the platform. */
 export const DEMO_PERSONAS = [
-  "usr_evasquez",
-  "usr_mreinhardt",
-  "usr_cmendoza",
-  "usr_swhitfield",
+  "usr_rmenon",
+  "usr_ndeshpande",
+  "usr_aiyer",
+  "usr_pnair",
 ] as const;

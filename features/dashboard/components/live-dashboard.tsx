@@ -19,7 +19,7 @@ import {
   forecastFlow,
 } from "@/src/domain/flow-balance";
 import { cn } from "@/src/lib/cn";
-import { DEMO_NOW } from "@/src/lib/constants";
+import { DEMO_NOW, DEFAULT_CURRENCY } from "@/src/lib/constants";
 import { buildCsv, exportSectionsCsv } from "@/src/lib/export";
 import { formatMoney } from "@/src/lib/format";
 import { useExecutionStore } from "@/src/workflow/execution-store";
@@ -174,7 +174,7 @@ export function LiveFlowVerdict({ cases }: { cases: CaseListItem[] }) {
         comparison,
         null,
         (amount) =>
-          formatMoney(amount, projected[0]?.currency ?? "USD", { forceCompact: true }),
+          formatMoney(amount, projected[0]?.currency ?? DEFAULT_CURRENCY, { forceCompact: true }),
       ),
     };
   }, [cases, state]);
