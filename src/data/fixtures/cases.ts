@@ -135,12 +135,12 @@ const SEEDS: CaseSeed[] = [
     caseNo: "QO-PA-2026-00418",
     title: "Packaging material shortage — HDPE pails",
     description:
-      "On-hand coverage of 20-litre HDPE pails fell to two days against the Vapi filling schedule after Bharat Packaging deferred a confirmed consignment. Dispatch of tile adhesive and waterproofing packs is exposed.",
+      "On-hand coverage of 20-litre HDPE pails fell to two days against the Vapi filling schedule after Bharat Packaging deferred a confirmed consignment. All four corrective actions are complete and evidenced — the deferred consignment was released, a second approved supplier was qualified, and the reorder point was reset. Submitted for independent verification; awaiting a reviewer.",
     exceptionType: "MATERIAL_SHORTAGE",
     detectedBy: "EVERY_ANGLE",
     sourceSystem: "SAP ERP",
     sourceRecord: "PO-PA-45903",
-    status: "IN_PROGRESS",
+    status: "PENDING_VERIFY",
     plantCode: "VP01",
     materialCode: "PK-HD-2000",
     materialDesc: "HDPE pail, 20L, printed, with lid",
@@ -159,7 +159,7 @@ const SEEDS: CaseSeed[] = [
     recurrenceCount: 2,
     escalationLevel: 1,
     totalActionCount: 4,
-    openActionCount: 2,
+    openActionCount: 0,
     playbookId: "pb_material_shortage",
   },
   {
