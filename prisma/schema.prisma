@@ -157,12 +157,26 @@ model User {
   name      String
   jobTitle  String
   roleKey   UserRoleType
-  /// Plant codes this person can see. Empty means the whole tenant.
+  /// Plant scope, language and activity. Empty scope means the whole tenant.
   plantScope String[]
   language  String       @default("en")
   isActive  Boolean      @default(true)
   lastLoginAt DateTime?
   createdAt DateTime     @default(now())
+
+  /// The demo persona this person is reachable as, e.g. "usr_aiyer".
+  ///
+  /// The POC signs in by picking a persona, and the session carries that
+  /// persona's id. Until this column existed, a session id named a fixture
+  /// user and matched no row in the database, so nothing done in database mode
+  /// could be attributed to anybody. Ownership, audit authorship and the two
+  /// sides of a verification all resolve through here.
+  ///
+  /// Null for a person who exists only in the database — a real user added
+  /// later has no persona and is not reachable from the persona switcher.
+  /// Unique per tenant, never globally: two tenants may both expose an
+  /// "owner" persona and they must resolve to different people.
+  personaKey String?
 
   tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   role      Role   @relation(fields: [roleKey], references: [key])
@@ -175,9 +189,12 @@ model User {
   reviewedVerifications  Verification[] @relation("VerificationReviewer")
   auditEvents    AuditEvent[]
 
+  comments Comment[]
+
   /// Email is unique inside a tenant, not globally — two tenants may both have
   /// an evaluator at the same address.
   @@unique([tenantId, email])
+  @@unique([tenantId, personaKey])
   @@index([tenantId])
 }
 
@@ -199,11 +216,27 @@ model Plant {
 
 /* ------------------------------------------------------------------ Cases */
 
+//
+// `seedKey` — the line between demo data and client data.
+//
+// Every row the seed owns carries a stable `seedKey`. Every row a person
+// created through the portal has `seedKey = null`. That single invariant is
+// what makes the seed safe to re-run against an environment a client is
+// already using: it can find its own rows exactly, and it can prove a row is
+// not its own before leaving it alone. Nothing else in the schema can tell a
+// seeded case from an entered one, and "looks like the one I wrote" is not a
+// basis on which to touch a client's data.
+//
+// Unique per tenant rather than globally, so both tenants can carry the same
+// scenario key without colliding.
+//
+
 /// Where a case came from, kept separate because a source is a record in a
 /// system QuikOps does not own and may be referenced by more than one case.
 model CaseSource {
   id           String  @id @default(cuid())
   tenantId     String
+  seedKey      String?
   /// "SAP ERP", "Quality Management System", "Manual entry".
   system       String
   /// The row inside it — a purchase order, an inspection lot, a dispatch note.
@@ -216,12 +249,14 @@ model CaseSource {
 
   cases Case[]
 
+  @@unique([tenantId, seedKey])
   @@index([tenantId])
 }
 
 model Case {
   id            String          @id @default(cuid())
   tenantId      String
+  seedKey       String?
   caseNo        String
   title         String
   description   String
@@ -270,8 +305,10 @@ model Case {
   evidence     Evidence[]
   measurements KpiMeasurement[]
   verification Verification?
+  comments     Comment[]
 
   @@unique([tenantId, caseNo])
+  @@unique([tenantId, seedKey])
   @@index([tenantId, status])
   @@index([tenantId, plantId])
 }
@@ -279,6 +316,7 @@ model Case {
 model CorrectiveAction {
   id           String       @id @default(cuid())
   tenantId     String
+  seedKey      String?
   caseId       String
   title        String
   description  String
@@ -297,6 +335,7 @@ model CorrectiveAction {
   owner    User       @relation("ActionOwner", fields: [ownerId], references: [id])
   evidence Evidence[]
 
+  @@unique([tenantId, seedKey])
   @@index([tenantId])
   @@index([caseId])
 }
@@ -306,6 +345,7 @@ model CorrectiveAction {
 model Evidence {
   id          String   @id @default(cuid())
   tenantId    String
+  seedKey     String?
   caseId      String
   actionId    String?
   fileName    String
@@ -321,6 +361,7 @@ model Evidence {
   action     CorrectiveAction? @relation(fields: [actionId], references: [id])
   uploadedBy User              @relation(fields: [uploadedById], references: [id])
 
+  @@unique([tenantId, seedKey])
   @@index([tenantId])
   @@index([caseId])
 }
@@ -350,6 +391,7 @@ model KpiDefinition {
 model KpiMeasurement {
   id         String   @id @default(cuid())
   tenantId   String
+  seedKey    String?
   caseId     String
   kpiId      String
   baseline   Float
@@ -365,6 +407,7 @@ model KpiMeasurement {
   case Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
   kpi  KpiDefinition @relation(fields: [kpiId], references: [id])
 
+  @@unique([tenantId, seedKey])
   @@index([tenantId])
   @@index([caseId])
 }
@@ -374,6 +417,7 @@ model KpiMeasurement {
 model Verification {
   id            String                @id @default(cuid())
   tenantId      String
+  seedKey       String?
   caseId        String                @unique
   requestedById String
   requestedAt   DateTime
@@ -389,6 +433,7 @@ model Verification {
   requestedBy User @relation("VerificationRequester", fields: [requestedById], references: [id])
   reviewer    User @relation("VerificationReviewer", fields: [reviewerId], references: [id])
 
+  @@unique([tenantId, seedKey])
   @@index([tenantId])
 }
 
@@ -397,6 +442,7 @@ model Verification {
 model AuditEvent {
   id         String   @id @default(cuid())
   tenantId   String
+  seedKey    String?
   /// Null for events the platform raised itself — an SLA breach has no author.
   userId     String?
   /// What happened, e.g. "case.assigned", "verification.decided", "user.created".
@@ -414,6 +460,38 @@ model AuditEvent {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user   User?  @relation(fields: [userId], references: [id])
 
+  @@unique([tenantId, seedKey])
   @@index([tenantId, occurredAt])
   @@index([entityType, entityId])
+}
+
+/* --------------------------------------------------------------- Comments */
+
+/// A comment on a case.
+///
+/// Scoped to both the tenant and the case: the case already determines the
+/// tenant, and carrying `tenantId` anyway means every read filters on it
+/// without a join, the same way every other business record here does.
+///
+/// `editedAt` is null until the author changes the text, so "edited" is a fact
+/// the record can state rather than something the UI infers from timestamps
+/// being close together. Deliberately not soft-deleted: nothing in the POC
+/// deletes a comment, and a `deletedAt` nobody sets is a promise the schema
+/// cannot keep.
+model Comment {
+  id        String   @id @default(cuid())
+  tenantId  String
+  seedKey   String?
+  caseId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  editedAt  DateTime?
+
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@unique([tenantId, seedKey])
+  @@index([tenantId])
+  @@index([caseId, createdAt])
 }

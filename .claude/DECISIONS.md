@@ -1224,6 +1224,90 @@ be dispatched before a re-render. A second click in that window would write a
 second cookie and race its own navigation — the one way a presenter lands in the
 wrong role in front of a client.
 
+### D-91 — A seed that can delete is not a seed, it is a reset
+Decided 2026-08-15, Phase A.
+
+The seed opened with `prisma.tenant.deleteMany({})`. Every business record
+cascades off `Tenant`, so that one line erases the cases, actions, evidence,
+verifications and audit trail of every tenant in the database. That was
+defensible while the database was a private staging copy. It stops being
+defensible the moment a client is given access, and it was never going to
+announce itself — the failure mode is a colleague running `node prisma/seed.mjs`
+to "refresh the demo" a week into an evaluation.
+
+**The seed no longer deletes anything.** There is no `deleteMany`, no truncate,
+no drop. Re-running it is now a no-op: verified by running it three times and
+watching runs two and three create nothing and leave the totals identical.
+
+**Two classes of row, two rules.** *Reference data* — tenants, roles,
+permissions, plants, people, KPI definitions — is upserted, because it is
+configuration and a corrected label should propagate. *Transactional data* —
+cases, actions, evidence, measurements, verifications, comments, audit — is
+created if missing and then never written again, because a client may have
+edited it and this script cannot tell an edit from the original.
+
+### D-92 — `seedKey` is the line between demo data and client data
+Decided 2026-08-15, Phase A.
+
+Every row the seed creates carries a stable `seedKey`; every row a person
+creates through the portal has `seedKey = null`. Nothing else in the schema can
+tell the two apart, and "it looks like the row I wrote" is not a basis on which
+to touch a client's data.
+
+The alternative — matching on business keys at write time — fails the moment a
+client names a case the way the seed would have. The column is nullable and
+unique per tenant, so both tenants can carry the same scenario key.
+
+Rows written before the column existed are **adopted**: matched once on their
+business key, stamped with their `seedKey`, and otherwise left alone. Adoption
+only ever considers rows whose `seedKey` is still null, so it can capture the
+old seed's work and never a client's.
+
+**Verified, not assumed.** A simulated client case, a client comment, and a
+client edit to a *seeded* case were planted in Neon; the seed was re-run; all
+three survived byte-for-byte, including the edit the seed "knew" a different
+value for.
+
+### D-93 — A session names somebody the database has heard of
+Decided 2026-08-15, Phase A.
+
+The POC signs in by choosing a persona, and the cookie carries a persona key —
+`usr_aiyer`, not a database id. In database mode that matched no row, so a
+signed-in session named a person the database did not have. Ownership, audit
+authorship and both halves of a verification all need a real identity, which is
+why segregation of duties could not be enforced in database mode at all.
+
+`User.personaKey` closes it: nullable, unique per tenant, resolved by
+`findUserByPersona(tenantId, personaKey)`. Nineteen personas across two tenants
+each resolve to exactly one user, with no duplicates and no key shared across
+tenants.
+
+**Tenant-scoped on every call, never global.** Both tenants may expose a
+"reviewer" persona; a lookup that forgot the tenant would be a cross-tenant
+identity leak wearing the clothes of a convenience.
+
+**No silent fallback.** If a persona resolves to nobody in database mode the
+session is treated as stale — `null`, and the guard sends the request to
+`/login`. It deliberately does not fall back to the fixture user of the same
+name: signing somebody in as an identity the database has never heard of is how
+an audit trail becomes fiction.
+
+### D-94 — Comments are a table, not a promise
+Decided 2026-08-15, Phase A.
+
+Case Detail has had a comments section since Phase 3 with no model behind it, so
+comments were the one part of the case record that could never persist. The
+`Comment` model closes that gap ahead of the write path that will use it:
+tenant- and case-scoped, author relation, `createdAt`, and `editedAt` that stays
+null until the text changes, so "edited" is a fact the row states rather than
+something the UI infers.
+
+Deliberately not soft-deleted. Nothing in the POC deletes a comment, and a
+`deletedAt` nobody sets is a promise the schema cannot keep.
+
+**Phase A stops at the schema.** The write path is Phase B; seeding five
+comments proves the model without pretending the feature is finished.
+
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.

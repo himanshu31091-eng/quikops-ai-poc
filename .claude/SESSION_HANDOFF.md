@@ -12,8 +12,11 @@
 
 ## Session Date
 
-**2026-08-14** — Sika evaluation closure. Case Detail finished its move to Neon,
-four client-facing defects were fixed, and the demo configuration was frozen.
+**2026-08-15** — Phase A: the persistence foundation. The seed was made
+non-destructive, the Sika evaluation corpus was expanded across five sites,
+persona identity was mapped into the database, and the `Comment` model landed.
+
+**Phase B has not started and must not be started without approval.**
 
 ---
 
@@ -23,135 +26,143 @@ four client-facing defects were fixed, and the demo configuration was frozen.
 
 ---
 
-## How to run the demo — read before showing a client
+## Read this before anything else
 
-**Leave `USE_DATABASE` unset.** The demo runs on the seeded fixture corpus, and
-that is deliberate, not a shortcut. Every screen then reads the same eight-case
-corpus and they all agree with each other.
+**The application still has no write path to the database.** Not one
+`prisma.*.create` or `.update` outside the seed; the only two server actions
+write cookies. Every edit a user makes in the portal — cases, actions,
+evidence, verification, comments — lives in React state and dies on refresh.
 
-Turning the flag on makes Work Manager and Case Detail read Neon while the
-Dashboard, Analytics and Reports keep reading fixtures — so the Dashboard would
-report seven cases and the queue three, in the same session, in front of the
-client. **That is the one thing that must not happen during an evaluation.**
+Phase A did not change that, and was not meant to. It built the floor Phase B
+stands on. **Do not tell a client their data will persist yet.**
 
-The database path is real, complete for the screens it covers, and verified. It
-is staged for the next phase, not for the demo.
+---
 
-### The two cases the demo needs
+## How to run the demo — unchanged
 
-No single case carries the whole story, because the halves live on two records.
+**Leave `USE_DATABASE` unset.** Work Manager and Case Detail read Neon when it
+is on; Dashboard, Analytics and Reports do not. Turning it on in front of a
+client shows a dashboard of eight cases above a queue of three.
 
 | Case | Shows |
 |---|---|
 | `QO-PA-2026-00421` | Problem, priority score, ownership, corrective actions, evidence, timeline, audit |
 | `QO-PA-2026-00418` | The KPI movement and the independent verification decision |
 
-`00421` is `IN_PROGRESS` with an open action, so it correctly shows **no**
-verification card — in either mode. `00418` is the only record that renders the
-full panel: 87 baseline → 92 interim, target 95, 14-day window still open,
-requested by Arun Iyer, reviewed by Sunil Joshi, decision pending.
-
----
-
-## Where things stand
-
-| Area | State |
-|---|---|
-| Work Manager | Neon-backed behind the flag; fixtures by default |
-| Case Detail — record, actions, evidence, KPI, verification, timeline, audit | Neon-backed behind the flag; fixtures by default |
-| Dashboard · Analytics · Reports · Administration · My Work · Action Center · Playbooks · Connectors · Audit Log | Fixtures in both modes |
-| Tenant isolation | Enforced in the query layer, verified both directions |
-| RBAC | Authenticated guard on the whole tree; server-side role check on `/admin` |
-| Languages | English, Spanish, Portuguese — navigation and shared labels |
-| AI Copilot | Live, verified end to end against a real model response |
-
 ---
 
 ## What changed this session
 
-**Case Detail completed its migration** (`9fa3902`). One mapper,
-`src/data/queries/case-detail-db-mapper.ts`, holds every Prisma-facing line.
-Three translations, none of them a cast: `fileType` → `EvidenceKind` through a
-three-tier validated lookup; stored audit `source` → the UI union by reading
-`AUDIT_SOURCE_LABEL` backwards so the two cannot drift; `roleKey` → `UserRole`
-checked against the role list. Each has a stated fallback. No `TimelineEvent`
-model — a timeline is a reading of the record, not a second copy of it.
+**The seed can no longer destroy anything (D-91).** `prisma.tenant.deleteMany({})`
+cascaded to every case, action, evidence row and audit entry in the database.
+It is gone, along with every other delete. Reference data upserts; transactional
+data is created once and never written again. Three consecutive runs: run one
+created the new corpus, runs two and three created nothing and left the totals
+identical.
 
-**Build reproducibility fixed** (`0ea09ad`, `ec37ed0`). `@prisma/client` v7
-installs as a stub with no `PrismaClient` export until `prisma generate` runs,
-which had only ever happened locally as a side effect of the migration. Any
-clean install could not compile. A `postinstall` hook now generates the client,
-and the package moved to `dependencies` where a runtime import belongs.
+**`seedKey` separates demo data from client data (D-92).** Every seeded row
+carries one; every row a person creates has `seedKey = null`. Rows from the old
+seed were adopted — matched once on their business key, stamped, otherwise
+untouched. Proven by planting a client case, a client comment and a client edit
+to a *seeded* case, re-running the seed, and finding all three intact.
 
-**Four client-facing defects fixed** (`7e37376`): the dashboard claimed four
-plants against three in the data; the summary card printed the model name,
-prompt version and a raw system code; Administration was reachable by URL
-whatever the role; and Portuguese was offered in the menu with no catalogue
-behind it.
+**Persona identity resolves in the database (D-93).** `User.personaKey` plus
+`findUserByPersona(tenantId, personaKey)`. All 19 personas across both tenants
+resolve 1:1, no duplicates, no key shared across tenants. `getSessionUser()` is
+database-aware and does **not** fall back to a fixture identity in database
+mode.
+
+**`Comment` model added (D-94).** Tenant- and case-scoped, author relation,
+`createdAt`, nullable `editedAt`. Schema only — the write path is Phase B.
+
+**The Sika evaluation corpus grew** from 1 site / 1 case to **5 sites / 14
+cases**, construction-chemicals throughout: admixtures, membranes, adhesives,
+resins, sealants, mortars. Five plants, four priority bands, eight exception
+types, seven statuses, both assigned and unassigned work. Sites 2 and 3 sit in
+Spanish- and Portuguese-speaking countries, so the language switch has data
+behind it. Every name is invented; every address is `example.com`.
+
+**Localization was measured, not translated.** `.claude/LOCALIZATION_PLAN.md`.
+
+---
+
+## Database state (Neon)
+
+| | |
+|---|---|
+| Tenants | 2 — `perma-demo` (3 cases), `sika-evaluation` (14 cases) |
+| Users | 19, every one carrying a `personaKey` |
+| Plants | 8 — 3 Perma, 5 Sika |
+| Cases / actions / evidence | 17 / 27 / 17 |
+| Measurements / verifications / comments / audit | 17 / 4 / 5 / 18 |
+| Rows with `seedKey = null` | **0** — no client data exists yet |
+| Migrations | 2, both applied; the Phase A one is additive only |
 
 ---
 
 ## Known gaps — state these plainly, do not paper over them
 
-- **Sika cannot be shown their own environment.** The tenant exists in Neon with
-  its own site, people, case and euro currency, correctly isolated. There is no
-  selector, and the data exists only in Neon — so reaching it means running in
-  database mode, which is what breaks Dashboard coherence. **Sika tenant access
-  is blocked behind the Dashboard/Analytics/Reports migration**, not behind a
-  missing switcher. That chain is the single most valuable next piece of work.
-- **No approved Sika logo exists**, so `logoPath` is null and the shell falls
-  back to the QuikOps mark. A brand mark is supplied by its owner; do not source
-  or approximate one.
-- **Translation stops at the navigation and shared labels.** Page bodies are
-  English in all three languages.
-- **Administration is read-only** — no add or edit user.
-- **Segregation of duties is enforced in the UI only.** `decideVerification` has
-  no actor check. In database mode no persona id matches a Neon user, so the
-  reviewer cannot record a decision at all; in demo mode it works, because
-  personas and reviewers come from the same corpus.
-- **Analytics 90-day trends are static series**, not calculated from case
-  history. Say so if asked.
+- **Nothing a user does in the portal persists.** The single most important
+  fact about this build. Phase B.
+- **Evidence upload is an in-memory `objectUrl`.** Persisting it needs blob
+  storage, not just a row.
+- **Sika cannot be shown their own environment.** `DEFAULT_TENANT_ID` is
+  `perma-demo`, there is no selector and no environment override, and reaching
+  Sika data means database mode — which breaks Dashboard coherence. Blocked
+  behind the Dashboard/Analytics/Reports migration (Phase C).
+- **Translation stops at the navigation.** Exactly two files call `t()`.
+  ≈ 827 UI strings remain. See `LOCALIZATION_PLAN.md`.
+- **Administration is read-only.**
+- **Segregation of duties is enforced in the UI only.** `decideVerification`
+  has no actor check. The identity mapping now makes one possible; it is not
+  written yet.
+- **No approved Sika logo**, so `logoPath` is null and the shell falls back to
+  the QuikOps mark.
+- **Analytics 90-day trends are static series.**
 
 ---
 
-## Verification record
-
-Run against `7e37376` on a clean `npm ci`:
+## Verification record — Phase A
 
 | Gate | Result |
 |---|---|
-| `npm ci` → `postinstall` → `prisma generate` | pass |
 | `prisma validate` | pass |
-| `tsc --noEmit`, `tsconfig.tsbuildinfo` deleted first | pass |
+| `prisma migrate deploy` | 1 migration applied, additive only — no DROP, no DELETE, no destructive ALTER |
+| Seed dry run (transaction, rolled back) | reported the plan; wrote nothing |
+| Seed run 1 | created 13 cases + supporting rows; adopted 4 cases and 29 child rows |
+| Seed runs 2 and 3 | **created nothing**, totals identical |
+| Client-data safety | planted case, comment and an edit to a seeded case → all 3 survived a reseed |
+| Tenant isolation | 0 rows visible across the boundary in either direction; 0 persona keys shared |
+| Persona resolution | 9/9 Perma, 10/10 Sika, no duplicates |
+| `tsc --noEmit` (tsbuildinfo deleted first) | pass |
 | `npx eslint .` | 0 errors, 0 warnings |
 | `next build` | 19/19 entries |
-| Route smoke test, signed in | 14/14 → 200 |
-| Route guard, signed out | `/dashboard` `/work` `/admin` → 307; `/login` → 200 |
-| RBAC | Task Owner and Analyst redirected off `/admin`; Administrator and Ops Manager admitted |
-| Case Detail six-area gate, rendered DOM | 71/71 assertions |
-| Tenant isolation | cross-tenant case → "Case not found" |
-| Languages | English / Panel ejecutivo / Painel executivo |
-| Responsive, 5 screens × 4 widths | 20/20 no overflow |
-| Runtime errors | 0 in both modes |
+| Runtime, `USE_DATABASE=true` | `/work` `/my-work` `/dashboard` `/login` → 200; the queue rendered exactly the 3 Neon cases; a fixture-only case correctly read "Case not found"; a cross-tenant case was invisible |
 
-**Method, stated plainly:** findings come from `document.body.innerText` in real
-headless Chrome after hydration — never the RSC payload. Fixture data can appear
-in serialised RSC output without being rendered, which misled an earlier
-session. The discriminator throughout: a fixture-only record must disappear when
-the flag is on, and the database record must appear in its place.
+**Method note, again:** a case number appearing in the HTML is not proof it was
+rendered — fixture strings ride along in the RSC payload. The valid
+discriminators are the `<title>` and the rendered `href="/work/…"` links.
+
+---
+
+## Not done, deliberately
+
+- **Not pushed, not deployed.** `origin/main` is still `011b585`. Pushing
+  triggers a Vercel production build from `main`, and Phase A has not been
+  approved for production. The commit sits on `main` locally.
+- Phase B (server actions, rewiring the Case Detail reducer) — not started.
+- Phase C (migrating the other 13 query modules) — not started.
 
 ---
 
 ## Resume from here
 
 1. Read `CLAUDE.md`, then `.claude/` in the order it gives.
-2. **Kill stale dev servers before verifying anything.** `netstat -ano | grep
-   :3000`, then `taskkill //PID <pid> //F`.
-3. **`USE_DATABASE` stays off by default.** Turning it on is a deliberate,
-   per-environment act, and not for a client demo until the Dashboard agrees
-   with the queue.
-4. `tsconfig.json` sets `incremental: true`. Delete `tsconfig.tsbuildinfo`
-   before trusting a typecheck — a stale cache once hid a real compile error
-   that only surfaced in CI.
-5. Next phase, in order: migrate Dashboard, then Analytics and Reports, then
-   make the tenant selectable. Those three unlock showing Sika their own data.
+2. **Kill stale dev servers before verifying anything.**
+3. `USE_DATABASE` stays off by default.
+4. Delete `tsconfig.tsbuildinfo` before trusting a typecheck.
+5. **Ask before pushing.** A push to `main` deploys to production.
+6. Phase B, in order: server actions for case → actions → evidence → comments →
+   verification, each writing its audit row in the same transaction; then
+   rewire `use-case-detail.ts`; then the acceptance test the client asked for
+   (create through the UI, refresh, log out and in, restart, still there).

@@ -3,8 +3,11 @@
 > Authoritative record of what is built, what is frozen, and what is not.
 > **Update this after every completed module, before ending the session.**
 
-**Last updated:** 2026-08-06 · after Connector Health
-**Build:** `npm run typecheck` clean · `npm run build` ✓ 15/15 pages
+**Last updated:** 2026-08-15 · Phase A (persistence foundation). §0–§3 and §5–§7
+below still describe the 2026-08-06 build and are accurate about the fixture
+application; §4 carries the corrections.
+**Build:** `npm run typecheck` clean · `npx eslint .` 0/0 · `npm run build`
+✓ 19/19 entries
 
 ---
 
@@ -207,10 +210,18 @@ Ordered by how likely they are to matter.
 2. **Browser click-through has never been verified from this environment.**
    Every claim about interaction is from code and HTTP responses, not from a
    rendered page. This has been stated consistently and remains true.
-3. **No persistence.** Every mutation is session-scoped; refresh re-reads the
-   fixtures. Deliberate for the demo, blocking for anything else.
-4. **No database.** `prisma/` is an empty directory — there is no
-   `schema.prisma`, despite what the README and a domain-types comment imply.
+3. **No persistence — still true, and now the top item.** Every mutation is
+   session-scoped React state; a refresh erases it. There is no write path to
+   the database anywhere in the application: zero `prisma.*.create/update`
+   calls outside the seed, and the only two server actions write cookies.
+   Deliberate for the demo, blocking for a client who is asked to enter data.
+   **Phase B.**
+4. ~~**No database.**~~ **Superseded 2026-08-14/15.** `prisma/schema.prisma`
+   holds 14 models against Neon, with two migrations applied. Reads are live
+   behind `USE_DATABASE` for **Work Manager** and **Case Detail** only; the
+   other 13 query modules still read fixtures, which is why the flag stays off
+   for demos. Phase A (2026-08-15) added `Comment`, `User.personaKey` and a
+   `seedKey` on every seeded model, and made the seed non-destructive.
 5. **No tests, no test tooling.**
 6. **No rate limiting on `/api/copilot`.** Input size, history and context are
    bounded; request frequency is not.

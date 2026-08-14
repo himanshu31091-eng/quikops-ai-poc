@@ -127,7 +127,7 @@ function toKpiKey(key: string | undefined, fallback: KpiKey): KpiKey {
   return KPI_KEY_SET.has(key) ? (key as KpiKey) : fallback;
 }
 
-function toUser(row: {
+export function toUser(row: {
   id: string;
   email: string;
   name: string;
