@@ -14,7 +14,7 @@
  * carry them in the database with a locale column.
  */
 
-export const LOCALES = ["en", "es", "de", "fr", "ja"] as const;
+export const LOCALES = ["en", "es", "pt-BR", "de", "fr", "ja"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
@@ -25,6 +25,10 @@ export const LOCALE_META: Record<
 > = {
   en: { label: "English", nativeLabel: "English", intlTag: "en-US", currency: "USD" },
   es: { label: "Spanish", nativeLabel: "Español", intlTag: "es-MX", currency: "USD" },
+  // Brazilian Portuguese, per the evaluation brief. Registering the locale is
+  // not the same as translating into it: the catalogues are a later phase, and
+  // a tenant should not offer a language whose strings are not written yet.
+  "pt-BR": { label: "Portuguese (Brazil)", nativeLabel: "Português", intlTag: "pt-BR", currency: "BRL" },
   de: { label: "German", nativeLabel: "Deutsch", intlTag: "de-DE", currency: "EUR" },
   fr: { label: "French", nativeLabel: "Français", intlTag: "fr-FR", currency: "EUR" },
   ja: { label: "Japanese", nativeLabel: "日本語", intlTag: "ja-JP", currency: "JPY" },

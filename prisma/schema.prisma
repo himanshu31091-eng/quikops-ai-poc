@@ -1,0 +1,419 @@
+// QuikOps AI — persistence schema.
+//
+// Modelled directly on `src/domain/types.ts`, which the POC already treats as
+// the contract: the enums below are the same unions the domain uses, so a row
+// read from Postgres maps onto the existing view models without translation.
+// That is what lets `src/data/queries/*` swap fixture bodies for Prisma without
+// the UI above it changing.
+//
+// Two rules run through the whole file.
+//
+// 1. Every business record carries `tenantId`. Isolation is enforced in the
+//    query layer's WHERE clause, never by filtering in the browser — an
+//    evaluation environment that can reach another tenant's data is a security
+//    defect, not a display bug.
+// 2. Nothing here is over-built. Only what the current POC renders is modelled;
+//    there are no soft deletes, versioning tables or audit triggers, because
+//    nothing on screen reads them yet.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7 moved the connection URL out of the schema; it lives in
+// prisma.config.ts and is read from DATABASE_URL. Credentials never appear here.
+datasource db {
+  provider = "postgresql"
+}
+
+/* ------------------------------------------------------------------ Enums */
+
+enum EnvironmentType {
+  EVALUATION
+  DEMO
+}
+
+enum UserRoleType {
+  EXECUTIVE
+  OPS_MANAGER
+  TASK_OWNER
+  ANALYST
+  ADMINISTRATOR
+}
+
+enum CaseStatus {
+  NEW
+  TRIAGED
+  ASSIGNED
+  IN_PROGRESS
+  PENDING_VERIFY
+  VERIFIED
+  CLOSED
+  DISMISSED
+  REOPENED
+}
+
+enum PriorityBand {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ExceptionType {
+  VENDOR_DELAY
+  MATERIAL_SHORTAGE
+  CAPACITY_CONSTRAINT
+  QUALITY_HOLD
+  INVENTORY_EXCESS
+  INVENTORY_STOCKOUT
+  PLANNING_DEVIATION
+  DELIVERY_AT_RISK
+  OTHER
+}
+
+enum DetectionSource {
+  EVERY_ANGLE
+  PLAYBOOK_MONITOR
+  MANUAL
+}
+
+enum ActionStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum ActionOrigin {
+  MANUAL
+  AI_SUGGESTED
+  PLAYBOOK
+}
+
+enum CustomerTier {
+  TIER_1
+  TIER_2
+  TIER_3
+}
+
+enum VerificationDecision {
+  APPROVED
+  REJECTED
+  SENT_BACK
+}
+
+/* ---------------------------------------------------------------- Tenancy */
+
+model Tenant {
+  id                String          @id
+  name              String
+  environmentLabel  String
+  environmentType   EnvironmentType
+  industry          String
+  defaultLanguage   String          @default("en")
+  supportedLanguages String[]
+  currency          String
+  currencyLocale    String
+  /// Path to an approved logo. Null until the owner supplies one.
+  logoPath          String?
+  /// Stated on screen so an evaluator is never misled about what they are seeing.
+  dataDisclosure    String
+  createdAt         DateTime        @default(now())
+
+  users        User[]
+  plants       Plant[]
+  cases        Case[]
+  kpis         KpiDefinition[]
+  auditEvents  AuditEvent[]
+}
+
+/* -------------------------------------------------------- People and access */
+
+model Role {
+  id          String       @id @default(cuid())
+  key         UserRoleType @unique
+  label       String
+  description String
+
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id     String @id @default(cuid())
+  /// Dotted capability, e.g. "case.assign" or "user.manage".
+  key    String @unique
+  label  String
+
+  roles  Role[]
+}
+
+model User {
+  id        String       @id @default(cuid())
+  tenantId  String
+  email     String
+  name      String
+  jobTitle  String
+  roleKey   UserRoleType
+  /// Plant codes this person can see. Empty means the whole tenant.
+  plantScope String[]
+  language  String       @default("en")
+  isActive  Boolean      @default(true)
+  lastLoginAt DateTime?
+  createdAt DateTime     @default(now())
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role      Role   @relation(fields: [roleKey], references: [key])
+
+  ownedCases     Case[]             @relation("CaseOwner")
+  reviewedCases  Case[]             @relation("CaseReviewer")
+  ownedActions   CorrectiveAction[] @relation("ActionOwner")
+  uploadedEvidence Evidence[]
+  requestedVerifications Verification[] @relation("VerificationRequester")
+  reviewedVerifications  Verification[] @relation("VerificationReviewer")
+  auditEvents    AuditEvent[]
+
+  /// Email is unique inside a tenant, not globally — two tenants may both have
+  /// an evaluator at the same address.
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Plant {
+  id          String @id @default(cuid())
+  tenantId    String
+  code        String
+  name        String
+  country     String
+  countryCode String
+  timezone    String
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cases  Case[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+/* ------------------------------------------------------------------ Cases */
+
+/// Where a case came from, kept separate because a source is a record in a
+/// system QuikOps does not own and may be referenced by more than one case.
+model CaseSource {
+  id           String  @id @default(cuid())
+  tenantId     String
+  /// "SAP ERP", "Quality Management System", "Manual entry".
+  system       String
+  /// The row inside it — a purchase order, an inspection lot, a dispatch note.
+  recordRef    String
+  /// The signal reference the connector emitted.
+  signalRef    String?
+  /// The rule that judged the signal worth raising.
+  businessRuleId   String?
+  businessRuleName String?
+
+  cases Case[]
+
+  @@index([tenantId])
+}
+
+model Case {
+  id            String          @id @default(cuid())
+  tenantId      String
+  caseNo        String
+  title         String
+  description   String
+  exceptionType ExceptionType
+  detectedBy    DetectionSource
+  status        CaseStatus
+  priorityBand  PriorityBand
+  priorityScore Float
+  escalationLevel Int           @default(0)
+
+  plantId       String
+  sourceId      String?
+
+  materialCode  String?
+  materialDesc  String?
+  customerCode  String?
+  customerName  String?
+  customerTier  CustomerTier?
+  supplierCode  String?
+  supplierName  String?
+
+  revenueAtRisk Decimal @db.Decimal(14, 2)
+  currency      String
+
+  ownerId       String?
+  reviewerId    String?
+
+  openedAt      DateTime
+  assignedAt    DateTime?
+  dueAt         DateTime
+  slaBreachedAt DateTime?
+  verifiedAt    DateTime?
+  closedAt      DateTime?
+  lastDetectedAt DateTime
+
+  recurrenceCount Int    @default(1)
+  playbookId      String?
+
+  tenant  Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plant   Plant       @relation(fields: [plantId], references: [id])
+  source  CaseSource? @relation(fields: [sourceId], references: [id])
+  owner   User?       @relation("CaseOwner", fields: [ownerId], references: [id])
+  reviewer User?      @relation("CaseReviewer", fields: [reviewerId], references: [id])
+
+  actions      CorrectiveAction[]
+  evidence     Evidence[]
+  measurements KpiMeasurement[]
+  verification Verification?
+
+  @@unique([tenantId, caseNo])
+  @@index([tenantId, status])
+  @@index([tenantId, plantId])
+}
+
+model CorrectiveAction {
+  id           String       @id @default(cuid())
+  tenantId     String
+  caseId       String
+  title        String
+  description  String
+  ownerId      String
+  status       ActionStatus
+  origin       ActionOrigin @default(MANUAL)
+  /// 0–100. Status is derived from this, never typed in independently.
+  completionPct Int         @default(0)
+  acceptanceCriteria String?
+  notes        String?
+  dueAt        DateTime
+  completedAt  DateTime?
+  sequence     Int          @default(0)
+
+  case     Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  owner    User       @relation("ActionOwner", fields: [ownerId], references: [id])
+  evidence Evidence[]
+
+  @@index([tenantId])
+  @@index([caseId])
+}
+
+/// Metadata only. The file itself belongs in object storage with signed URLs;
+/// nothing here holds bytes.
+model Evidence {
+  id          String   @id @default(cuid())
+  tenantId    String
+  caseId      String
+  actionId    String?
+  fileName    String
+  fileType    String
+  fileSizeBytes Int
+  /// What this file is meant to prove — the reason it counts as evidence.
+  proves      String
+  uploadedById String
+  uploadedAt  DateTime @default(now())
+  accepted    Boolean  @default(false)
+
+  case       Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  action     CorrectiveAction? @relation(fields: [actionId], references: [id])
+  uploadedBy User              @relation(fields: [uploadedById], references: [id])
+
+  @@index([tenantId])
+  @@index([caseId])
+}
+
+/* -------------------------------------------------------------------- KPIs */
+
+model KpiDefinition {
+  id         String @id @default(cuid())
+  tenantId   String
+  /// Stable identifier, e.g. OTIF_PCT. Never rendered — see KPI_LABEL.
+  key        String
+  label      String
+  /// How the number is arrived at, in words a business reader can check.
+  definition String
+  unit       String
+  /// Which system measures it. QuikOps reads OTIF; it does not compute it.
+  sourceSystem String
+
+  tenant       Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  measurements KpiMeasurement[]
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+}
+
+/// A reading against a case, captured at a point in the measurement window.
+model KpiMeasurement {
+  id         String   @id @default(cuid())
+  tenantId   String
+  caseId     String
+  kpiId      String
+  baseline   Float
+  target     Float
+  /// Null until a reading exists. Interim while the window is open.
+  current    Float?
+  windowDays Int      @default(14)
+  windowOpenedAt DateTime
+  /// True while the window is still open, so a reading is interim not final.
+  inProgress Boolean  @default(true)
+  measuredAt DateTime @default(now())
+
+  case Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  kpi  KpiDefinition @relation(fields: [kpiId], references: [id])
+
+  @@index([tenantId])
+  @@index([caseId])
+}
+
+/* ----------------------------------------------------------- Verification */
+
+model Verification {
+  id            String                @id @default(cuid())
+  tenantId      String
+  caseId        String                @unique
+  requestedById String
+  requestedAt   DateTime
+  reviewerId    String
+  /// Null while the decision is pending. A pending state is a real state.
+  decision      VerificationDecision?
+  decidedAt     DateTime?
+  comment       String?
+  notes         String?
+  windowDays    Int                   @default(14)
+
+  case        Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  requestedBy User @relation("VerificationRequester", fields: [requestedById], references: [id])
+  reviewer    User @relation("VerificationReviewer", fields: [reviewerId], references: [id])
+
+  @@index([tenantId])
+}
+
+/* ------------------------------------------------------------------ Audit */
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  tenantId   String
+  /// Null for events the platform raised itself — an SLA breach has no author.
+  userId     String?
+  /// What happened, e.g. "case.assigned", "verification.decided", "user.created".
+  event      String
+  entityType String
+  entityId   String
+  /// Field-level before/after where the event changed one.
+  field      String?
+  fromValue  String?
+  toValue    String?
+  /// Which surface recorded it — rule engine, Work Manager, case detail, API.
+  source     String
+  occurredAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, occurredAt])
+  @@index([entityType, entityId])
+}
