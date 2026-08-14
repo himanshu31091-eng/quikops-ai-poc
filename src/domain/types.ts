@@ -323,7 +323,8 @@ export interface CaseAuditEntry {
   source: "EVERY_ANGLE" | "WORK_MANAGER" | "CASE_DETAIL" | "RULE_ENGINE" | "API";
 }
 
-export type EvidenceKind = "IMAGE" | "PDF" | "SPREADSHEET" | "DOCUMENT" | "NOTE";
+export const EVIDENCE_KINDS = ["IMAGE", "PDF", "SPREADSHEET", "DOCUMENT", "NOTE"] as const;
+export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
 export interface CaseEvidence {
   id: string;

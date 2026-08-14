@@ -306,6 +306,54 @@ export const AUDIT_SOURCE_LABEL: Record<CaseAuditEntry["source"], string> = {
   API: "API",
 };
 
+/**
+ * What a user reads where a stored audit event is shown.
+ *
+ * The persisted `event` is a dotted identifier — "case.assigned" — chosen so it
+ * stays stable while the wording on screen changes. It is not display text, and
+ * rendering it raw would put a machine key in the column a quality auditor
+ * reads. Same rule as `AUDIT_SOURCE_LABEL` above.
+ */
+export const AUDIT_EVENT_LABEL: Record<string, string> = {
+  "case.created": "Case created and scored",
+  "case.triaged": "Case triaged",
+  "case.assigned": "Owner changed",
+  "case.status": "Status changed",
+  "case.priority": "Priority changed",
+  "case.due": "Due date changed",
+  "case.escalated": "Escalated",
+  "case.reopened": "Case reopened",
+  "case.closed": "Case closed",
+  "case.dismissed": "Case dismissed",
+  "action.added": "Action added",
+  "action.updated": "Action updated",
+  "action.completed": "Action completed",
+  "action.removed": "Action removed",
+  "evidence.added": "Evidence uploaded",
+  "evidence.removed": "Evidence removed",
+  "comment.added": "Comment added",
+  "playbook.applied": "Playbook applied",
+  "sla.breached": "SLA breached",
+  "priority.computed": "Priority score computed",
+  "verification.requested": "Verification requested",
+  "verification.decided": "Verification decision recorded",
+  "user.created": "User created",
+  "user.updated": "User updated",
+};
+
+/**
+ * The label for a stored event, or a readable sentence built from the key when
+ * the event is one this build has no wording for yet. A missing label is a copy
+ * gap, not a reason to show the reader nothing.
+ */
+export function auditEventLabel(event: string): string {
+  const known = AUDIT_EVENT_LABEL[event];
+  if (known) return known;
+  const words = event.replace(/[._-]+/g, " ").trim();
+  if (words.length === 0) return "Recorded change";
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 export const ACTION_STATUS_META: Record<ActionStatus, TokenSet> = {
   TODO: {
     label: "To do",

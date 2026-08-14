@@ -35,6 +35,15 @@ import {
 import { EXECUTION_METRICS } from "../fixtures/metrics";
 import { PLANTS } from "../fixtures/organisation";
 import { assignableUsers, toCaseListItem } from "./case-mapper";
+import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
+import { USE_DATABASE } from "../db";
+import {
+  findAssignableUsersForTenant,
+  findCasesForTenant,
+  findPlantsForTenant,
+} from "./case-db-mapper";
+import { chooseReviewer, findCaseDetailRecords } from "./case-detail-db-mapper";
+import type { CaseActorDirectory } from "../fixtures/case-detail";
 
 /**
  * Case Detail data access. One call returns the complete execution record so
@@ -309,38 +318,99 @@ export interface CaseDetailModel {
   exceptionLabel: string;
 }
 
-export async function getCaseDetail(caseNo: string): Promise<CaseDetailModel | null> {
+export async function getCaseDetail(
+  caseNo: string,
+  tenantId: string = DEFAULT_TENANT_ID,
+): Promise<CaseDetailModel | null> {
   const normalised = decodeURIComponent(caseNo).trim().toUpperCase();
-  const source = CASES.find((entry) => entry.caseNo.toUpperCase() === normalised);
-  if (!source) return null;
 
-  const item = toCaseListItem(source);
-  const all = CASES.map(toCaseListItem);
+  // Both sources produce the same six pieces of the execution record. Which
+  // one ran is invisible from here down: everything after this block reads the
+  // same view models, which is why the cards needed no changes.
+  let item: CaseListItem;
+  let all: CaseListItem[];
+  let reviewer: User;
+  let actions: CorrectiveAction[];
+  let evidence: CaseEvidence[];
+  let verification: VerificationRecord | null;
+  let timeline: CaseTimelineEvent[];
+  let audit: CaseAuditEntry[];
+  let comments: CaseComment[];
+  let people: User[];
+  let plants: Plant[];
 
-  const actions = buildCorrectiveActions(item);
-  const evidence = buildEvidence(item, actions);
-  const verification = buildVerification(item, actions);
-  const timeline = buildTimeline(item, actions, evidence, verification);
+  if (USE_DATABASE) {
+    // Tenant is applied in the query, not here: `findCasesForTenant` filters in
+    // its WHERE clause and the record lookup below uses the composite
+    // (tenantId, caseNo) key, so another tenant's case number never resolves.
+    all = await findCasesForTenant(tenantId, DEMO_NOW);
+    const found = all.find((entry) => entry.caseNo.toUpperCase() === normalised);
+    if (!found) return null;
+    item = found;
+
+    const [records, dbPeople, dbPlants] = await Promise.all([
+      findCaseDetailRecords(tenantId, item),
+      findAssignableUsersForTenant(tenantId),
+      findPlantsForTenant(tenantId),
+    ]);
+    if (!records) return null;
+
+    people = dbPeople;
+    plants = dbPlants;
+    actions = records.actions;
+    evidence = records.evidence;
+    verification = records.verification;
+    audit = records.audit;
+    // A case may carry no named reviewer; the routing rule then picks one from
+    // the tenant's own people. `reviewerFor` is the last resort only so the
+    // model stays non-null — with a seeded tenant it is never reached.
+    reviewer = records.reviewer ?? chooseReviewer(item, people) ?? reviewerFor(item);
+
+    const directory: CaseActorDirectory = { userById: records.userById, reviewer };
+    // Derived from the database-backed actions, evidence and verification by
+    // the same builder the fixtures use — there is no timeline table, because a
+    // timeline is a reading of the record rather than a second copy of it.
+    timeline = buildTimeline(item, actions, evidence, verification, directory);
+    // No discussion is persisted yet. An empty thread is the honest answer;
+    // composing one from fixture people would put strangers on a real case.
+    comments = [];
+  } else {
+    const source = CASES.find((entry) => entry.caseNo.toUpperCase() === normalised);
+    if (!source) return null;
+    item = toCaseListItem(source);
+    all = CASES.map(toCaseListItem);
+
+    reviewer = reviewerFor(item);
+    actions = buildCorrectiveActions(item);
+    evidence = buildEvidence(item, actions);
+    verification = buildVerification(item, actions);
+    timeline = buildTimeline(item, actions, evidence, verification);
+    audit = buildAuditLog(item, timeline, verification);
+    comments = buildComments(item);
+    people = assignableUsers();
+    plants = PLANTS;
+  }
+
   const supplierIssues = buildSupplierIssues(item, all);
 
   return {
     case: item,
-    reviewer: reviewerFor(item),
+    reviewer,
     information: buildCaseInformation(item),
     summary: buildExecutiveSummary(item),
     actions,
     evidence,
-    comments: buildComments(item),
+    comments,
     timeline,
-    audit: buildAuditLog(item, timeline, verification),
+    audit,
     verification,
     related: buildRelatedCases(item, all),
     relatedIndicators: buildRelatedIndicators(item, all),
     supplierIssues,
     insights: buildAiInsights(item, supplierIssues, actions),
     health: buildCaseHealth(item, actions),
-    assignableUsers: assignableUsers(),
-    plants: PLANTS,
+    assignableUsers: people,
+    plants,
     exceptionLabel: EXCEPTION_META[item.exceptionType].label,
   };
 }

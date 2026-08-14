@@ -166,6 +166,25 @@ function ordinal(value: number): string {
   return `${value}${suffix}`;
 }
 
+/**
+ * Who the people named on a record actually are.
+ *
+ * The builders below compose a narrative out of a case, and a narrative needs
+ * names. Fixture mode resolves them from the seeded organisation; the database
+ * path supplies the tenant's own users instead. Passing the directory in rather
+ * than reaching for `USER_BY_ID` is what lets one timeline builder serve both
+ * sources — and stops a fixture person appearing on a database-backed case,
+ * which is the exact leak this migration has to avoid.
+ */
+export interface CaseActorDirectory {
+  userById: Record<string, User | undefined>;
+  reviewer: User;
+}
+
+function directoryFor(item: CaseListItem, supplied?: CaseActorDirectory): CaseActorDirectory {
+  return supplied ?? { userById: USER_BY_ID, reviewer: reviewerFor(item) };
+}
+
 export function reviewerFor(item: CaseListItem): User {
   const plantManager = USERS.find(
     (user) =>
@@ -763,9 +782,12 @@ export function buildEvidence(
 
 /* ------------------------------------------------------------------ Comments */
 
-export function buildComments(item: CaseListItem): CaseComment[] {
-  const owner = item.ownerId ? USER_BY_ID[item.ownerId] : null;
-  const reviewer = reviewerFor(item);
+export function buildComments(
+  item: CaseListItem,
+  directory?: CaseActorDirectory,
+): CaseComment[] {
+  const owner = item.owner;
+  const { reviewer } = directoryFor(item, directory);
   const analyst = USER_BY_ID.usr_agupta!;
   const group = statusGroupOf(item.status);
   const comments: CaseComment[] = [];
@@ -916,10 +938,11 @@ export function buildTimeline(
   actions: CorrectiveAction[],
   evidence: CaseEvidence[],
   verification: VerificationRecord | null,
+  directory?: CaseActorDirectory,
 ): CaseTimelineEvent[] {
   const info = buildCaseInformation(item);
-  const owner = item.ownerId ? USER_BY_ID[item.ownerId] : null;
-  const reviewer = reviewerFor(item);
+  const owner = item.owner;
+  const { reviewer, userById } = directoryFor(item, directory);
   const group = statusGroupOf(item.status);
   const events: CaseTimelineEvent[] = [];
 
@@ -1021,10 +1044,12 @@ export function buildTimeline(
         kind: "ACTION_COMPLETED",
         at: action.completedAt!,
         actorId: action.ownerId,
-        actorName: USER_BY_ID[action.ownerId]?.name ?? "Action owner",
-        actorRole: USER_BY_ID[action.ownerId]?.role ?? null,
+        actorName: userById[action.ownerId]?.name ?? "Action owner",
+        actorRole: userById[action.ownerId]?.role ?? null,
         title: `Action completed — ${action.title}`,
-        detail: action.notes,
+        // A stored action need not carry a progress note; what it was for is
+        // then the only honest thing to say about it.
+        detail: action.notes || action.description,
         facts: [{ label: "Progress", value: "100%" }],
       });
     });
@@ -1038,7 +1063,7 @@ export function buildTimeline(
         at: file.uploadedAt,
         actorId: file.uploadedById,
         actorName: file.uploadedByName,
-        actorRole: USER_BY_ID[file.uploadedById]?.role ?? null,
+        actorRole: userById[file.uploadedById]?.role ?? null,
         title: "Evidence uploaded",
         detail: `${file.fileName} — ${file.description}`,
         facts: [{ label: "Type", value: file.kind }],
@@ -1067,7 +1092,7 @@ export function buildTimeline(
       at: verification.requestedAt,
       actorId: verification.requestedById,
       actorName: verification.requestedByName,
-      actorRole: USER_BY_ID[verification.requestedById]?.role ?? null,
+      actorRole: userById[verification.requestedById]?.role ?? null,
       title: "Verification requested",
       detail: `Submitted to ${verification.reviewerName} with the measurement window evidence attached.`,
       facts: [
@@ -1083,7 +1108,7 @@ export function buildTimeline(
         at: verification.decidedAt,
         actorId: verification.reviewerId,
         actorName: verification.reviewerName,
-        actorRole: USER_BY_ID[verification.reviewerId]?.role ?? null,
+        actorRole: userById[verification.reviewerId]?.role ?? null,
         title: "Verification approved",
         detail: verification.comment,
         facts: [
