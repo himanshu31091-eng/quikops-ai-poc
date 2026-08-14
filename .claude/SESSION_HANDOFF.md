@@ -12,9 +12,8 @@
 
 ## Session Date
 
-**2026-08-14** — Phase 7: Case Detail completed its migration to Neon. The whole
-execution record — corrective actions, evidence, KPI, verification, timeline and
-audit — now reads from the database when `USE_DATABASE=true`.
+**2026-08-14** — Sika evaluation closure. Case Detail finished its move to Neon,
+four client-facing defects were fixed, and the demo configuration was frozen.
 
 ---
 
@@ -24,114 +23,135 @@ audit — now reads from the database when `USE_DATABASE=true`.
 
 ---
 
-## Where Things Stand
+## How to run the demo — read before showing a client
 
-`USE_DATABASE` is still **off by default** and is not set in `.env.local`. It is
-passed per process (`USE_DATABASE=true npm start`). Fixtures remain the fallback
-and were not touched as data.
+**Leave `USE_DATABASE` unset.** The demo runs on the seeded fixture corpus, and
+that is deliberate, not a shortcut. Every screen then reads the same eight-case
+corpus and they all agree with each other.
 
-Database-backed when the flag is on:
+Turning the flag on makes Work Manager and Case Detail read Neon while the
+Dashboard, Analytics and Reports keep reading fixtures — so the Dashboard would
+report seven cases and the queue three, in the same session, in front of the
+client. **That is the one thing that must not happen during an evaluation.**
 
-| Screen | Source |
+The database path is real, complete for the screens it covers, and verified. It
+is staged for the next phase, not for the demo.
+
+### The two cases the demo needs
+
+No single case carries the whole story, because the halves live on two records.
+
+| Case | Shows |
 |---|---|
-| Work Manager | Neon (`case-db-mapper.ts`) |
-| Case Detail — case record | Neon (`case-db-mapper.ts`) |
-| Case Detail — actions, evidence, verification, KPI, audit | Neon (`case-detail-db-mapper.ts`) |
-| Case Detail — timeline | Derived from the above by `buildTimeline` |
-| Case Detail — discussion | Empty; there is no comment table yet |
-| Everything else | Fixtures, in both modes |
+| `QO-PA-2026-00421` | Problem, priority score, ownership, corrective actions, evidence, timeline, audit |
+| `QO-PA-2026-00418` | The KPI movement and the independent verification decision |
 
-`getCaseDetail` now branches once, at the top, and assembles the same six view
-models from either source. Nothing below the branch knows which one ran.
+`00421` is `IN_PROGRESS` with an open action, so it correctly shows **no**
+verification card — in either mode. `00418` is the only record that renders the
+full panel: 87 baseline → 92 interim, target 95, 14-day window still open,
+requested by Arun Iyer, reviewed by Sunil Joshi, decision pending.
 
 ---
 
-## What Changed
+## Where things stand
 
-**Added**
-
-- `src/data/queries/case-detail-db-mapper.ts` — the only place Prisma types are
-  visible for the case *record*. Holds the three validated translations:
-  `fileType` → `EvidenceKind`, stored audit `source` → the UI union (read
-  backwards out of `AUDIT_SOURCE_LABEL`, so the two cannot disagree), and
-  `roleKey` → `UserRole`. None of them is a cast; each has a stated fallback.
-
-**Modified**
-
-- `src/data/queries/case-detail.ts` — database branch assembles the full record.
-- `src/data/fixtures/case-detail.ts` — `buildTimeline` and `buildComments` take
-  an optional `CaseActorDirectory` so one builder serves both sources. Defaults
-  to the fixture organisation, so fixture output is unchanged.
-- `src/config/app-config.ts` — `AUDIT_EVENT_LABEL` and `auditEventLabel()`.
-- `src/domain/types.ts` — `EVIDENCE_KINDS` const array, so `EvidenceKind` can be
-  validated at runtime the way `KpiKey` and `UserRole` already are.
-- `prisma/seed.mjs` — three data gaps closed (see below). No schema change.
-
-**Schema: unchanged.** No `TimelineEvent` model was created; a timeline is a
-reading of the record, not a second copy of it.
+| Area | State |
+|---|---|
+| Work Manager | Neon-backed behind the flag; fixtures by default |
+| Case Detail — record, actions, evidence, KPI, verification, timeline, audit | Neon-backed behind the flag; fixtures by default |
+| Dashboard · Analytics · Reports · Administration · My Work · Action Center · Playbooks · Connectors · Audit Log | Fixtures in both modes |
+| Tenant isolation | Enforced in the query layer, verified both directions |
+| RBAC | Authenticated guard on the whole tree; server-side role check on `/admin` |
+| Languages | English, Spanish, Portuguese — navigation and shared labels |
+| AI Copilot | Live, verified end to end against a real model response |
 
 ---
 
-## Data Gaps Closed
+## What changed this session
 
-The seed was missing rows the UI needs to tell the truth. All additive; nothing
-was deleted and the database was never reset.
+**Case Detail completed its migration** (`9fa3902`). One mapper,
+`src/data/queries/case-detail-db-mapper.ts`, holds every Prisma-facing line.
+Three translations, none of them a cast: `fileType` → `EvidenceKind` through a
+three-tier validated lookup; stored audit `source` → the UI union by reading
+`AUDIT_SOURCE_LABEL` backwards so the two cannot drift; `roleKey` → `UserRole`
+checked against the role list. Each has a stated fallback. No `TimelineEvent`
+model — a timeline is a reading of the record, not a second copy of it.
 
-1. `QO-PA-2026-00421` had no `KpiMeasurement`, so the mapper reported baseline 0
-   against target 0. Added OTIF 87 → 95, interim 92, 14-day window.
-2. `QO-PA-2026-00400` had none either. Added `INVENTORY_DAYS` 34 → 25 (with the
-   KPI definition it needs).
-3. `QO-PA-2026-00418` is submitted for verification and its own description says
-   "All four corrective actions are complete and evidenced" — but no actions or
-   evidence existed. Added the four playbook steps and one evidence file each.
+**Build reproducibility fixed** (`0ea09ad`, `ec37ed0`). `@prisma/client` v7
+installs as a stub with no `PrismaClient` export until `prisma generate` runs,
+which had only ever happened locally as a side effect of the migration. Any
+clean install could not compile. A `postinstall` hook now generates the client,
+and the package moved to `dependencies` where a runtime import belongs.
 
----
-
-## Verification Method
-
-Rendered UI in **real headless Chrome over CDP**, reading
-`document.body.innerText` after hydration. Deliberately not the RSC flight
-payload: fixture data can appear in serialised RSC data without being rendered,
-which has misled an earlier session. `innerText` cannot contain a `<script>`
-body, so a record that is serialised but not rendered cannot show up.
-
-The discriminator: a record that exists **only** in fixtures must disappear when
-the flag is on, and the database record must appear in its place. It does — for
-every section, individually.
-
-Fixture mode renders **byte-identical** to the capture taken before any of this
-session's changes.
+**Four client-facing defects fixed** (`7e37376`): the dashboard claimed four
+plants against three in the data; the summary card printed the model name,
+prompt version and a raw system code; Administration was reachable by URL
+whatever the role; and Portuguese was offered in the menu with no catalogue
+behind it.
 
 ---
 
-## Known Gaps
+## Known gaps — state these plainly, do not paper over them
 
-- **Session identity is still fixture-backed.** `src/auth/session.ts` resolves
-  the persona cookie against `USER_BY_ID`, so in database mode the signed-in
-  user's id never matches a database user id. The verification card therefore
-  shows "Only X can record the decision" rather than the decision form. Auth was
-  out of scope this session; migrating it is the next thing that matters.
-- **No comment table.** The discussion renders empty in database mode. That is
-  honest — composing a thread from fixture people would put strangers on a real
-  case — but it is a visible gap in the demo.
-- Dashboard, Analytics, Reports, My Work, Action Center and the global Audit Log
-  still read fixtures in both modes.
+- **Sika cannot be shown their own environment.** The tenant exists in Neon with
+  its own site, people, case and euro currency, correctly isolated. There is no
+  selector, and the data exists only in Neon — so reaching it means running in
+  database mode, which is what breaks Dashboard coherence. **Sika tenant access
+  is blocked behind the Dashboard/Analytics/Reports migration**, not behind a
+  missing switcher. That chain is the single most valuable next piece of work.
+- **No approved Sika logo exists**, so `logoPath` is null and the shell falls
+  back to the QuikOps mark. A brand mark is supplied by its owner; do not source
+  or approximate one.
+- **Translation stops at the navigation and shared labels.** Page bodies are
+  English in all three languages.
+- **Administration is read-only** — no add or edit user.
+- **Segregation of duties is enforced in the UI only.** `decideVerification` has
+  no actor check. In database mode no persona id matches a Neon user, so the
+  reviewer cannot record a decision at all; in demo mode it works, because
+  personas and reviewers come from the same corpus.
+- **Analytics 90-day trends are static series**, not calculated from case
+  history. Say so if asked.
 
 ---
 
-## Resume From Here
+## Verification record
+
+Run against `7e37376` on a clean `npm ci`:
+
+| Gate | Result |
+|---|---|
+| `npm ci` → `postinstall` → `prisma generate` | pass |
+| `prisma validate` | pass |
+| `tsc --noEmit`, `tsconfig.tsbuildinfo` deleted first | pass |
+| `npx eslint .` | 0 errors, 0 warnings |
+| `next build` | 19/19 entries |
+| Route smoke test, signed in | 14/14 → 200 |
+| Route guard, signed out | `/dashboard` `/work` `/admin` → 307; `/login` → 200 |
+| RBAC | Task Owner and Analyst redirected off `/admin`; Administrator and Ops Manager admitted |
+| Case Detail six-area gate, rendered DOM | 71/71 assertions |
+| Tenant isolation | cross-tenant case → "Case not found" |
+| Languages | English / Panel ejecutivo / Painel executivo |
+| Responsive, 5 screens × 4 widths | 20/20 no overflow |
+| Runtime errors | 0 in both modes |
+
+**Method, stated plainly:** findings come from `document.body.innerText` in real
+headless Chrome after hydration — never the RSC payload. Fixture data can appear
+in serialised RSC output without being rendered, which misled an earlier
+session. The discriminator throughout: a fixture-only record must disappear when
+the flag is on, and the database record must appear in its place.
+
+---
+
+## Resume from here
 
 1. Read `CLAUDE.md`, then `.claude/` in the order it gives.
 2. **Kill stale dev servers before verifying anything.** `netstat -ano | grep
-   :3000`, then `taskkill //PID <pid> //F`. A process serving a wiped `.next`
-   produces 500s that look like code failures and are not.
-3. Frozen and not to be redesigned: Executive Dashboard, Work Manager, Case
-   Detail, My Work, Execution Workflow. Bug fixes only.
-4. **`USE_DATABASE` must stay off by default.** Turning it on is a deliberate,
-   per-environment act.
-5. When adding a database read, put the Prisma types in a `*-db-mapper.ts` and
-   return a finished view model. Validate a stored string against the union's
-   own member list before widening it — never cast.
-6. Every change ends with `npx eslint .`, `npm run typecheck`, `npm run build`,
-   a rendered-UI pass, then updates to `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md`,
-   `DECISIONS.md` and this file.
+   :3000`, then `taskkill //PID <pid> //F`.
+3. **`USE_DATABASE` stays off by default.** Turning it on is a deliberate,
+   per-environment act, and not for a client demo until the Dashboard agrees
+   with the queue.
+4. `tsconfig.json` sets `incremental: true`. Delete `tsconfig.tsbuildinfo`
+   before trusting a typecheck — a stale cache once hid a real compile error
+   that only surfaced in CI.
+5. Next phase, in order: migrate Dashboard, then Analytics and Reports, then
+   make the tenant selectable. Those three unlock showing Sika their own data.
