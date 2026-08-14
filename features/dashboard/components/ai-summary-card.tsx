@@ -56,16 +56,20 @@ export function AiSummaryCard({ summary }: { summary: AiExecutiveSummary }) {
               ) : (
                 <span
                   key={citation.ref}
+                  title={citation.ref}
                   className="inline-flex items-center gap-1 rounded-sm border border-line bg-surface px-1.5 py-0.5 font-mono text-2xs text-content-tertiary"
                 >
-                  {citation.ref}
+                  {/*
+                    The label, not the raw reference. `ref` is an internal
+                    lookup key — "VP01/OTIF_PCT/2026-08-04" — and printing it
+                    put a system code in front of a business reader. The exact
+                    reference stays on the tooltip for anyone tracing a number.
+                  */}
+                  {citation.label}
                 </span>
               ),
             )}
           </div>
-          <span className="font-mono text-2xs text-content-tertiary">
-            {summary.model} · {summary.promptVersion}
-          </span>
         </div>
       }
     >

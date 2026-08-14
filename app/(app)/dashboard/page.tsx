@@ -113,7 +113,12 @@ export default async function ExecutiveDashboardPage() {
     <div className="space-y-5">
       <PageHeader
         title={`Good morning, ${firstName}`}
-        description="Operational health across four plants, with every number traceable to the cases behind it."
+        // Counted from the plants actually on screen. The figure was written by
+        // hand and said four while the network had three, which the plant filter
+        // beside it contradicted on sight.
+        description={`Operational health across ${plantHealth.length} plant${
+          plantHealth.length === 1 ? "" : "s"
+        }, with every number traceable to the cases behind it.`}
         docKey="dashboard"
         meta={
           <>

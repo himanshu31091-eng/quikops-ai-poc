@@ -165,6 +165,26 @@ export const NAVIGATION: NavSection[] = [
  * as an owner does not drop them on an executive dashboard. `ANALYST` shares
  * the manager's landing because an analyst investigates from the same queue.
  */
+/**
+ * Whether a role may open a route at all.
+ *
+ * Read from `NAVIGATION` rather than declared separately, so the answer cannot
+ * drift from the menu the same table builds. Hiding a link is a courtesy, not a
+ * control: the nav filters what a role *sees*, and this is what decides what a
+ * role can *reach* when the address is typed directly. A route with no entry in
+ * the table is open — every authenticated screen either appears in the nav or
+ * is deliberately reachable by anyone, and inventing a deny-by-default rule
+ * here would silently break the case and login routes.
+ */
+export function canRoleOpen(role: UserRole, href: string): boolean {
+  for (const section of NAVIGATION) {
+    for (const item of section.items) {
+      if (item.href === href) return item.roles.includes(role);
+    }
+  }
+  return true;
+}
+
 export const ROLE_LANDING: Record<UserRole, string> = {
   EXECUTIVE: "/dashboard",
   OPS_MANAGER: "/work",
