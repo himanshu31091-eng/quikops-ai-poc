@@ -5,6 +5,7 @@ import { ActionToast } from "@/components/patterns/action-toast";
 import { FilterMenu } from "@/components/patterns/filter-menu";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -91,6 +92,7 @@ interface ConnectorHealthViewProps {
 }
 
 export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewProps) {
+  const { t } = useTranslation();
   const api = useConnectorHealth(data, sessionUser);
   const { model, filters, selectConnector } = api;
 
@@ -113,8 +115,8 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
     <div className="space-y-5">
       <PageHeader
         docKey="connectors"
-        title="Connector Health"
-        description="Enterprise data ingestion status, run history, deduplication and dead-letter replay — the integration layer that turns signals into cases."
+        title={t("page.connectors.title")}
+        description={t("page.connectors.description")}
         meta={
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">

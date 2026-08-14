@@ -16,7 +16,8 @@ import type {
   Plant,
   User,
 } from "@/src/domain/types";
-import { CASES } from "../fixtures/cases";
+import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
+import { USE_DATABASE } from "../db";
 import {
   buildAuditLog,
   buildComments,
@@ -27,12 +28,12 @@ import {
   buildVerification,
   reviewerFor,
 } from "../fixtures/case-detail";
-import { PLANTS } from "../fixtures/organisation";
+import { getCaseCorpus, getPeople, getPlants } from "./corpus";
+import { findCaseDetailRecords } from "./case-detail-db-mapper";
 import {
   fillTemplate,
   RECOMMENDATION_TEMPLATES,
 } from "../fixtures/recommendations";
-import { assignableUsers, toCaseListItem } from "./case-mapper";
 
 /**
  * Action Center data access.
@@ -193,7 +194,9 @@ function buildRecommendation(
 }
 
 export async function getActionCenterData(scope: PlantScope = ALL_PLANTS): Promise<ActionCenterData> {
-  const all = scopeCases(CASES, scope).map(toCaseListItem);
+  const all = scopeCases(await getCaseCorpus(), scope);
+  const people = await getPeople();
+  const plants = await getPlants();
 
   const actions: CorrectiveAction[] = [];
   const contextByCaseNo: Record<string, ActionCaseContext> = {};
@@ -201,19 +204,28 @@ export async function getActionCenterData(scope: PlantScope = ALL_PLANTS): Promi
   const recommendations: ActionRecommendation[] = [];
 
   for (const item of all) {
-    const caseActions = buildCorrectiveActions(item);
+    /* In database mode every part of this bundle is read rather than derived.
+     * The fixture builders below synthesise a plausible plan from the case
+     * row, which is exactly right for a seeded corpus and exactly wrong for a
+     * stored one: they would invent corrective actions this case does not
+     * have, and the Action Center would show work nobody created. */
+    const records = USE_DATABASE ? await findCaseDetailRecords(DEFAULT_TENANT_ID, item) : null;
+
+    const caseActions = records ? records.actions : buildCorrectiveActions(item);
     actions.push(...caseActions);
     contextByCaseNo[item.caseNo] = buildContext(item);
 
-    const evidence = buildEvidence(item, caseActions);
-    const verification = buildVerification(item, caseActions);
+    const evidence = records ? records.evidence : buildEvidence(item, caseActions);
+    const verification = records
+      ? records.verification
+      : buildVerification(item, caseActions);
     const timeline = buildTimeline(item, caseActions, evidence, verification);
 
     drawerByCaseNo[item.caseNo] = {
       timeline,
-      comments: buildComments(item),
+      comments: records ? records.comments : buildComments(item),
       evidence,
-      audit: buildAuditLog(item, timeline, verification),
+      audit: records ? records.audit : buildAuditLog(item, timeline, verification),
     };
 
     const recommendation = buildRecommendation(item, caseActions, all);
@@ -231,7 +243,7 @@ export async function getActionCenterData(scope: PlantScope = ALL_PLANTS): Promi
       (a, b) =>
         b.confidence.score - a.confidence.score || b.revenueAtRisk - a.revenueAtRisk,
     ),
-    assignableUsers: assignableUsers(),
-    plants: PLANTS,
+    assignableUsers: people,
+    plants,
   };
 }

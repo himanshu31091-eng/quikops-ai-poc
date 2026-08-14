@@ -5,6 +5,7 @@ import { ActionToast } from "@/components/patterns/action-toast";
 import { AssignMenu } from "@/components/patterns/assign-menu";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ interface ActionCenterViewProps {
 }
 
 export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
+  const { t } = useTranslation();
   const api = useActionCenter(data, sessionUser);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [appliedIds, setAppliedIds] = React.useState<Set<string>>(new Set());
@@ -110,8 +112,8 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
     <div className="space-y-4">
       <PageHeader
         docKey="actions"
-        title="Action Center"
-        description="Everything that needs a decision today — assigned work, SLA warnings, approvals, escalations and what the platform recommends next."
+        title={t("page.actions.title")}
+        description={t("page.actions.description")}
         meta={
           <>
             <MetaChip icon="Clock">Data as at {formatTimestamp(DEMO_NOW)} UTC</MetaChip>
@@ -187,8 +189,8 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
 
           <div id="action-queue" data-tour="action-queue" className="scroll-mt-20">
             <SectionCard
-              title="Action queue"
-              subtitle="Every corrective action across the network, worst SLA first"
+              title={t("actions.queue")}
+              subtitle={t("actions.queueSub")}
               icon="Rows3"
               flush
               action={<QueueSummary rows={api.rows} />}

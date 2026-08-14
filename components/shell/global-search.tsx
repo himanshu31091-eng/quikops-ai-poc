@@ -9,6 +9,7 @@ import { NAVIGATION } from "@/src/config/app-config";
 import type { PriorityBand } from "@/src/domain/types";
 import { caseHref } from "@/src/lib/routes";
 import { cn } from "@/src/lib/cn";
+import { useTranslation } from "@/src/i18n/provider";
 
 /**
  * Command-palette search over cases and navigation.
@@ -31,6 +32,7 @@ interface GlobalSearchProps {
 const MAX_RESULTS_PER_GROUP = 5;
 
 export function GlobalSearch({ cases }: GlobalSearchProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
 
@@ -84,7 +86,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
           )}
         >
           <Icon name="Search" size="sm" />
-          <span className="flex-1 text-left">Search cases, plants, materials…</span>
+          <span className="flex-1 text-left">{t("shell.searchCollapsed")}</span>
           <kbd className="hidden items-center gap-0.5 rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-2xs text-content-tertiary sm:inline-flex">
             ⌘K
           </kbd>
@@ -92,7 +94,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
       </DialogTrigger>
 
       <DialogContent className="max-w-xl p-0">
-        <DialogTitle className="sr-only">Global search</DialogTitle>
+        <DialogTitle className="sr-only">{t("shell.globalSearch")}</DialogTitle>
 
         <div className="flex items-center gap-2.5 border-b border-line px-3.5">
           <Icon name="Search" size="md" className="text-content-tertiary" />
@@ -100,7 +102,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by case number, title, plant or material…"
+            placeholder={t("shell.searchPlaceholder")}
             // An input carries an intrinsic min-width of about 20 characters,
             // so without min-w-0 it refuses to shrink and pushes the ESC key
             // out of the dialog at narrow widths.
@@ -121,7 +123,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
           {caseResults.length > 0 ? (
             <>
               <p className="px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                {normalised ? "Cases" : "Recent critical cases"}
+                {normalised ? "Cases" : t("shell.recentCritical")}
               </p>
               {caseResults.map((result) => (
                 <Link

@@ -5,15 +5,13 @@ import type {
   TrendPoint,
   User,
 } from "@/src/domain/types";
-import { CASES } from "../fixtures/cases";
+import { getCaseCorpus, getPeople, getPlants } from "./corpus";
 import { reviewerFor } from "../fixtures/case-detail";
 import {
   OTIF_SERIES_90D,
   REVENUE_AT_RISK_SERIES_90D,
   SLA_BREACH_SERIES_90D,
 } from "../fixtures/metrics";
-import { PLANTS, USERS } from "../fixtures/organisation";
-import { toCaseListItem } from "./case-mapper";
 
 /**
  * Execution Analytics data access.
@@ -47,12 +45,13 @@ export interface AnalyticsData {
 }
 
 export async function getAnalyticsData(scope: PlantScope = ALL_PLANTS): Promise<AnalyticsData> {
-  const cases = scopeCases(CASES, scope).map(toCaseListItem);
+  const [corpus, plants, people] = await Promise.all([getCaseCorpus(), getPlants(), getPeople()]);
+  const cases = scopeCases(corpus, scope);
 
   return {
     cases,
-    plants: PLANTS,
-    people: USERS.filter((user) => user.isActive),
+    plants,
+    people: people.filter((user) => user.isActive),
     // Resolved server-side because `reviewerFor` is a fixture concern; the
     // module only needs the mapping, not the rule behind it.
     reviewers: cases.map((item) => ({

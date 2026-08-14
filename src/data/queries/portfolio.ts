@@ -12,7 +12,7 @@ import type {
 import { PRIORITY_BANDS } from "@/src/domain/types";
 import { DEMO_NOW, DEFAULT_CURRENCY } from "@/src/lib/constants";
 import { buildCorrectiveActions } from "../fixtures/case-detail";
-import { CASES } from "../fixtures/cases";
+import { getCaseCorpus } from "./corpus";
 import {
   EXECUTION_METRICS,
   INVENTORY_HEALTH,
@@ -20,7 +20,6 @@ import {
   REVENUE_IMPACT,
 } from "../fixtures/metrics";
 import { USER_BY_ID } from "../fixtures/organisation";
-import { toCaseListItem } from "./case-mapper";
 
 /**
  * Portfolio data access.
@@ -216,7 +215,7 @@ function buildRecentMovement(all: CaseListItem[]): RecentMovement {
 }
 
 export async function getPortfolioSnapshot(scope: PlantScope = ALL_PLANTS): Promise<PortfolioSnapshot> {
-  const all = scopeCases(CASES, scope).map(toCaseListItem);
+  const all = scopeCases(await getCaseCorpus(), scope);
   const open = all
     .filter((item) => isOpenStatus(item.status))
     .sort((a, b) => b.priorityScore - a.priorityScore);

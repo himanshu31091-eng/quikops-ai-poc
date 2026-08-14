@@ -1,8 +1,10 @@
+import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
 import type { ActionItem, CaseListItem, User } from "@/src/domain/types";
-import { CASES } from "../fixtures/cases";
+import { USE_DATABASE } from "../db";
 import { TODAYS_ACTIONS } from "../fixtures/intelligence";
 import { EXECUTION_METRICS } from "../fixtures/metrics";
-import { assignableUsers, toCaseListItem } from "./case-mapper";
+import { getCaseCorpus, getPeople } from "./corpus";
+import { findActionsForOwner } from "./portfolio-db-mapper";
 
 /**
  * My Work data access.
@@ -24,10 +26,20 @@ export interface MyWorkData {
 }
 
 export async function getMyWorkData(userId: string): Promise<MyWorkData> {
+  const [corpus, people] = await Promise.all([getCaseCorpus(), getPeople()]);
+  const cases = [...corpus].sort((a, b) => b.priorityScore - a.priorityScore);
+
+  // The seeded action list is keyed to fixture people. In database mode the
+  // signed-in persona resolves to a Neon user whose actions are real rows, so
+  // reading the fixture list there would show one person another's work.
+  const actions = USE_DATABASE
+    ? await findActionsForOwner(DEFAULT_TENANT_ID, userId, cases)
+    : TODAYS_ACTIONS.filter((action) => action.ownerId === userId);
+
   return {
-    cases: CASES.map(toCaseListItem).sort((a, b) => b.priorityScore - a.priorityScore),
-    actions: TODAYS_ACTIONS.filter((action) => action.ownerId === userId),
-    assignableUsers: assignableUsers(),
+    cases,
+    actions,
+    assignableUsers: people,
     portfolioMttrHours: EXECUTION_METRICS.mttrHours,
   };
 }

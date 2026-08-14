@@ -14,7 +14,7 @@ import {
   type DeadLetterMessage,
   type FieldMapping,
 } from "../fixtures/connectors";
-import { CASES } from "../fixtures/cases";
+import { getCaseCorpus } from "./corpus";
 import { DEMO_NOW } from "@/src/lib/constants";
 
 /**
@@ -147,8 +147,9 @@ export async function getConnectorHealthData(): Promise<ConnectorHealthData> {
 
   // Cases raised is counted from the corpus, not from the runs, so the funnel
   // can never claim more cases than the queue actually holds.
+  const corpus = await getCaseCorpus();
   const raisedBySource = (source: DetectionSource): number =>
-    CASES.filter((item) => item.detectedBy === source).length;
+    corpus.filter((item) => item.detectedBy === source).length;
 
   return {
     connectors,

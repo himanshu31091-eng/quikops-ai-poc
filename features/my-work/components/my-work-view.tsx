@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { ProgressBar } from "@/components/patterns/progress-bar";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -38,6 +39,7 @@ const HOUR_MS = 3_600_000;
  * derived; nothing is stored twice.
  */
 export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
+  const { t } = useTranslation();
   const { state } = useExecutionStore();
 
   const projected = React.useMemo(
@@ -93,8 +95,8 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="My Work"
-        description="Everything assigned to you, ordered by priority and due date."
+        title={t("page.myWork.title")}
+        description={t("page.myWork.description")}
         docKey="my-work"
         meta={
           <>
@@ -152,7 +154,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
       <div className="grid min-w-0 gap-4 xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-4 xl:col-span-8">
           <CaseList
-            title="Cases you own"
+            title={t("myWork.casesYouOwn")}
             subtitle={`${open.length} open · worked in priority order`}
             icon="Rows3"
             cases={open}
@@ -162,7 +164,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
 
           {awaitingReview.length > 0 ? (
             <CaseList
-              title="Submitted for verification"
+              title={t("myWork.submitted")}
               subtitle={`${awaitingReview.length} waiting on a reviewer`}
               icon="ShieldCheck"
               cases={awaitingReview}
@@ -173,7 +175,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
 
           {closed.length > 0 ? (
             <CaseList
-              title="Closed this session"
+              title={t("myWork.closedThisSession")}
               subtitle={`${closed.length} verified or closed`}
               icon="CircleCheck"
               cases={closed}
@@ -186,7 +188,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
         <aside className="min-w-0 xl:col-span-4">
           <div className="grid gap-4 xl:sticky xl:top-[calc(var(--spacing-topbar)+1rem)]">
             <SectionCard
-              title="Awaiting your review"
+              title={t("myWork.awaitingReview")}
               subtitle={`${toReview.length} case${toReview.length === 1 ? "" : "s"}`}
               icon="ShieldCheck"
               flush
@@ -221,7 +223,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
             </SectionCard>
 
             <SectionCard
-              title="Today's actions"
+              title={t("myWork.todaysActions")}
               subtitle={`${openActions.length} open`}
               icon="ListChecks"
               flush
@@ -260,7 +262,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
                             ACTION_STATUS_META[action.status].className,
                           )}
                         >
-                          {ACTION_STATUS_META[action.status].label}
+                          {t(`actionStatus.${action.status}`)}
                         </span>
                       </div>
                     </li>
@@ -269,7 +271,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
               )}
             </SectionCard>
 
-            <SectionCard title="Queue" icon="Rows3" flush>
+            <SectionCard title={t("myWork.queue")} icon="Rows3" flush>
               <div className="px-4 py-3.5">
                 <Button variant="secondary" size="md" asChild className="w-full justify-start">
                   <Link href="/work?mine=true">

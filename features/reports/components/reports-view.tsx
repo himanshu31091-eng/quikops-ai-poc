@@ -9,6 +9,7 @@ import { Icon } from "@/components/patterns/icon";
 import { KpiTileRow, type KpiTileModel } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { SavedReportsPanel } from "./saved-reports-panel";
@@ -45,6 +46,7 @@ import { caseHref } from "@/src/lib/routes";
  */
 
 export function ReportsView({ data }: { data: ReportsData }) {
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = React.useState<string>(
     data.templates[0]?.id ?? "",
   );
@@ -295,8 +297,8 @@ export function ReportsView({ data }: { data: ReportsData }) {
     <div className="space-y-5">
       <PageHeader
         docKey="reports"
-        title="Reports"
-        description="Scheduled and on-demand executive and audit reporting, composed from the same figures the dashboard reads."
+        title={t("page.reports.title")}
+        description={t("page.reports.description")}
         meta={
           <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
             <Icon name="FileText" size="xs" />
@@ -347,11 +349,11 @@ export function ReportsView({ data }: { data: ReportsData }) {
       <div className="grid gap-4 xl:grid-cols-12">
         {/* Library + builder */}
         <div className="min-w-0 space-y-4 xl:col-span-4 print:hidden">
-          <SectionCard title="Report library" subtitle="Pick a template to compose" icon="FileText">
+          <SectionCard title={t("reports.library")} subtitle={t("reports.librarySub")} icon="FileText">
             {visibleTemplates.length === 0 ? (
               <EmptyState
                 icon="SearchX"
-                title="No templates match"
+                title={t("reports.noTemplates")}
                 description="Try a different search term."
                 size="sm"
               />
@@ -392,8 +394,8 @@ export function ReportsView({ data }: { data: ReportsData }) {
           </SectionCard>
 
           <SectionCard
-            title="Saved reports"
-            subtitle="The template and the sections you kept, together"
+            title={t("reports.saved")}
+            subtitle={t("reports.savedSub")}
             icon="BookMarked"
           >
             <SavedReportsPanel
@@ -409,8 +411,8 @@ export function ReportsView({ data }: { data: ReportsData }) {
           </SectionCard>
 
           <SectionCard
-            title="Sections"
-            subtitle="Toggle what this report contains"
+            title={t("reports.sections")}
+            subtitle={t("reports.sectionsSub")}
             icon="Filter"
           >
             <ul className="space-y-1.5">
@@ -460,7 +462,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
             {sections.size === 0 ? (
               <EmptyState
                 icon="FileText"
-                title="No sections selected"
+                title={t("reports.noSections")}
                 description="Choose at least one section to compose a report."
                 size="sm"
               />
@@ -627,8 +629,8 @@ export function ReportsView({ data }: { data: ReportsData }) {
       {/* Schedules + history */}
       <div className="grid gap-4 xl:grid-cols-2 print:hidden">
         <SectionCard
-          title="Schedules"
-          subtitle="Cadence, recipients and next run"
+          title={t("reports.schedules")}
+          subtitle={t("reports.schedulesSub")}
           icon="CalendarSync"
           flush
         >
@@ -669,8 +671,8 @@ export function ReportsView({ data }: { data: ReportsData }) {
         </SectionCard>
 
         <SectionCard
-          title="Run history"
-          subtitle="Recent generations, newest first"
+          title={t("reports.runHistory")}
+          subtitle={t("reports.historySub")}
           icon="History"
           flush
         >

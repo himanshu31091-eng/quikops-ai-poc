@@ -6,9 +6,8 @@ import {
 import type { CaseListItem, ExceptionType } from "@/src/domain/types";
 import { EXCEPTION_TYPES } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
-import { CASES } from "../fixtures/cases";
+import { getCaseCorpus } from "./corpus";
 import { PLAYBOOK_LIBRARY, type PlaybookStep } from "../fixtures/playbooks";
-import { toCaseListItem } from "./case-mapper";
 
 /**
  * Playbook library data access.
@@ -41,7 +40,7 @@ export interface PlaybookLibraryData {
 }
 
 export async function getPlaybookLibraryData(): Promise<PlaybookLibraryData> {
-  const all = CASES.map(toCaseListItem);
+  const all = await getCaseCorpus();
 
   const playbooks: PlaybookView[] = PLAYBOOK_LIBRARY.map((playbook) => {
     const applied = all.filter((item) => item.playbookId === playbook.id);

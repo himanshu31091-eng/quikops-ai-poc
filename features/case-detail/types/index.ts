@@ -81,7 +81,18 @@ export interface EvidenceDraft {
   sizeBytes: number;
   description: string;
   actionId: string | null;
+  /**
+   * In-tab preview for an image, alive only until the page unloads.
+   *
+   * Never the persistence mechanism — that is `storageUrl` below. This exists
+   * so a thumbnail can appear the instant a file is dropped, before the upload
+   * to blob storage has finished.
+   */
   objectUrl?: string;
+  /** Where the uploaded file landed in private blob storage. */
+  storageUrl?: string;
+  /** Pathname inside the store, which is what reads and deletes address. */
+  storagePath?: string;
 }
 
 export interface VerificationDraft {

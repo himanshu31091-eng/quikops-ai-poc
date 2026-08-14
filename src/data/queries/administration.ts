@@ -1,10 +1,8 @@
 import { EXCEPTION_META } from "@/src/config/app-config";
 import type { ExceptionType, OperationalCase, Plant, User } from "@/src/domain/types";
-import { CASES } from "../fixtures/cases";
+import { getCaseCorpus, getPeople, getPlants } from "./corpus";
 import { reviewerFor } from "../fixtures/case-detail";
-import { PLANTS, USERS } from "../fixtures/organisation";
 import { resolveMode } from "@/src/ai/services/copilot-service";
-import { assignableUsers, toCaseListItem } from "./case-mapper";
 
 /**
  * Administration data access.
@@ -47,10 +45,12 @@ export interface AdministrationData {
 }
 
 export async function getAdministrationData(): Promise<AdministrationData> {
-  const all = CASES.map(toCaseListItem);
+  const all = await getCaseCorpus();
+  const plants = await getPlants();
+  const users = await getPeople();
   const rules: RoutingRule[] = [];
 
-  for (const plant of PLANTS) {
+  for (const plant of plants) {
     const atPlant = all.filter((item) => item.plantCode === plant.code);
     const types = [...new Set(atPlant.map((item) => item.exceptionType))];
 
@@ -65,7 +65,7 @@ export async function getAdministrationData(): Promise<AdministrationData> {
         counts.set(item.ownerId!, (counts.get(item.ownerId!) ?? 0) + 1);
       }
       const [ownerId] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]!;
-      const owner = USERS.find((user) => user.id === ownerId);
+      const owner = users.find((user) => user.id === ownerId);
       if (!owner) continue;
 
       rules.push({
@@ -83,13 +83,13 @@ export async function getAdministrationData(): Promise<AdministrationData> {
   }
 
   return {
-    users: USERS,
-    plants: PLANTS,
-    assignableCount: assignableUsers().length,
+    users,
+    plants,
+    assignableCount: users.length,
     routingRules: rules.sort(
       (a, b) => a.plantName.localeCompare(b.plantName) || b.caseCount - a.caseCount,
     ),
-    cases: CASES,
+    cases: all,
     isCopilotLive: resolveMode() === "live",
   };
 }

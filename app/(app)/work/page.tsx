@@ -1,5 +1,6 @@
 import { getPlantScope } from "@/src/scope/plant-scope";
 import { getSessionUser } from "@/src/auth/session";
+import { USE_DATABASE } from "@/src/data/db";
 import { getWorkManagerData } from "@/src/data/queries/work";
 import { WorkManagerView } from "@/features/work-manager/components/work-manager-view";
 import {
@@ -43,6 +44,7 @@ export default async function WorkManagerPage({
       portfolio={data.portfolio}
       sessionUser={user}
       initialState={initialState}
+      persistent={USE_DATABASE}
     />
   );
 }

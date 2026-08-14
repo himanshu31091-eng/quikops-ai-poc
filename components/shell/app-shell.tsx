@@ -14,6 +14,7 @@ import { PlatformControls } from "@/components/shell/platform-controls";
 import { SkipLink } from "@/components/patterns/skip-link";
 import { useFocusTrap } from "@/src/a11y/use-focus-trap";
 import { UserMenu } from "./user-menu";
+import { useTranslation } from "@/src/i18n/provider";
 
 /**
  * The application frame: side navigation, top bar, and the content slot.
@@ -44,6 +45,7 @@ export function AppShell({
   searchableCases,
   children,
 }: AppShellProps) {
+  const { t } = useTranslation();
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const navTrapRef = useFocusTrap(mobileNavOpen);
 
@@ -79,12 +81,12 @@ export function AppShell({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Navigation"
+          aria-label={t("shell.navigation")}
           className="fixed inset-0 z-50 lg:hidden"
         >
           <button
             type="button"
-            aria-label="Close navigation"
+            aria-label={t("shell.closeNavigation")}
             onClick={() => setMobileNavOpen(false)}
             className="absolute inset-0 bg-surface-inverse/25"
           />
@@ -109,7 +111,7 @@ export function AppShell({
         >
           <button
             type="button"
-            aria-label="Open navigation"
+            aria-label={t("shell.openNavigation")}
             onClick={() => setMobileNavOpen(true)}
             className="-ml-1 flex size-8 items-center justify-center rounded-md text-content-secondary transition-colors duration-150 hover:bg-surface-hover lg:hidden"
           >

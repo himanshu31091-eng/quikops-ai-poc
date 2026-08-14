@@ -4,6 +4,7 @@ import * as React from "react";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { AnalyticsData } from "@/src/data/queries/analytics";
@@ -42,6 +43,7 @@ function MetaChip({ icon, children }: { icon: string; children: React.ReactNode 
 const FILTERED_NOTE = "Reflects the current filter selection.";
 
 export function AnalyticsView({ data }: { data: AnalyticsData }) {
+  const { t } = useTranslation();
   const api = useAnalytics(data);
   const { model, filters, facets } = api;
 
@@ -51,8 +53,8 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
     <div className="space-y-5">
       <PageHeader
         docKey="analytics"
-        title="Execution Analytics"
-        description="How the operation is performing at closing the exceptions it detects — by plant, by owner and over time."
+        title={t("page.analytics.title")}
+        description={t("page.analytics.description")}
         meta={
           <>
             <MetaChip icon="Clock">Data as at {formatTimestamp(DEMO_NOW)} UTC</MetaChip>
@@ -103,7 +105,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
             title="On-time in full"
-            subtitle="Group level, against the 95% target"
+            subtitle={t("analytics.groupTarget")}
             icon="ChartNoAxesColumn"
             className="h-full"
             footer={
@@ -126,7 +128,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
             title="Revenue at risk"
-            subtitle="Open exposure over time"
+            subtitle={t("analytics.exposure")}
             icon="DollarSign"
             className="h-full"
           >
@@ -145,7 +147,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         <div className="min-w-0 xl:col-span-6">
           <SectionCard
             title="Resolution time"
-            subtitle="Mean hours from detection to verification, by week"
+            subtitle={t("analytics.mttrWeekly")}
             icon="Clock"
             className="h-full"
             footer={
@@ -167,7 +169,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         <div className="min-w-0 xl:col-span-6">
           <SectionCard
             title="Cases opened and closed"
-            subtitle="Weekly throughput — is the backlog clearing?"
+            subtitle={t("analytics.throughput")}
             icon="Activity"
             className="h-full"
           >
@@ -181,13 +183,13 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
 
       {/* 3 — Distribution */}
       <div className="grid gap-4 xl:grid-cols-3">
-        <SectionCard title="Cases by priority" subtitle="Scored by the rule set" icon="Target">
+        <SectionCard title="Cases by priority" subtitle={t("analytics.scored")} icon="Target">
           <CategoryBreakdownChart
             data={model.byPriority}
             emptyMessage="No cases match the current filters."
           />
         </SectionCard>
-        <SectionCard title="Cases by plant" subtitle="Where the work sits" icon="Factory">
+        <SectionCard title="Cases by plant" subtitle={t("analytics.whereWorkSits")} icon="Factory">
           <CategoryBreakdownChart
             data={model.byPlant}
             emptyMessage="No cases match the current filters."
@@ -195,7 +197,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         </SectionCard>
         <SectionCard
           title="Cases by exception type"
-          subtitle="What keeps going wrong"
+          subtitle={t("analytics.recurring")}
           icon="OctagonAlert"
         >
           <CategoryBreakdownChart
@@ -209,7 +211,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
           title="Top performing plants"
-          subtitle="Ranked on SLA adherence, penalised for open breaches"
+          subtitle={t("analytics.plantRanking")}
           icon="TrendingUp"
           flush
           className="h-full"
@@ -231,7 +233,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
           title="Owner performance"
-          subtitle="Execution against the cases each person owns"
+          subtitle={t("analytics.byOwner")}
           icon="UserCog"
           flush
           className="h-full"
@@ -245,7 +247,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         </SectionCard>
         <SectionCard
           title="Reviewer performance"
-          subtitle="Verification load and turnaround"
+          subtitle={t("analytics.verificationLoad")}
           icon="ShieldCheck"
           flush
           className="h-full"
@@ -269,7 +271,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
           title="SLA heatmap"
-          subtitle="Open cases past target, by plant and priority"
+          subtitle={t("analytics.breaches")}
           icon="Grid3x3"
           className="h-full"
         >
@@ -277,7 +279,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         </SectionCard>
         <SectionCard
           title="Aging heatmap"
-          subtitle="How long open work has been sitting, by plant"
+          subtitle={t("analytics.ageing")}
           icon="Hourglass"
           className="h-full"
         >

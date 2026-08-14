@@ -8,6 +8,7 @@ import { Icon } from "@/components/patterns/icon";
 import { KpiTileRow, type KpiTileModel } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { ProgressBar } from "@/components/patterns/progress-bar";
 import { SectionCard } from "@/components/patterns/section-card";
 import { KnowledgePanels } from "./knowledge-panels";
@@ -231,6 +232,7 @@ const PlaybookCard = React.memo(function PlaybookCard({
 });
 
 export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
+  const { t } = useTranslation();
   const [search, setSearch] = React.useState("");
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
   const [notice, setNotice] = React.useState<string | null>(null);
@@ -333,8 +335,8 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
     <div className="space-y-5">
       <PageHeader
         docKey="playbooks"
-        title="Playbooks"
-        description="Reusable corrective-action templates per exception type, with the measured effect of each on resolution time and recurrence."
+        title={t("page.playbooks.title")}
+        description={t("page.playbooks.description")}
         meta={
           <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
             <Icon name="BookMarked" size="xs" />

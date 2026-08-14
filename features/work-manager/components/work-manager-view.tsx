@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/patterns/icon";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import type { WorkPortfolioMetrics } from "@/src/data/queries/work";
 import type { CaseListItem, Plant, User } from "@/src/domain/types";
@@ -33,6 +34,8 @@ interface WorkManagerViewProps {
   portfolio: WorkPortfolioMetrics;
   sessionUser: User;
   initialState: WorkViewState;
+  /** True when created cases are written to the database. */
+  persistent?: boolean;
 }
 
 function MetaChip({ icon, children }: { icon: string; children: React.ReactNode }) {
@@ -56,7 +59,9 @@ export function WorkManagerView({
   portfolio,
   sessionUser,
   initialState,
+  persistent,
 }: WorkManagerViewProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [createOpen, setCreateOpen] = React.useState(false);
 
@@ -66,6 +71,7 @@ export function WorkManagerView({
     assignableUsers,
     sessionUser,
     initial: initialState,
+    persistent,
   });
 
   const facets = React.useMemo(
@@ -166,8 +172,8 @@ export function WorkManagerView({
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Work Manager"
-        description="Every detected operational case, in one queue — triage it, own it, execute it, verify it."
+        title={t("page.work.title")}
+        description={t("page.work.description")}
         docKey="work"
         meta={
           <>

@@ -29,3 +29,6 @@ Thumbs.db
 .vscode/
 # Presentation distribution package
 quikops-perma-presentation-pack.zip
+
+.vercel
+.env*

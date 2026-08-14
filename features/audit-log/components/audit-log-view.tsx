@@ -8,6 +8,7 @@ import { Icon } from "@/components/patterns/icon";
 import { KpiTileRow } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
 import { AUDIT_SOURCE_LABEL, ROLE_META } from "@/src/config/app-config";
@@ -37,6 +38,7 @@ const SOURCE_TONE: Record<string, string> = {
 };
 
 export function AuditLogView({ data }: { data: AuditLogData }) {
+  const { t } = useTranslation();
   const api = useAuditLog(data);
 
   const columns = React.useMemo<DataTableColumn<AuditEntryRow, AuditSortKey>[]>(
@@ -137,8 +139,8 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
     <div className="space-y-5">
       <PageHeader
         docKey="audit"
-        title="Audit Log"
-        description="Append-only record of every state change, assignment, verification decision and configuration edit across the network."
+        title={t("page.audit.title")}
+        description={t("page.audit.description")}
         meta={
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
@@ -231,7 +233,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
       ) : null}
 
       <SectionCard
-        title="Audit trail"
+        title={t("audit.trail")}
         subtitle="Newest first. Session changes interleave with the stored record."
         icon="ScrollText"
         flush

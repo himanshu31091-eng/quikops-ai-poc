@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "@/src/i18n/provider";
 /**
  * The first Tab stop on every page.
  *
@@ -7,12 +10,13 @@
  * `display: none`.
  */
 export function SkipLink({ targetId = "main-content" }: { targetId?: string }) {
+  const { t } = useTranslation();
   return (
     <a
       href={`#${targetId}`}
       className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-md focus:border focus:border-accent focus:bg-surface focus:px-3 focus:py-2 focus:text-xs focus:font-medium focus:text-content focus:shadow-overlay"
     >
-      Skip to main content
+      {t("shell.skipToContent")}
     </a>
   );
 }

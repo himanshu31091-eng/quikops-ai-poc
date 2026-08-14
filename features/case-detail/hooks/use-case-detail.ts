@@ -1,9 +1,29 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { CASE_STATUS_META, PRIORITY_META } from "@/src/config/app-config";
+import {
+  addActionAction,
+  addCommentAction,
+  addEvidenceAction,
+  assignOwnerAction,
+  decideVerificationAction,
+  removeActionAction,
+  removeEvidenceAction,
+  reorderActionAction,
+  requestVerificationAction,
+  setDueAtAction,
+  setPriorityAction,
+  setReviewerAction,
+  setStatusAction,
+  startWorkAction,
+  updateActionAction,
+} from "@/src/data/mutations/case-mutations";
+import type { MutationResult } from "@/src/data/mutations/result";
 import type { CaseDetailModel } from "@/src/data/queries/case-detail";
 import { scoreCaseHealth } from "@/src/domain/case-health";
+import { verifiedKpiValue } from "@/src/domain/kpi-outcome";
 import type {
   ActionStatus,
   CaseHealth,
@@ -637,13 +657,7 @@ function createReducer(ctx: ReducerContext) {
         const nextStatus: CaseStatus = decision === "APPROVED" ? "VERIFIED" : "IN_PROGRESS";
 
         const kpiCurrent =
-          decision === "APPROVED"
-            ? Math.round(
-                (ctx.targetValue >= ctx.baselineValue
-                  ? ctx.baselineValue + (ctx.targetValue - ctx.baselineValue) * 1.02
-                  : ctx.baselineValue - (ctx.baselineValue - ctx.targetValue) * 1.02) * 10,
-              ) / 10
-            : null;
+          decision === "APPROVED" ? verifiedKpiValue(ctx.baselineValue, ctx.targetValue) : null;
 
         return record(
           {
@@ -764,7 +778,19 @@ export interface CaseDetailApi {
   exportRecord: () => void;
 }
 
-export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseDetailApi {
+export function useCaseDetail(
+  detail: CaseDetailModel,
+  sessionUser: User,
+  /**
+   * Whether changes are written to the database.
+   *
+   * Decided on the server and passed down, because `USE_DATABASE` is a
+   * server-side value and a client bundle must never be able to read it. False
+   * keeps the fixture behaviour exactly as it was: everything below still
+   * dispatches to the reducer, and nothing is sent anywhere.
+   */
+  persistent = false,
+): CaseDetailApi {
   const ctx = React.useMemo<ReducerContext>(
     () => ({
       caseId: detail.case.id,
@@ -871,6 +897,38 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
 
   const dismissNotice = React.useCallback(() => setNotice(null), []);
 
+  /**
+   * Sends a change to the server and re-reads the record.
+   *
+   * The reducer above has already applied the change optimistically, which is
+   * what keeps the page immediate. This is what makes it true: the write goes
+   * to the database, and `router.refresh()` pulls the stored record back.
+   * Fresh server data remounts this hook (see the `key` in the page), so
+   * whatever the database actually holds replaces the optimistic copy.
+   *
+   * **A failed write is never swallowed.** The message is shown and the record
+   * is re-read anyway, which discards the optimistic change rather than
+   * leaving something on screen that was never saved. Silently keeping it is
+   * how a client comes back tomorrow to find their work gone.
+   */
+  const router = useRouter();
+  const persist = React.useCallback(
+    (run: () => Promise<MutationResult>) => {
+      if (!persistent) return;
+      void (async () => {
+        let result: MutationResult;
+        try {
+          result = await run();
+        } catch {
+          result = { ok: false, error: "the server did not respond." };
+        }
+        if (!result.ok) say(`Not saved — ${result.error}`, "info");
+        router.refresh();
+      })();
+    },
+    [persistent, router, say],
+  );
+
   const assignOwner = React.useCallback(
     (ownerId: string | null) => {
       settle("assign", () => {
@@ -901,9 +959,10 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
           ownerId ? "success" : "info",
           "assignment",
         );
+        persist(() => assignOwnerAction(caseNo, ownerId));
       });
     },
-    [ctx.userById, sessionUser, say, settle, publish, detail.case.title],
+    [ctx.userById, sessionUser, say, settle, publish, persist, caseNo, detail.case.title],
   );
 
   const setReviewer = React.useCallback(
@@ -913,12 +972,13 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         { reviewerId },
         {
           kind: "ASSIGNED",
-          summary: `${ctx.userById[reviewerId]?.name ?? "A reviewer"} named as reviewer on ${detail.case.caseNo}`,
+          summary: `${ctx.userById[reviewerId]?.name ?? "A reviewer"} named as reviewer on ${caseNo}`,
         },
       );
       say(`Reviewer set to ${ctx.userById[reviewerId]?.name ?? "the selected reviewer"}.`);
+      persist(() => setReviewerAction(caseNo, reviewerId));
     },
-    [ctx.userById, sessionUser, say, publish, detail.case.caseNo],
+    [ctx.userById, sessionUser, say, publish, persist, caseNo],
   );
 
   const setDueAt = React.useCallback(
@@ -928,12 +988,13 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         { dueAt },
         {
           kind: "ASSIGNED",
-          summary: `Resolution target moved on ${detail.case.caseNo} — SLA recalculated`,
+          summary: `Resolution target moved on ${caseNo} — SLA recalculated`,
         },
       );
       say("Due date updated. The SLA countdown follows the new target.");
+      persist(() => setDueAtAction(caseNo, dueAt));
     },
-    [sessionUser, say, publish, detail.case.caseNo],
+    [sessionUser, say, publish, persist, caseNo],
   );
 
   const setPriority = React.useCallback(
@@ -943,20 +1004,22 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         { priorityBand: band },
         {
           kind: "ASSIGNED",
-          summary: `Priority overridden to ${PRIORITY_META[band].label.toLowerCase()} on ${detail.case.caseNo}`,
+          summary: `Priority overridden to ${PRIORITY_META[band].label.toLowerCase()} on ${caseNo}`,
         },
       );
       say(`Priority overridden to ${PRIORITY_META[band].label.toLowerCase()}.`);
+      persist(() => setPriorityAction(caseNo, band));
     },
-    [sessionUser, say, publish, detail.case.caseNo],
+    [sessionUser, say, publish, persist, caseNo],
   );
 
   const setStatus = React.useCallback(
     (status: CaseStatus) => {
       dispatch({ type: "SET_STATUS", status, actor: sessionUser });
       say(`Status changed to ${CASE_STATUS_META[status].label.toLowerCase()}.`);
+      persist(() => setStatusAction(caseNo, status));
     },
-    [sessionUser, say],
+    [sessionUser, say, persist, caseNo],
   );
 
   const startWork = React.useCallback(() => {
@@ -967,22 +1030,25 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         { kind: "WORK_STARTED", summary: `Work started on ${detail.case.title}` },
       );
       say("Work started. The case is now in progress and the plan is live.", "success", "timeline");
+      persist(() => startWorkAction(caseNo));
     });
-  }, [sessionUser, say, settle, publish, detail.case.title]);
+  }, [sessionUser, say, settle, publish, persist, caseNo, detail.case.title]);
 
   const addAction = React.useCallback(
     (draft: NewActionDraft) => {
       dispatch({ type: "ADD_ACTION", draft, actor: sessionUser });
       say("Corrective action added to the plan.");
+      persist(() => addActionAction(caseNo, draft));
     },
-    [sessionUser, say],
+    [sessionUser, say, persist, caseNo],
   );
 
   const setActionProgress = React.useCallback(
     (id: string, completionPct: number) => {
       dispatch({ type: "UPDATE_ACTION", id, patch: { completionPct }, actor: sessionUser });
+      persist(() => updateActionAction(caseNo, id, { completionPct }));
     },
-    [sessionUser],
+    [sessionUser, persist, caseNo],
   );
 
   const setActionStatus = React.useCallback(
@@ -1000,20 +1066,22 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
           { actionsTotal: actions.length, actionsDone: done },
           {
             kind: "ACTION_COMPLETED",
-            summary: `Corrective action completed on ${detail.case.caseNo} — ${done} of ${actions.length} closed`,
+            summary: `Corrective action completed on ${caseNo} — ${done} of ${actions.length} closed`,
           },
         );
         say("Action marked complete.");
       }
+      persist(() => updateActionAction(caseNo, id, { status }));
     },
-    [sessionUser, say, publish, detail.case.caseNo],
+    [sessionUser, say, publish, persist, caseNo],
   );
 
   const setActionNotes = React.useCallback(
     (id: string, notes: string) => {
       dispatch({ type: "UPDATE_ACTION", id, patch: { notes }, actor: sessionUser });
+      persist(() => updateActionAction(caseNo, id, { notes }));
     },
-    [sessionUser],
+    [sessionUser, persist, caseNo],
   );
 
   const editAction = React.useCallback(
@@ -1023,23 +1091,26 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
     ) => {
       dispatch({ type: "UPDATE_ACTION", id, patch, actor: sessionUser });
       say("Action updated.");
+      persist(() => updateActionAction(caseNo, id, patch));
     },
-    [sessionUser, say],
+    [sessionUser, say, persist, caseNo],
   );
 
   const reorderAction = React.useCallback(
     (id: string, direction: -1 | 1) => {
       dispatch({ type: "REORDER_ACTION", id, direction, actor: sessionUser });
+      persist(() => reorderActionAction(caseNo, id, direction));
     },
-    [sessionUser],
+    [sessionUser, persist, caseNo],
   );
 
   const removeAction = React.useCallback(
     (id: string) => {
       dispatch({ type: "REMOVE_ACTION", id, actor: sessionUser });
       say("Action removed from the plan.");
+      persist(() => removeActionAction(caseNo, id));
     },
-    [sessionUser, say],
+    [sessionUser, say, persist, caseNo],
   );
 
   const addEvidence = React.useCallback(
@@ -1053,7 +1124,7 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
             kind: "EVIDENCE_UPLOADED",
             summary: `${drafts.length} evidence file${
               drafts.length === 1 ? "" : "s"
-            } attached to ${detail.case.caseNo}`,
+            } attached to ${caseNo}`,
           },
         );
         say(
@@ -1063,17 +1134,37 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
           "success",
           "evidence",
         );
+        // The object URL behind an image preview stays in the browser and is
+        // deliberately not sent: it names a blob in this tab's memory, which
+        // is meaningless to anybody else and gone on refresh. What persists is
+        // the evidence record — who filed what, against which action, and what
+        // it proves.
+        persist(() =>
+          addEvidenceAction(
+            caseNo,
+            drafts.map((draft) => ({
+              fileName: draft.fileName,
+              kind: draft.kind,
+              sizeBytes: draft.sizeBytes,
+              description: draft.description,
+              actionId: draft.actionId,
+              ...(draft.storageUrl ? { storageUrl: draft.storageUrl } : {}),
+              ...(draft.storagePath ? { storagePath: draft.storagePath } : {}),
+            })),
+          ),
+        );
       });
     },
-    [sessionUser, say, settle, publish, detail.case.caseNo],
+    [sessionUser, say, settle, publish, persist, caseNo],
   );
 
   const removeEvidence = React.useCallback(
     (id: string) => {
       dispatch({ type: "REMOVE_EVIDENCE", id, actor: sessionUser });
       say("Evidence removed from the case.");
+      persist(() => removeEvidenceAction(caseNo, id));
     },
-    [sessionUser, say],
+    [sessionUser, say, persist, caseNo],
   );
 
   const addComment = React.useCallback(
@@ -1089,8 +1180,9 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         mentions,
         actor: sessionUser,
       });
+      persist(() => addCommentAction(caseNo, body));
     },
-    [detail.assignableUsers, sessionUser],
+    [detail.assignableUsers, sessionUser, persist, caseNo],
   );
 
   const requestVerification = React.useCallback(() => {
@@ -1105,7 +1197,7 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         },
         {
           kind: "VERIFICATION_REQUESTED",
-          summary: `Verification requested on ${detail.case.caseNo} — awaiting ${
+          summary: `Verification requested on ${caseNo} — awaiting ${
             ctx.userById[sessionRef.current.reviewerId]?.name ?? "the reviewer"
           }`,
         },
@@ -1117,8 +1209,9 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
         "success",
         "verification",
       );
+      persist(() => requestVerificationAction(caseNo));
     });
-  }, [ctx.userById, sessionUser, say, settle, publish, detail.case.caseNo]);
+  }, [ctx.userById, sessionUser, say, settle, publish, persist, caseNo]);
 
   const decideVerification = React.useCallback(
     (draft: VerificationDraft) => {
@@ -1141,11 +1234,11 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
           {
             kind: approved ? "VERIFICATION_APPROVED" : "VERIFICATION_REJECTED",
             summary: approved
-              ? `Verified and closed ${detail.case.caseNo} — ${formatMoney(
+              ? `Verified and closed ${caseNo} — ${formatMoney(
                   detail.case.revenueAtRisk,
                   detail.case.currency,
                 )} recovered`
-              : `Verification returned on ${detail.case.caseNo} — back with the owner`,
+              : `Verification returned on ${caseNo} — back with the owner`,
           },
         );
         say(
@@ -1157,9 +1250,13 @@ export function useCaseDetail(detail: CaseDetailModel, sessionUser: User): CaseD
           draft.decision === "APPROVED" ? "success" : "info",
           "verification",
         );
+        // Segregation of duties is checked again on the server, where it
+        // cannot be bypassed. A reviewer the UI would have let through still
+        // gets refused there, and the refusal is what the person sees.
+        persist(() => decideVerificationAction(caseNo, draft));
       });
     },
-    [sessionUser, say, settle, publish, detail.case],
+    [sessionUser, say, settle, publish, persist, caseNo, detail.case],
   );
 
   const exportRecord = React.useCallback(() => {

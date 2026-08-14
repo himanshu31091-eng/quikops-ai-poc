@@ -103,12 +103,13 @@ function NavRow({
 }
 
 export function SideNav({ role, badges, onNavigate }: SideNavProps) {
+  const { t, messages } = useTranslation();
   const pathname = usePathname();
 
   return (
     <nav
       className="flex h-full w-nav shrink-0 flex-col border-r border-line bg-surface"
-      aria-label="Primary"
+      aria-label={t("shell.primaryNavigation")}
     >
       <div className="flex h-topbar shrink-0 items-center gap-2.5 border-b border-line px-4">
         <BrandMark className="size-[22px]" />
@@ -117,7 +118,7 @@ export function SideNav({ role, badges, onNavigate }: SideNavProps) {
             {APP.name}
           </p>
           <p className="truncate text-2xs leading-3.5 text-content-tertiary">
-            {APP.tagline}
+            {t("shell.tagline")}
           </p>
         </div>
       </div>
@@ -131,7 +132,7 @@ export function SideNav({ role, badges, onNavigate }: SideNavProps) {
             <div key={section.key} className={cn(index > 0 && "mt-5")}>
               {section.label ? (
                 <p className="mb-1.5 px-2.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                  {section.label}
+                  {messages[`navSection.${section.key}`] ? t(`navSection.${section.key}`) : section.label}
                 </p>
               ) : null}
               <div className="space-y-0.5">
@@ -155,11 +156,11 @@ export function SideNav({ role, badges, onNavigate }: SideNavProps) {
           <div className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-success" />
             <p className="text-2xs font-medium text-content-secondary">
-              Enterprise Data Platform connected
+              {t("shell.dataPlatformConnected")}
             </p>
           </div>
           <p className="mt-1 text-2xs leading-4 text-content-tertiary">
-            Last sync 2h ago · 34 signals
+            {t("shell.lastSync")}
           </p>
         </div>
         <p className="mt-2.5 px-0.5 text-2xs text-content-tertiary">

@@ -342,6 +342,18 @@ export interface CaseEvidence {
   accepted: boolean;
   /** Present only for evidence created in-session, so it can be previewed. */
   objectUrl?: string;
+  /**
+   * Whether a file is actually stored behind this record.
+   *
+   * A boolean rather than the storage URL: the store is private, the URL is
+   * useless without a server credential, and shipping it to a browser would
+   * only invite someone to try. The download route addresses the evidence by
+   * id and checks the tenant itself.
+   *
+   * False for records filed before storage existed and for seeded evidence —
+   * both remain valid; they simply have nothing to open.
+   */
+  hasStoredFile?: boolean;
 }
 
 export interface CaseCommentAttachment {

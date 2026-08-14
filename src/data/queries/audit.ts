@@ -1,4 +1,6 @@
+import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
 import type { CaseAuditEntry, Plant, User } from "@/src/domain/types";
+import { USE_DATABASE } from "../db";
 import { CASES } from "../fixtures/cases";
 import {
   buildAuditLog,
@@ -9,6 +11,8 @@ import {
 } from "../fixtures/case-detail";
 import { PLANTS, USERS } from "../fixtures/organisation";
 import { toCaseListItem } from "./case-mapper";
+import { getPeople, getPlants } from "./corpus";
+import { findAuditForTenant } from "./portfolio-db-mapper";
 
 /**
  * Global audit log.
@@ -39,6 +43,24 @@ export interface AuditLogData {
 
 export async function getAuditLogData(): Promise<AuditLogData> {
   const entries: AuditEntryRow[] = [];
+
+  // In database mode the trail is not derived — it is read. Every mutation
+  // writes its audit row in the same transaction as the change, so these are
+  // the events that actually happened rather than a reconstruction of what
+  // the case record implies happened.
+  if (USE_DATABASE) {
+    const [stored, people, plants] = await Promise.all([
+      findAuditForTenant(DEFAULT_TENANT_ID),
+      getPeople(),
+      getPlants(),
+    ]);
+    return {
+      entries: stored,
+      users: people,
+      plants,
+      actions: [...new Set(stored.map((entry) => entry.action))].sort(),
+    };
+  }
 
   for (const source of CASES) {
     const item = toCaseListItem(source);

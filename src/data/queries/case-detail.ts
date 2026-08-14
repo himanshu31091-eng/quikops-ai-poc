@@ -371,9 +371,7 @@ export async function getCaseDetail(
     // the same builder the fixtures use — there is no timeline table, because a
     // timeline is a reading of the record rather than a second copy of it.
     timeline = buildTimeline(item, actions, evidence, verification, directory);
-    // No discussion is persisted yet. An empty thread is the honest answer;
-    // composing one from fixture people would put strangers on a real case.
-    comments = [];
+    comments = records.comments;
   } else {
     const source = CASES.find((entry) => entry.caseNo.toUpperCase() === normalised);
     if (!source) return null;

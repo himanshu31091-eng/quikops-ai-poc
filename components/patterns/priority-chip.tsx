@@ -3,6 +3,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PRIORITY_META } from "@/src/config/app-config";
 import type { PriorityBand, PriorityFactor } from "@/src/domain/types";
+import { useTranslation } from "@/src/i18n/provider";
 import { cn } from "@/src/lib/cn";
 import { Icon } from "./icon";
 
@@ -29,6 +30,10 @@ export function PriorityChip({
   className,
 }: PriorityChipProps) {
   const meta = PRIORITY_META[band];
+  // Same fallback rule as StatusBadge: the catalogue when it has the band, the
+  // authored English label when it does not.
+  const { t, messages } = useTranslation();
+  const key = `priority.${band}`;
 
   const chip = (
     <span
@@ -43,7 +48,7 @@ export function PriorityChip({
       )}
     >
       <span className={cn("size-1.5 rounded-full", meta.dotClassName)} />
-      {meta.label}
+      {messages[key] ? t(key) : meta.label}
       {score !== undefined ? (
         <span className="tabular-nums opacity-70">{score.toFixed(1)}</span>
       ) : null}

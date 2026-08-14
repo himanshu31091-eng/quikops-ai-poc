@@ -1,5 +1,6 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -8,6 +9,7 @@ import type { CaseEvidence, CorrectiveAction } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatTimestamp, formatWhen } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
+import { useTranslation } from "@/src/i18n/provider";
 import type { EvidenceDraft } from "../types";
 import {
   ACCEPT_ATTRIBUTE,
@@ -27,6 +29,10 @@ interface EvidenceCardProps {
   onRemove: (id: string) => void;
   /** Set by the parent so the header's Upload evidence button can focus the zone. */
   dropZoneRef: React.RefObject<HTMLDivElement | null>;
+  /** The case these files are filed against — sent to the upload authoriser. */
+  caseNo: string;
+  /** True when uploads go to blob storage rather than living in this tab. */
+  persistent: boolean;
 }
 
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -36,9 +42,9 @@ const MAX_BYTES = 25 * 1024 * 1024;
  * strict about two things: the file type must be one a reviewer can open, and
  * every file records who attached it and against which action.
  *
- * Files are held in the browser for this session — nothing is uploaded to a
- * store yet — which is why images preview from an object URL and the card says
- * so rather than implying a server round trip.
+ * Files upload straight from the browser to private blob storage, authorised
+ * by a route that checks the session and the case first. The object URL below
+ * is only the instant preview while that happens — never the storage.
  */
 export const EvidenceCard = React.memo(function EvidenceCard({
   evidence,
@@ -48,7 +54,10 @@ export const EvidenceCard = React.memo(function EvidenceCard({
   onAdd,
   onRemove,
   dropZoneRef,
+  caseNo,
+  persistent,
 }: EvidenceCardProps) {
+  const { t } = useTranslation();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = React.useState(false);
   const [rejected, setRejected] = React.useState<string[]>([]);
@@ -58,7 +67,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
   const [note, setNote] = React.useState("");
 
   const accept = React.useCallback(
-    (files: FileList | File[]) => {
+    async (files: FileList | File[]) => {
       const drafts: EvidenceDraft[] = [];
       const problems: string[] = [];
 
@@ -72,7 +81,8 @@ export const EvidenceCard = React.memo(function EvidenceCard({
           problems.push(`${file.name} — over the 25 MB limit`);
           continue;
         }
-        drafts.push({
+
+        const draft: EvidenceDraft = {
           fileName: file.name,
           kind,
           sizeBytes: file.size,
@@ -81,7 +91,33 @@ export const EvidenceCard = React.memo(function EvidenceCard({
             "Attached from the case detail screen. No description recorded.",
           actionId: linkedAction === "" ? null : linkedAction,
           ...(kind === "IMAGE" ? { objectUrl: URL.createObjectURL(file) } : {}),
-        });
+        };
+
+        /* The file goes straight from here to private blob storage. The route
+         * that authorises it checks the session and that the case belongs to
+         * this tenant before any token exists, and the bytes never pass
+         * through a Server Action — which is what makes the 25 MB limit above
+         * honest rather than aspirational.
+         *
+         * When storage is not configured the upload fails and the evidence is
+         * still recorded, as metadata. That is the pre-existing behaviour and
+         * it is the honest one: the record of who filed what, and what it
+         * proves, is worth keeping even when the file could not be stored. */
+        if (persistent) {
+          try {
+            const uploaded = await upload(`evidence/${caseNo}/${file.name}`, file, {
+              access: "private",
+              handleUploadUrl: "/api/evidence/upload",
+              clientPayload: caseNo,
+            });
+            draft.storageUrl = uploaded.url;
+            draft.storagePath = uploaded.pathname;
+          } catch {
+            problems.push(`${file.name} — stored as a record only; the file could not be uploaded`);
+          }
+        }
+
+        drafts.push(draft);
       }
 
       setRejected(problems);
@@ -90,7 +126,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
         setDescription("");
       }
     },
-    [description, linkedAction, onAdd],
+    [description, linkedAction, onAdd, persistent, caseNo],
   );
 
   const submitNote = (event: React.FormEvent) => {
@@ -127,8 +163,9 @@ export const EvidenceCard = React.memo(function EvidenceCard({
       footer={
         <p className="flex items-center gap-1.5 text-2xs text-content-tertiary">
           <Icon name="Info" size="xs" />
-          Files attached in this session are held in the browser. Connecting object storage makes
-          them durable without changing anything on this screen.
+          {persistent
+            ? "Files are stored privately and can only be opened from this case by someone in your organisation."
+            : "Files attached in this session are held in the browser. Turning on the database stores them durably."}
         </p>
       }
     >
@@ -341,6 +378,20 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                       {file.uploadedByName} · {formatWhen(file.uploadedAt, DEMO_NOW)}
                     </span>
                     <span>{formatBytes(file.sizeBytes)}</span>
+                    {/* Only where a file was actually stored. A record filed
+                        before storage existed stays valid and simply offers
+                        nothing to open, rather than a link that 404s. */}
+                    {file.hasStoredFile ? (
+                      <a
+                        href={`/api/evidence/${file.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1 font-medium text-accent hover:underline"
+                      >
+                        <Icon name="Download" size="xs" />
+                        {t("evidence.open")}
+                      </a>
+                    ) : null}
                     {action ? (
                       <span className="flex items-center gap-1">
                         <Icon name="ListChecks" size="xs" />

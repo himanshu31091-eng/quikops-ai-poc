@@ -15,10 +15,13 @@ import type {
 import { isOpenStatus } from "@/src/domain/case-status";
 import { PRIORITY_BANDS } from "@/src/domain/types";
 import { OTIF_TARGET_PCT, SPARKLINE_POINTS } from "@/src/lib/constants";
-import { CASES } from "../fixtures/cases";
-import { toCaseListItem } from "./case-mapper";
+import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
+import { USE_DATABASE } from "../db";
+import { getCaseCorpus, getPlants } from "./corpus";
+import { findAuditForTenant, findOpenActionsForTenant } from "./portfolio-db-mapper";
 import {
   ACTIVITY_FEED,
+  buildPortfolioSummary,
   EXECUTIVE_SUMMARY,
   TODAYS_ACTIONS,
 } from "../fixtures/intelligence";
@@ -43,8 +46,42 @@ import {
  */
 
 /** Every dashboard figure narrows through here, so scope cannot be applied twice or missed. */
-const scoped = (scope: PlantScope) => scopeCases(CASES, scope);
-const openCases = (scope: PlantScope) => scoped(scope).filter((c) => isOpenStatus(c.status));
+const scoped = async (scope: PlantScope) => scopeCases(await getCaseCorpus(), scope);
+const openCases = async (scope: PlantScope) =>
+  (await scoped(scope)).filter((c) => isOpenStatus(c.status));
+
+/**
+ * Every open corrective action in the tenant, as the dashboard's work list.
+ *
+ * The seeded list is keyed to fixture people and fixture cases; in database
+ * mode it would put another organisation's work on the screen.
+ */
+async function storedOpenActions(): Promise<ActionItem[]> {
+  const corpus = await getCaseCorpus();
+  const actions = await findOpenActionsForTenant(DEFAULT_TENANT_ID, corpus);
+  return actions;
+}
+
+/**
+ * Which activity icon a stored audit event earns.
+ *
+ * Read from the rendered label rather than the dotted event key, because the
+ * label is already the one place those words are decided. Anything unmatched
+ * falls back to the neutral kind instead of guessing.
+ */
+function activityKindFor(action: string): ActivityEvent["kind"] {
+  const text = action.toLowerCase();
+  if (text.includes("created")) return "CASE_CREATED";
+  if (text.includes("owner") || text.includes("assigned")) return "CASE_ASSIGNED";
+  if (text.includes("approved")) return "VERIFICATION_APPROVED";
+  if (text.includes("rejected") || text.includes("returned")) return "VERIFICATION_REJECTED";
+  if (text.includes("verification")) return "VERIFICATION_SUBMITTED";
+  if (text.includes("escalat")) return "CASE_ESCALATED";
+  if (text.includes("closed")) return "CASE_CLOSED";
+  if (text.includes("comment")) return "COMMENT_ADDED";
+  if (text.includes("action")) return "ACTION_COMPLETED";
+  return "SIGNAL_INGESTED";
+}
 
 function tail(series: TrendPoint[], count = SPARKLINE_POINTS): TrendPoint[] {
   return series.slice(-count);
@@ -53,7 +90,7 @@ function tail(series: TrendPoint[], count = SPARKLINE_POINTS): TrendPoint[] {
 /* ------------------------------------------------------------------ KPI band */
 
 export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<KpiCardModel[]> {
-  const open = openCases(scope);
+  const open = await openCases(scope);
   const revenueAtRisk = open.reduce((sum, c) => sum + c.revenueAtRisk, 0);
   const criticalOpen = open.filter((c) => c.priorityBand === "CRITICAL").length;
   const breaches = open.filter((c) => c.slaBreachedAt !== null).length;
@@ -119,15 +156,21 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
 /* --------------------------------------------------------------- Panel loads */
 
 export async function getExecutiveSummary(): Promise<AiExecutiveSummary> {
+  // The summary cites specific cases by number. Reading the fixture version
+  // while the tiles beneath it count stored cases is how a client is shown a
+  // paragraph about cases their queue does not contain.
+  if (USE_DATABASE) {
+    const [corpus, sites] = await Promise.all([getCaseCorpus(), getPlants()]);
+    return buildPortfolioSummary(corpus, sites);
+  }
   return EXECUTIVE_SUMMARY;
 }
 
 export async function getCriticalCases(limit = 5, scope: PlantScope = ALL_PLANTS): Promise<CaseListItem[]> {
-  return openCases(scope)
+  return (await openCases(scope))
     .filter((c) => c.priorityBand === "CRITICAL" || c.priorityBand === "HIGH")
     .sort((a, b) => b.priorityScore - a.priorityScore)
-    .slice(0, limit)
-    .map(toCaseListItem);
+    .slice(0, limit);
 }
 
 export async function getPlantHealth(): Promise<PlantHealth[]> {
@@ -136,7 +179,8 @@ export async function getPlantHealth(): Promise<PlantHealth[]> {
 
 export async function getTodaysActions(limit = 5): Promise<ActionItem[]> {
   const order = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 } as const;
-  return [...TODAYS_ACTIONS]
+  const source = USE_DATABASE ? await storedOpenActions() : TODAYS_ACTIONS;
+  return [...source]
     .sort(
       (a, b) =>
         order[a.priorityBand] - order[b.priorityBand] ||
@@ -150,11 +194,28 @@ export async function getOtifTrend(): Promise<TrendPoint[]> {
 }
 
 export async function getActivityFeed(limit = 8): Promise<ActivityEvent[]> {
+  // The stored trail is the real activity feed: every mutation writes an audit
+  // row, so what shows here is what people actually did rather than a seeded
+  // narrative about cases that may not exist in this environment.
+  if (USE_DATABASE) {
+    const entries = await findAuditForTenant(DEFAULT_TENANT_ID);
+    return entries.slice(0, limit).map((entry) => ({
+      id: entry.id,
+      kind: activityKindFor(entry.action),
+      // A null actor means the platform acted; the feed renders that as its own
+      // voice rather than attributing an SLA timer to a person.
+      actorName: entry.actorId === null ? null : entry.actorName,
+      actorRole: entry.actorRole,
+      caseNo: entry.caseNo,
+      summary: `${entry.action} — ${entry.caseTitle}`,
+      at: entry.at,
+    }));
+  }
   return ACTIVITY_FEED.slice(0, limit);
 }
 
 export async function getPriorityDistribution(scope: PlantScope = ALL_PLANTS): Promise<PriorityDistributionSlice[]> {
-  const open = openCases(scope);
+  const open = await openCases(scope);
   return PRIORITY_BANDS.map((band) => {
     const matching = open.filter((c) => c.priorityBand === band);
     return {
@@ -182,13 +243,13 @@ export async function getExecutionMetrics(): Promise<ExecutionMetrics> {
  * headline numbers against work done in the current session.
  */
 export async function getCaseBaseline(scope: PlantScope = ALL_PLANTS): Promise<CaseListItem[]> {
-  return scoped(scope).map(toCaseListItem);
+  return scoped(scope);
 }
 
 /* ------------------------------------------------------------- Shell badges */
 
 export async function getNavBadgeCounts(scope: PlantScope = ALL_PLANTS): Promise<Record<string, number>> {
-  const open = openCases(scope);
+  const open = await openCases(scope);
   return {
     unassigned: open.filter((c) => c.ownerId === null).length,
     myOpen: TODAYS_ACTIONS.filter((a) => a.status !== "DONE").length,

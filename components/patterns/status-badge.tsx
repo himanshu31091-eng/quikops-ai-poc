@@ -1,5 +1,8 @@
+"use client";
+
 import { CASE_STATUS_META, ACTION_STATUS_META } from "@/src/config/app-config";
 import type { ActionStatus, CaseStatus } from "@/src/domain/types";
+import { useTranslation } from "@/src/i18n/provider";
 import { cn } from "@/src/lib/cn";
 
 /**
@@ -29,6 +32,13 @@ export function StatusBadge({
       ? CASE_STATUS_META[status as CaseStatus]
       : ACTION_STATUS_META[status as ActionStatus];
 
+  // Translated where a catalogue carries the key, English otherwise. Checking
+  // `messages` rather than trusting `t()` keeps the authored label as the
+  // fallback: `t()` alone would render the raw key on a screen whose catalogue
+  // is still being written, which is worse than the English word.
+  const { t, messages } = useTranslation();
+  const key = `${kind === "case" ? "status" : "actionStatus"}.${status}`;
+
   if (!meta) return null;
 
   return (
@@ -46,7 +56,7 @@ export function StatusBadge({
       {showDot ? (
         <span className={cn("size-1.5 rounded-full", meta.dotClassName)} />
       ) : null}
-      {meta.label}
+      {messages[key] ? t(key) : meta.label}
     </span>
   );
 }

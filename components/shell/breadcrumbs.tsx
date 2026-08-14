@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/patterns/icon";
 import { NAVIGATION } from "@/src/config/app-config";
+import { useTranslation } from "@/src/i18n/provider";
 
 /**
  * Breadcrumbs derived from the pathname.
@@ -41,11 +42,12 @@ function toTitle(segment: string): string {
 }
 
 export function Breadcrumbs() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const flatNav = NAVIGATION.flatMap((section) => section.items);
   const segments = pathname.split("/").filter(Boolean);
 
-  const crumbs: Crumb[] = [{ label: "Home", href: "/dashboard" }];
+  const crumbs: Crumb[] = [{ label: t("shell.home"), href: "/dashboard" }];
 
   segments.forEach((segment, index) => {
     const href = `/${segments.slice(0, index + 1).join("/")}`;
@@ -58,7 +60,7 @@ export function Breadcrumbs() {
   });
 
   return (
-    <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1">
+    <nav aria-label={t("shell.breadcrumb")} className="flex min-w-0 items-center gap-1">
       {crumbs.map((crumb, index) => (
         <span key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1">
           {index > 0 ? (

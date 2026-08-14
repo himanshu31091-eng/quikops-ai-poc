@@ -9,6 +9,7 @@ import { KpiTileRow, type KpiTileModel } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { PageHeader } from "@/components/patterns/page-header";
+import { useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -82,6 +83,7 @@ const WEIGHT_LABELS: { key: keyof PriorityWeights; label: string; hint: string }
 ];
 
 export function AdministrationView({ data }: { data: AdministrationData }) {
+  const { t } = useTranslation();
   const [search, setSearch] = React.useState("");
   const [notice, setNotice] = React.useState<string | null>(null);
   const [weights, setWeights] = React.useState<PriorityWeights>({ ...PRIORITY_WEIGHTS });
@@ -303,8 +305,8 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
     <div className="space-y-5">
       <PageHeader
         docKey="admin"
-        title="Administration"
-        description="Users, roles, plant scoping, assignment routing, SLA thresholds and priority weights — with a live preview of what each change would do."
+        title={t("page.admin.title")}
+        description={t("page.admin.description")}
         meta={
           <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
             <Icon name="Settings2" size="xs" />
@@ -328,7 +330,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
 
       {/* Users */}
       <SectionCard
-        title="Users and roles"
+        title={t("admin.usersRoles")}
         subtitle="Only operations managers, task owners and analysts can be assigned a case"
         icon="Users"
         flush
@@ -375,7 +377,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       {/* Priority weights */}
       <div data-tour="admin-weights">
         <SectionCard
-          title="Priority weights"
+          title={t("admin.priorityWeights")}
           subtitle="Re-scored across every open case as you change them. Nothing is saved until you apply."
           icon="Target"
           action={
@@ -474,7 +476,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
 
       {/* SLA targets */}
       <SectionCard
-        title="SLA thresholds"
+        title={t("admin.slaThresholds")}
         subtitle="Resolution target per band, in hours. Breaching escalates a case above its owner."
         icon="Clock"
         action={
@@ -571,7 +573,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
 
       {/* Routing */}
       <SectionCard
-        title="Assignment routing"
+        title={t("admin.routing")}
         subtitle="Default owner by plant and exception type, applied when a case is raised"
         icon="Settings2"
         flush
@@ -618,7 +620,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7" data-tour="admin-permissions">
           <SectionCard
-            title="Permissions"
+            title={t("admin.permissions")}
             subtitle="Derived from the rules the product enforces, not declared here"
             icon="Lock"
             className="h-full"
@@ -629,8 +631,8 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
         </div>
         <div className="min-w-0 xl:col-span-5" data-tour="admin-departments">
           <SectionCard
-            title="Departments"
-            subtitle="Joined through the case owner — reassigning moves the work"
+            title={t("admin.departments")}
+            subtitle={t("admin.routingSub")}
             icon="Users"
             className="h-full"
           >

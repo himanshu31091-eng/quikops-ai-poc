@@ -7,9 +7,8 @@ import {
 } from "@/src/domain/portfolio-metrics";
 import type { CaseListItem, ExecutionMetrics, Plant } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
-import { CASES } from "../fixtures/cases";
+import { getCaseCorpus, getPlants } from "./corpus";
 import { EXECUTION_METRICS } from "../fixtures/metrics";
-import { PLANTS } from "../fixtures/organisation";
 import {
   CADENCE_META,
   REPORT_RUNS,
@@ -19,7 +18,6 @@ import {
   type ReportSchedule,
   type ReportTemplate,
 } from "../fixtures/reports";
-import { toCaseListItem } from "./case-mapper";
 
 /**
  * Reports data access.
@@ -62,7 +60,8 @@ export interface ReportsData {
 }
 
 export async function getReportsData(): Promise<ReportsData> {
-  const all = CASES.map(toCaseListItem);
+  const all = await getCaseCorpus();
+  const plants = await getPlants();
   const open = all.filter((item) => isOpenStatus(item.status));
 
   const bySupplier = new Map<string, { cases: number; revenue: number; recurrence: number }>();
@@ -94,7 +93,7 @@ export async function getReportsData(): Promise<ReportsData> {
     source: {
       counts: portfolioCounts(all, DEMO_NOW),
       metrics: EXECUTION_METRICS,
-      plants: PLANTS.map((plant) => ({
+      plants: plants.map((plant) => ({
         ...plant,
         ...computePlantRollup(all, plant.code, DEMO_NOW),
       })),

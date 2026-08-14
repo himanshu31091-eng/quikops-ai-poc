@@ -60,6 +60,8 @@ const SECTION_LABEL: Record<CaseSection, string> = {
 interface CaseDetailViewProps {
   detail: CaseDetailModel;
   sessionUser: User;
+  /** True when changes are written to the database rather than held in session. */
+  persistent?: boolean;
 }
 
 /**
@@ -67,8 +69,8 @@ interface CaseDetailViewProps {
  * useCaseDetail, the presentation lives in the cards, and this file is the
  * wiring plus the two-column layout.
  */
-export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
-  const api = useCaseDetail(detail, sessionUser);
+export function CaseDetailView({ detail, sessionUser, persistent }: CaseDetailViewProps) {
+  const api = useCaseDetail(detail, sessionUser, persistent);
   const [copilotOpen, setCopilotOpen] = React.useState(false);
   const [copilotMounted, setCopilotMounted] = React.useState(false);
   const dropZoneRef = React.useRef<HTMLDivElement | null>(null);
@@ -253,6 +255,8 @@ export function CaseDetailView({ detail, sessionUser }: CaseDetailViewProps) {
               onAdd={api.addEvidence}
               onRemove={api.removeEvidence}
               dropZoneRef={dropZoneRef}
+              caseNo={detail.case.caseNo}
+              persistent={persistent ?? false}
             />
             </div>
           </div>

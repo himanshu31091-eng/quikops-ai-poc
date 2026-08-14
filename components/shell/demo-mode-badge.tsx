@@ -2,6 +2,7 @@
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { APP } from "@/src/config/app-config";
+import { useTranslation } from "@/src/i18n/provider";
 
 /**
  * States what this environment is, on every screen.
@@ -23,6 +24,7 @@ import { APP } from "@/src/config/app-config";
  * nothing rather than a badge that has to be remembered about.
  */
 export function DemoModeBadge() {
+  const { t } = useTranslation();
   if (APP.environment !== "Demo") return null;
 
   return (
@@ -35,7 +37,7 @@ export function DemoModeBadge() {
           role="note"
         >
           <span className="size-1.5 shrink-0 rounded-full bg-accent" />
-          Demo Scenario · Illustrative Data
+          {t("shell.demoStrip")}
         </span>
       </TooltipTrigger>
       <TooltipContent>

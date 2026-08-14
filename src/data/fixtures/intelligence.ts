@@ -5,7 +5,7 @@ import {
   portfolioCounts,
   worstPlantCode,
 } from "@/src/domain/portfolio-metrics";
-import type { ActionItem, ActivityEvent, AiExecutiveSummary } from "@/src/domain/types";
+import type { ActionItem, ActivityEvent, AiExecutiveSummary, Plant } from "@/src/domain/types";
 import { DEMO_NOW, OTIF_TARGET_PCT } from "@/src/lib/constants";
 import { formatHours, formatMoney } from "@/src/lib/format";
 import { CASES } from "./cases";
@@ -36,19 +36,31 @@ const ago = (ms: number): string => new Date(DEMO_NOW.getTime() - ms).toISOStrin
  * summary cannot disagree with the screen it sits on. The narrative shape is
  * still authored; only the facts are derived.
  */
-function buildPortfolioSummary(): AiExecutiveSummary {
-  const counts = portfolioCounts(CASES, DEMO_NOW);
+/**
+ * The case shape this summary reads.
+ *
+ * A `CaseListItem` satisfies it structurally, which is what lets the stored
+ * corpus and the fixture corpus share one builder — and why the executive
+ * summary says the same thing as the tiles beneath it in either mode.
+ */
+type SummaryCase = (typeof CASES)[number];
+
+export function buildPortfolioSummary(
+  corpus: SummaryCase[] = CASES,
+  sites: Plant[] = PLANTS,
+): AiExecutiveSummary {
+  const counts = portfolioCounts(corpus, DEMO_NOW);
   const metrics = EXECUTION_METRICS;
   const otif = OTIF_SERIES_90D[OTIF_SERIES_90D.length - 1]?.value ?? 0;
   const otif30dAgo = OTIF_SERIES_90D[OTIF_SERIES_90D.length - 31]?.value ?? otif;
 
-  const open = CASES.filter((item) => isOpenStatus(item.status));
-  const worstCode = worstPlantCode(CASES, PLANTS.map((plant) => plant.code), DEMO_NOW);
-  const worstPlant = PLANTS.find((plant) => plant.code === worstCode) ?? PLANTS[0]!;
-  const worstRollup = computePlantRollup(CASES, worstPlant.code, DEMO_NOW);
+  const open = corpus.filter((item) => isOpenStatus(item.status));
+  const worstCode = worstPlantCode(corpus, sites.map((plant) => plant.code), DEMO_NOW);
+  const worstPlant = sites.find((plant) => plant.code === worstCode) ?? sites[0]!;
+  const worstRollup = computePlantRollup(corpus, worstPlant.code, DEMO_NOW);
 
   const largest = [...open].sort((a, b) => b.revenueAtRisk - a.revenueAtRisk)[0];
-  const largestPlant = PLANTS.find((plant) => plant.code === largest?.plantCode);
+  const largestPlant = sites.find((plant) => plant.code === largest?.plantCode);
 
   // Suppliers carrying more than one open case — the commercial pattern.
   const bySupplier = new Map<string, { cases: number; maxRecurrence: number }>();
@@ -97,7 +109,7 @@ function buildPortfolioSummary(): AiExecutiveSummary {
         : `, all of it first-time detections rather than recurring failure.`
     }`,
     paragraphs: [
-      `Group on-time-in-full is running at ${otif.toFixed(1)}%, ${(OTIF_TARGET_PCT - otif).toFixed(1)} points below the ${OTIF_TARGET_PCT}% target and ${Math.abs(otif - otif30dAgo).toFixed(1)} points ${otif >= otif30dAgo ? "up" : "down"} across the last 30 days. ${worstPlant.name} carries ${worstRollup.openCases} open case${worstRollup.openCases === 1 ? "" : "s"} against ${worstRollup.slaAdherencePct.toFixed(1)}% SLA adherence, the lowest of the ${PLANTS.length} sites.`,
+      `Group on-time-in-full is running at ${otif.toFixed(1)}%, ${(OTIF_TARGET_PCT - otif).toFixed(1)} points below the ${OTIF_TARGET_PCT}% target and ${Math.abs(otif - otif30dAgo).toFixed(1)} points ${otif >= otif30dAgo ? "up" : "down"} across the last 30 days. ${worstPlant.name} carries ${worstRollup.openCases} open case${worstRollup.openCases === 1 ? "" : "s"} against ${worstRollup.slaAdherencePct.toFixed(1)}% SLA adherence, the lowest of the ${sites.length} sites.`,
       // The case title is used verbatim rather than lower-cased: it contains
       // proper nouns, and "against August plan" became "against august plan".
       largest
@@ -142,7 +154,7 @@ function buildPortfolioSummary(): AiExecutiveSummary {
           type: "case" as const,
           ref: item.caseNo,
           label: `${EXCEPTION_META[item.exceptionType].label} — ${
-            PLANTS.find((plant) => plant.code === item.plantCode)?.name ?? item.plantCode
+            sites.find((plant) => plant.code === item.plantCode)?.name ?? item.plantCode
           }`,
         })),
       {

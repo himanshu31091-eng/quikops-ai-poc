@@ -6,6 +6,7 @@ import {
   type ActionOrigin,
   type ActionStatus,
   type CaseAuditEntry,
+  type CaseComment,
   type CaseEvidence,
   type CaseListItem,
   type CorrectiveAction,
@@ -181,6 +182,7 @@ export interface CaseDetailRecords {
   evidence: CaseEvidence[];
   verification: VerificationRecord | null;
   audit: CaseAuditEntry[];
+  comments: CaseComment[];
   /** Everyone referenced by the record, so the timeline can name its actors. */
   userById: Record<string, User | undefined>;
 }
@@ -211,6 +213,7 @@ export async function findCaseDetailRecords(
       evidence: { include: { uploadedBy: true }, orderBy: { uploadedAt: "asc" } },
       measurements: { include: { kpi: true }, orderBy: { measuredAt: "desc" }, take: 1 },
       verification: { include: { requestedBy: true, reviewer: true } },
+      comments: { include: { author: true }, orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -275,6 +278,7 @@ export async function findCaseDetailRecords(
     description: file.proves,
     actionId: file.actionId,
     accepted: file.accepted,
+    hasStoredFile: file.storagePath !== null,
   }));
 
   /* ------------------------------------------------------------ Verification */
@@ -310,6 +314,30 @@ export async function findCaseDetailRecords(
       }
     : null;
 
+  /* --------------------------------------------------------------- Comments */
+
+  // Mentions are derived from the text against the people on the record rather
+  // than stored beside it. A stored mention list is a second source of truth
+  // that goes stale the moment somebody edits the sentence it came from.
+  const mentionable = Object.values(userById).filter((user): user is User => user !== undefined);
+  const comments: CaseComment[] = row.comments.map((entry) => ({
+    id: entry.id,
+    caseId: item.id,
+    // Threading and comment attachments have no columns behind them yet, so
+    // every stored comment is a top-level note. Inventing a parent here would
+    // put a reply under a thread the database never recorded.
+    parentId: null,
+    authorId: entry.authorId,
+    authorName: entry.author.name,
+    authorRole: toUserRole(entry.author.roleKey) ?? "ANALYST",
+    body: entry.body,
+    at: entry.createdAt.toISOString(),
+    mentions: mentionable
+      .filter((user) => entry.body.includes(`@${user.name}`))
+      .map((user) => user.id),
+    attachments: [],
+  }));
+
   /* ------------------------------------------------------------------ Audit */
 
   const audit: CaseAuditEntry[] = auditRows.map((entry) => ({
@@ -332,6 +360,7 @@ export async function findCaseDetailRecords(
     evidence,
     verification,
     audit,
+    comments,
     userById,
   };
 }

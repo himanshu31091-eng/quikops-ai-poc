@@ -14,6 +14,7 @@ import type { Plant } from "@/src/domain/types";
 import { ALL_PLANTS } from "@/src/scope/plant-scope-shared";
 import { setPlantScope } from "@/src/scope/plant-scope-actions";
 import { cn } from "@/src/lib/cn";
+import { useTranslation } from "@/src/i18n/provider";
 
 /**
  * The plant scope control in the top bar.
@@ -31,6 +32,7 @@ interface PlantScopeSelectorProps {
 }
 
 export function PlantScopeSelector({ plants, scope }: PlantScopeSelectorProps) {
+  const { t } = useTranslation();
   const [isPending, startTransition] = React.useTransition();
   const current = plants.find((p) => p.code === scope);
 
@@ -64,10 +66,10 @@ export function PlantScopeSelector({ plants, scope }: PlantScopeSelectorProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>Plant scope</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("shell.plantScope")}</DropdownMenuLabel>
         <DropdownMenuItem onSelect={() => select(ALL_PLANTS)}>
           <Icon name="Building2" />
-          <span className="flex-1">All plants</span>
+          <span className="flex-1">{t("shell.allPlants")}</span>
           {scope === ALL_PLANTS ? (
             <Icon name="Check" size="xs" className="ml-1.5 text-accent" />
           ) : null}

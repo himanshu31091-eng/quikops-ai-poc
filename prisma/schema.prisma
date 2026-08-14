@@ -357,6 +357,21 @@ model Evidence {
   uploadedAt  DateTime @default(now())
   accepted    Boolean  @default(false)
 
+  /// Where the uploaded file lives, in private blob storage.
+  ///
+  /// Null for evidence recorded before storage existed and for seeded rows
+  /// that never had a file behind them. Those records remain valid: the
+  /// metadata is what makes a file evidence — who filed it, against which
+  /// action, and what it proves — and the UI offers a download only where
+  /// there is something to download.
+  ///
+  /// The URL is never handed to a browser. The store is private, so reading a
+  /// blob requires a server-side credential; the download route streams it
+  /// after checking the session's tenant owns the case.
+  storageUrl  String?
+  /// Pathname inside the store, which is what read and delete operate on.
+  storagePath String?
+
   case       Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
   action     CorrectiveAction? @relation(fields: [actionId], references: [id])
   uploadedBy User              @relation(fields: [uploadedById], references: [id])

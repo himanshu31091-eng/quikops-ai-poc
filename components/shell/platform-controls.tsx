@@ -28,6 +28,7 @@ import { cn } from "@/src/lib/cn";
  */
 
 function LanguageMenu() {
+  const { t } = useTranslation();
   const { locale, setLocale } = useTranslation();
 
   return (
@@ -35,7 +36,7 @@ function LanguageMenu() {
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Change language">
+            <Button variant="ghost" size="icon" aria-label={t("shell.changeLanguage")}>
               <Icon name="Globe" size="sm" />
             </Button>
           </DropdownMenuTrigger>
@@ -46,7 +47,7 @@ function LanguageMenu() {
       </Tooltip>
 
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel>Language</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("shell.language")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {LOCALES.map((entry: Locale) => (
           <DropdownMenuItem
@@ -70,6 +71,7 @@ function LanguageMenu() {
 }
 
 function DemoResetControl() {
+  const { t } = useTranslation();
   const { reset, isDirty } = useDemoReset();
   const [confirming, setConfirming] = React.useState(false);
 
@@ -101,7 +103,7 @@ function DemoResetControl() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Reset demo data"
+          aria-label={t("shell.resetDemoData")}
           onClick={() => setConfirming(true)}
         >
           <Icon
@@ -123,12 +125,13 @@ function DemoResetControl() {
 }
 
 function TourControl() {
+  const { t } = useTranslation();
   const { start, hasCompleted } = useTour();
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Start product tour" onClick={start}>
+        <Button variant="ghost" size="icon" aria-label={t("shell.startTour")} onClick={start}>
           <Icon name="Sparkles" size="sm" className={cn(!hasCompleted && "text-accent")} />
         </Button>
       </TooltipTrigger>
@@ -140,6 +143,7 @@ function TourControl() {
 }
 
 export function PlatformControls() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-0.5">
       <TourControl />
@@ -147,14 +151,14 @@ export function PlatformControls() {
       <DemoResetControl />
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Open Help Center" asChild>
+          <Button variant="ghost" size="icon" aria-label={t("shell.openHelp")} asChild>
             <Link href="/help">
               <Icon name="CircleHelp" size="sm" />
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p className="text-2xs">Help Center</p>
+          <p className="text-2xs">{t("shell.helpCenter")}</p>
         </TooltipContent>
       </Tooltip>
     </div>

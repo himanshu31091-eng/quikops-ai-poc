@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/src/auth/session";
+import { USE_DATABASE } from "@/src/data/db";
 import { getCaseDetail } from "@/src/data/queries/case-detail";
 import { CaseDetailView } from "@/features/case-detail/components/case-detail-view";
 
@@ -31,5 +32,28 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
 
   if (!detail) notFound();
 
-  return <CaseDetailView detail={detail} sessionUser={user} />;
+  /*
+   * The key is what makes a persisted change visible.
+   *
+   * Case Detail seeds its reducer from these props once, on mount. After a
+   * mutation the server record is re-read, but a live reducer would keep
+   * showing its own optimistic copy — including a change the database
+   * rejected. Changing the key remounts the module against the record that was
+   * actually stored, so what is on screen is what is in Neon.
+   *
+   * The version is the audit trail's own length and latest entry, because
+   * every mutation writes exactly one audit row or more. In fixture mode the
+   * audit is derived deterministically from the corpus, so the key never
+   * changes and the session behaves precisely as it did before.
+   */
+  const dataVersion = `${detail.audit.length}:${detail.audit[0]?.id ?? "none"}`;
+
+  return (
+    <CaseDetailView
+      key={dataVersion}
+      detail={detail}
+      sessionUser={user}
+      persistent={USE_DATABASE}
+    />
+  );
 }

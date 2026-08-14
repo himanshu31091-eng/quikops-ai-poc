@@ -9,6 +9,7 @@ import {
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatWhen } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
+import { useTranslation } from "@/src/i18n/provider";
 
 /**
  * The notification bell and its dropdown.
@@ -34,6 +35,7 @@ const TONE_CLASS: Record<NotificationModel["tone"], string> = {
 };
 
 export function NotificationTray({ items }: { items: NotificationModel[] }) {
+  const { t } = useTranslation();
   const unreadCount = items.filter((item) => item.unread).length;
 
   return (
@@ -53,7 +55,7 @@ export function NotificationTray({ items }: { items: NotificationModel[] }) {
 
       <DropdownMenuContent className="w-[368px] p-0">
         <div className="flex items-center justify-between border-b border-line px-3 py-2.5">
-          <p className="text-sm font-semibold text-content">Notifications</p>
+          <p className="text-sm font-semibold text-content">{t("shell.notifications")}</p>
           <span className="rounded-sm bg-surface-hover px-1.5 py-0.5 text-2xs font-medium tabular-nums text-content-secondary">
             {unreadCount} unread
           </span>

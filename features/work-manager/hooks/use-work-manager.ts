@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { createCaseAction } from "@/src/data/mutations/work-mutations";
 import { statusForGroup, type CaseStatusGroup } from "@/src/domain/case-status";
 import type { CaseListItem, Plant, User } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
@@ -58,6 +59,8 @@ export interface WorkManagerInput {
   assignableUsers: User[];
   sessionUser: User;
   initial: WorkViewState;
+  /** True when created cases are written to the database rather than held in session. */
+  persistent?: boolean;
 }
 
 export interface WorkManagerApi {
@@ -114,6 +117,7 @@ export function useWorkManager({
   assignableUsers,
   sessionUser,
   initial,
+  persistent = false,
 }: WorkManagerInput): WorkManagerApi {
   const router = useRouter();
   const pathname = usePathname();
@@ -418,9 +422,22 @@ export function useWorkManager({
       });
       addCreatedCase(created, sessionUser);
       pushNotice("success", `${created.caseNo} created and scored ${created.priorityScore.toFixed(1)}.`);
+
+      // The optimistic case above keeps the queue responsive. This is the one
+      // that survives: the server scores the draft again, assigns the case
+      // number from the tenant's own sequence, and writes it. The refresh
+      // replaces the placeholder with the stored record — including its real
+      // number, which the browser is in no position to choose.
+      if (persistent) {
+        void (async () => {
+          const result = await createCaseAction(draft);
+          if (!result.ok) pushNotice("info", `Not saved — ${result.error}`);
+          router.refresh();
+        })();
+      }
       return created.caseNo;
     },
-    [plants, assignableUsers, pushNotice, addCreatedCase, sessionUser],
+    [plants, assignableUsers, pushNotice, addCreatedCase, sessionUser, persistent, router],
   );
 
   const discardChanges = React.useCallback(() => {
