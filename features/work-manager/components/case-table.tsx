@@ -10,6 +10,7 @@ import type { SortKey, WorkCaseRow, WorkSort } from "../types";
 import { SORT_META } from "../utils/filter-definitions";
 import { CaseTableRow, ROW_HEIGHT } from "./case-table-row";
 import { SelectionBox } from "./selection-box";
+import { useTranslation } from "@/src/i18n/provider";
 
 interface CaseTableProps {
   rows: WorkCaseRow[];
@@ -39,30 +40,32 @@ interface ColumnSpec {
  * Column widths are declared once and shared by the colgroup and the sticky
  * header, so the header can never drift from the body while the table scrolls.
  */
-const COLUMNS: ColumnSpec[] = [
+/** Built per render so the header follows the active language; the widths
+ *  are what must stay constant, not the words. */
+const buildColumns = (t: (key: string) => string): ColumnSpec[] => [
   { key: "select", label: "", width: 40 },
   // 142, not 118: the Perma case-number format (QO-PA-2026-00421) is four
   // characters longer than the one this column was sized for and wrapped onto a
   // second line, inflating every row. Funded from Category and Owner, both of
   // which truncate gracefully and had slack.
-  { key: "caseNo", label: "Case ID", width: 142, sortKey: "caseNo" },
-  { key: "title", label: "Title", width: null, sortKey: "title" },
+  { key: "caseNo", label: t("col.caseId"), width: 142, sortKey: "caseNo" },
+  { key: "title", label: t("col.title"), width: null, sortKey: "title" },
   // Plant, age and revenue are sized to their content, which is a four-character
   // code, "38d" and "$248,000". The 28px they give back is exactly what widening
   // status and priority took, so the flexible Title column — the column a reader
   // actually needs — is no narrower than before.
-  { key: "plant", label: "Plant", width: 60, sortKey: "plant" },
-  { key: "category", label: "Category", width: 120, sortKey: "category" },
+  { key: "plant", label: t("col.plant"), width: 60, sortKey: "plant" },
+  { key: "category", label: t("col.category"), width: 120, sortKey: "category" },
   // Sized to the widest label each column can hold on one line — "Critical 78.5"
   // and "Pending verification". At the previous 122/138 the status badge did not
   // fit its cell and wrapped out of its own fixed height.
-  { key: "priority", label: "Priority", width: 130, sortKey: "priority" },
-  { key: "status", label: "Status", width: 158, sortKey: "status" },
-  { key: "owner", label: "Owner", width: 128, sortKey: "owner" },
-  { key: "revenue", label: "Revenue impact", width: 108, sortKey: "revenue", align: "right" },
-  { key: "due", label: "Due date", width: 108, sortKey: "due" },
-  { key: "age", label: "Age", width: 52, sortKey: "age" },
-  { key: "detected", label: "Detected", width: 116, sortKey: "detected" },
+  { key: "priority", label: t("col.priority"), width: 130, sortKey: "priority" },
+  { key: "status", label: t("col.status"), width: 158, sortKey: "status" },
+  { key: "owner", label: t("col.owner"), width: 128, sortKey: "owner" },
+  { key: "revenue", label: t("col.revenueImpact"), width: 108, sortKey: "revenue", align: "right" },
+  { key: "due", label: t("col.dueDate"), width: 108, sortKey: "due" },
+  { key: "age", label: t("col.age"), width: 52, sortKey: "age" },
+  { key: "detected", label: t("col.detected"), width: 116, sortKey: "detected" },
   { key: "actions", label: "", width: 48, align: "right" },
 ];
 
@@ -83,6 +86,8 @@ export function CaseTable({
   onClose,
   onNotify,
 }: CaseTableProps) {
+  const { t } = useTranslation();
+  const columns = React.useMemo(() => buildColumns(t), [t]);
   const { setContainer, startIndex, endIndex, paddingTop, paddingBottom, scrollToTop } =
     useVirtualRows({ rowCount: rows.length, rowHeight: ROW_HEIGHT });
 
@@ -111,7 +116,7 @@ export function CaseTable({
         style={{ minWidth: MIN_TABLE_WIDTH }}
       >
         <colgroup>
-          {COLUMNS.map((column) => (
+          {columns.map((column) => (
             <col
               key={column.key}
               style={column.width === null ? undefined : { width: column.width }}
@@ -121,7 +126,7 @@ export function CaseTable({
 
         <thead>
           <tr>
-            {COLUMNS.map((column) => {
+            {columns.map((column) => {
               const isSorted = column.sortKey !== undefined && sort.key === column.sortKey;
               return (
                 <th
@@ -147,7 +152,7 @@ export function CaseTable({
                       type="button"
                       onClick={() => onSort(column.sortKey!)}
                       className={cn(
-                        // `items-start`, not `items-center`: "Revenue impact"
+                        // `items-start`, not `items-center`: t("col.revenueImpact")
                         // wraps to two lines in its column, and a centred sort
                         // arrow floats in the gap beside it instead of reading
                         // as part of the header. Identical for one-line labels.

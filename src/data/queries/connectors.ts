@@ -14,7 +14,8 @@ import {
   type DeadLetterMessage,
   type FieldMapping,
 } from "../fixtures/connectors";
-import { getCaseCorpus } from "./corpus";
+import { USE_DATABASE } from "../db";
+import { getCaseCorpus, getPlants } from "./corpus";
 import { DEMO_NOW } from "@/src/lib/constants";
 
 /**
@@ -132,6 +133,51 @@ function buildConnectorView(
   };
 }
 
+/**
+ * Rewrites the demo organisation's plant codes, plant names and case numbers to
+ * the active tenant's, everywhere they appear in this screen's authored text.
+ *
+ * A deep string swap rather than a field-by-field edit, because the references
+ * are embedded in prose and in JSON payload previews — "Oracle uses case-pack
+ * units at Roorkee", `{ "plantCode": "RK01", … }` — where no field maps to
+ * them. Anything the tenant has no counterpart for is left alone rather than
+ * mapped onto an unrelated site.
+ */
+async function buildRetargeter(): Promise<<T>(value: T) => T> {
+  const [plants, corpus] = await Promise.all([getPlants(), getCaseCorpus()]);
+  const swaps: [RegExp, string][] = [];
+
+  const demoPlants = [
+    ["VP01", "Vapi"],
+    ["RK01", "Roorkee"],
+    ["HY01", "Hyderabad"],
+  ] as const;
+
+  demoPlants.forEach(([code, name], index) => {
+    const replacement = plants[index];
+    if (!replacement) return;
+    swaps.push([new RegExp(code, "g"), replacement.code]);
+    swaps.push([new RegExp(name, "g"), replacement.name]);
+  });
+
+  const firstCase = corpus[0]?.caseNo;
+  if (firstCase) swaps.push([/QO-PA-\d{4}-\d+/g, firstCase]);
+
+  const rewrite = (value: string): string =>
+    swaps.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), value);
+
+  const walk = (value: unknown): unknown => {
+    if (typeof value === "string") return rewrite(value);
+    if (Array.isArray(value)) return value.map(walk);
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, walk(item)]));
+    }
+    return value;
+  };
+
+  return <T,>(value: T): T => walk(value) as T;
+}
+
 export async function getConnectorHealthData(): Promise<ConnectorHealthData> {
   const connectors = CONNECTORS.map((connector) =>
     buildConnectorView(connector, CONNECTOR_RUNS, DEAD_LETTER),
@@ -151,11 +197,21 @@ export async function getConnectorHealthData(): Promise<ConnectorHealthData> {
   const raisedBySource = (source: DetectionSource): number =>
     corpus.filter((item) => item.detectedBy === source).length;
 
+  /* Connector health is reference content: there are no connector tables, and
+   * the runs, dead letters and mappings are authored rather than observed. What
+   * they must not do is name another organisation's sites — the seeded prose
+   * mentions Roorkee, Vapi and a Perma case number, which on an evaluation
+   * tenant reads as somebody else's estate.
+   *
+   * So the *content* stays fixture, and only the identifiers are re-pointed at
+   * the tenant. Nothing here is presented as transactional data. */
+  const retarget = USE_DATABASE ? await buildRetargeter() : null;
+
   return {
-    connectors,
-    runs: CONNECTOR_RUNS,
-    deadLetter: DEAD_LETTER,
-    fieldMappings: FIELD_MAPPINGS,
+    connectors: retarget ? connectors.map(retarget) : connectors,
+    runs: retarget ? CONNECTOR_RUNS.map(retarget) : CONNECTOR_RUNS,
+    deadLetter: retarget ? DEAD_LETTER.map(retarget) : DEAD_LETTER,
+    fieldMappings: retarget ? FIELD_MAPPINGS.map(retarget) : FIELD_MAPPINGS,
     funnel: {
       received,
       deduplicated: connectors.reduce((sum, c) => sum + c.recordsDeduplicated, 0),

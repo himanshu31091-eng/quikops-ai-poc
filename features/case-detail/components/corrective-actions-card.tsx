@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -78,6 +79,7 @@ const ActionRow = React.memo(function ActionRow({
   onReorder: (id: string, direction: -1 | 1) => void;
   onRemove: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [editingNotes, setEditingNotes] = React.useState(false);
   const [draftNotes, setDraftNotes] = React.useState(action.notes);
   const [editing, setEditing] = React.useState(false);
@@ -125,7 +127,7 @@ const ActionRow = React.memo(function ActionRow({
               htmlFor={`edit-title-${action.id}`}
               className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
             >
-              Title
+              {t("col.title")}
             </label>
             <input
               id={`edit-title-${action.id}`}
@@ -141,7 +143,7 @@ const ActionRow = React.memo(function ActionRow({
               htmlFor={`edit-desc-${action.id}`}
               className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
             >
-              What good looks like
+              {t("cd.whatGoodLooksLike")}
             </label>
             <textarea
               id={`edit-desc-${action.id}`}
@@ -159,7 +161,7 @@ const ActionRow = React.memo(function ActionRow({
               htmlFor={`edit-owner-${action.id}`}
               className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
             >
-              Owner
+              {t("case.owner")}
             </label>
             <select
               id={`edit-owner-${action.id}`}
@@ -180,7 +182,7 @@ const ActionRow = React.memo(function ActionRow({
               htmlFor={`edit-due-${action.id}`}
               className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
             >
-              Due (UTC)
+              {t("cd.dueUtc")}
             </label>
             <input
               id={`edit-due-${action.id}`}
@@ -201,7 +203,7 @@ const ActionRow = React.memo(function ActionRow({
               type="button"
               onClick={() => setEditing(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -210,7 +212,7 @@ const ActionRow = React.memo(function ActionRow({
               disabled={draft.title.trim().length < 6}
             >
               <Icon name="Check" size="sm" />
-              Save action
+              {t("cd.saveAction")}
             </Button>
           </div>
         </form>
@@ -380,10 +382,10 @@ const ActionRow = React.memo(function ActionRow({
                     setEditingNotes(false);
                   }}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button variant="secondary" size="xs" onClick={commitNotes}>
-                  Save note
+                  {t("cd.saveNote")}
                 </Button>
               </div>
             </div>
@@ -415,7 +417,7 @@ const ActionRow = React.memo(function ActionRow({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Set status</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("cd.setStatus")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {(["TODO", "IN_PROGRESS", "BLOCKED", "DONE", "CANCELLED"] as ActionStatus[]).map(
                 (status) => (
@@ -440,11 +442,11 @@ const ActionRow = React.memo(function ActionRow({
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setEditing(true)}>
                 <Icon name="SquarePen" size="sm" />
-                Edit action
+                {t("cd.editAction")}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onRemove(action.id)}>
                 <Icon name="Trash2" size="sm" />
-                Remove from plan
+                {t("cd.removeFromPlan")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -474,6 +476,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
   onReorder,
   onRemove,
 }: CorrectiveActionsCardProps) {
+  const { t } = useTranslation();
   const [adding, setAdding] = React.useState(false);
   const [draft, setDraft] = React.useState<NewActionDraft>(() => ({
     title: "",
@@ -506,7 +509,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
 
   return (
     <SectionCard
-      title="Corrective actions"
+      title={t("section.actions")}
       subtitle={
         actions.length === 0
           ? "No plan yet"
@@ -551,13 +554,13 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
                 htmlFor="action-title"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                Title
+                {t("col.title")}
               </label>
               <input
                 id="action-title"
                 value={draft.title}
                 onChange={(event) => setDraft((prev) => ({ ...prev, title: event.target.value }))}
-                placeholder="Confirm the revised date in writing with the supplier"
+                placeholder={t("cd.actionTitlePlaceholder")}
                 className={FIELD_CLASS}
                 autoFocus
               />
@@ -574,7 +577,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
                 htmlFor="action-description"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                What good looks like
+                {t("cd.whatGoodLooksLike")}
               </label>
               <textarea
                 id="action-description"
@@ -583,7 +586,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
                   setDraft((prev) => ({ ...prev, description: event.target.value }))
                 }
                 rows={2}
-                placeholder="The acceptance criteria the reviewer will check this against."
+                placeholder={t("cd.acceptanceHint")}
                 className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
               />
             </div>
@@ -593,7 +596,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
                 htmlFor="action-owner"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                Owner
+                {t("case.owner")}
               </label>
               <select
                 id="action-owner"
@@ -616,7 +619,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
                 htmlFor="action-due"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                Due (UTC)
+                {t("cd.dueUtc")}
               </label>
               <input
                 id="action-due"
@@ -633,11 +636,11 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
 
           <div className="mt-3 flex justify-end gap-2">
             <Button variant="secondary" size="sm" type="button" onClick={() => setAdding(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button variant="primary" size="sm" type="submit">
               <Icon name="Plus" size="sm" />
-              Add to plan
+              {t("cd.addToPlan")}
             </Button>
           </div>
         </form>
@@ -646,13 +649,13 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
       {actions.length === 0 ? (
         <SectionEmpty
           icon="ListChecks"
-          title="No corrective actions yet"
-          description="A case without a plan is a case nobody is working. Add the first action, or apply the playbook for this exception type."
+          title={t("cd.noActions")}
+          description={t("cd.noActionsBody")}
           action={
             !readOnly ? (
               <Button variant="primary" size="md" onClick={() => setAdding(true)}>
                 <Icon name="Plus" size="sm" />
-                Add the first action
+                {t("cd.addFirstAction")}
               </Button>
             ) : null
           }

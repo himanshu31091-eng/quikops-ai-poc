@@ -1,4 +1,7 @@
+"use client";
+
 import { DeltaBadge } from "@/components/patterns/delta-badge";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import type { ExecutionMetrics } from "@/src/domain/types";
 import { formatHours, formatPercent } from "@/src/lib/format";
@@ -23,43 +26,44 @@ interface Metric {
 }
 
 export function ExecutionMetricsStrip({ metrics }: { metrics: ExecutionMetrics }) {
+  const { t } = useTranslation();
   const items: Metric[] = [
     {
       icon: "Clock",
-      label: "Mean time to resolve",
+      label: t("metric.mttr"),
       term: "sla",
       value: formatHours(metrics.mttrHours),
       delta: { value: metrics.mttrDeltaPct, unit: "%", higherIsBetter: false },
-      hint: "Case open to verified",
+      hint: t("metric.mttrSub"),
     },
     {
       icon: "Target",
-      label: "SLA adherence",
+      label: t("metric.slaAdherence"),
       term: "sla",
       value: formatPercent(metrics.slaAdherencePct),
       delta: { value: metrics.slaAdherenceDeltaPts, unit: "pts", higherIsBetter: true },
-      hint: "Resolved within band target",
+      hint: t("metric.slaAdherenceSub"),
     },
     {
       icon: "ShieldCheck",
-      label: "Verification pass rate",
+      label: t("metric.verificationPassRate"),
       term: "verification",
       value: formatPercent(metrics.verificationPassRatePct),
-      hint: "Approved on first submission",
+      hint: t("metric.verificationPassRateSub"),
     },
     {
       icon: "RefreshCw",
-      label: "Recurrence rate",
+      label: t("metric.recurrenceRate"),
       term: "recurrence",
       value: formatPercent(metrics.recurrenceRatePct),
-      hint: "Reopened within 30 days",
+      hint: t("metric.recurrenceRateSub"),
     },
     {
       icon: "Activity",
-      label: "Throughput this week",
+      label: t("metric.throughput"),
       term: "flowBalance",
       value: `${metrics.casesClosedThisWeek} / ${metrics.casesOpenedThisWeek}`,
-      hint: "Closed vs opened",
+      hint: t("metric.throughputSub"),
     },
   ];
 

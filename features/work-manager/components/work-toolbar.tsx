@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,9 +45,10 @@ interface WorkToolbarProps {
   onBulkClose: () => void;
 }
 
-const VIEWS: { key: WorkView; label: string; icon: string }[] = [
-  { key: "table", label: "Table", icon: "Rows3" },
-  { key: "board", label: "Board", icon: "Columns3" },
+/** Built per render so the labels follow the active language. */
+const buildViews = (t: (key: string) => string): { key: WorkView; label: string; icon: string }[] => [
+  { key: "table", label: t("work.viewTable"), icon: "Rows3" },
+  { key: "board", label: t("work.viewBoard"), icon: "Columns3" },
 ];
 
 /**
@@ -73,6 +75,8 @@ export const WorkToolbar = React.memo(function WorkToolbar({
   onBulkAssign,
   onBulkClose,
 }: WorkToolbarProps) {
+  const { t } = useTranslation();
+  const views = React.useMemo(() => buildViews(t), [t]);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
 
@@ -109,14 +113,14 @@ export const WorkToolbar = React.memo(function WorkToolbar({
               }
             }}
             type="search"
-            aria-label="Search cases by case number, material, supplier, plant, owner or customer"
-            placeholder="Search case, material, supplier, plant, owner, customer"
+            aria-label={t("work.searchAria")}
+            placeholder={t("work.searchPlaceholder")}
             className="min-w-0 flex-1 bg-transparent text-xs text-content outline-none placeholder:text-content-tertiary [&::-webkit-search-cancel-button]:hidden"
           />
           {search !== "" ? (
             <button
               type="button"
-              aria-label="Clear search"
+              aria-label={t("work.clearSearch")}
               onClick={() => {
                 onSearchChange("");
                 inputRef.current?.focus();
@@ -130,10 +134,10 @@ export const WorkToolbar = React.memo(function WorkToolbar({
 
         <div
           role="tablist"
-          aria-label="View"
+          aria-label={t("work.view")}
           className="flex h-8 shrink-0 items-center rounded-md border border-line bg-surface p-0.5"
         >
-          {VIEWS.map((entry) => (
+          {views.map((entry) => (
             <button
               key={entry.key}
               type="button"
@@ -167,7 +171,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
           }
         >
           <Icon name="Download" size="sm" />
-          Export
+          {t("common.export")}
         </Button>
 
         <Button variant="secondary" size="sm" onClick={onRefresh} disabled={isRefreshing}>
@@ -229,7 +233,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
 
         <Button variant="primary" size="sm" onClick={onCreate}>
           <Icon name="Plus" size="sm" />
-          Create case
+          {t("work.createCase")}
         </Button>
 
         {dirtyCount > 0 ? (
@@ -250,7 +254,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={onDiscardChanges}>
                 <Icon name="X" size="sm" />
-                Discard session changes
+                {t("work.discardChanges")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -288,7 +292,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
           <div className="flex justify-end gap-2 border-t border-line bg-surface-subtle px-5 py-3">
             <DialogClose asChild>
               <Button variant="secondary" size="md">
-                Cancel
+                {t("common.cancel")}
               </Button>
             </DialogClose>
             <Button
@@ -300,7 +304,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
               }}
             >
               <Icon name="CheckCheck" size="sm" />
-              Close cases
+              {t("work.closeCases")}
             </Button>
           </div>
         </DialogContent>

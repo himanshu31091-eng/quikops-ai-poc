@@ -1,3 +1,4 @@
+import { getTranslations } from "@/src/i18n/server";
 import { getPlantScope } from "@/src/scope/plant-scope";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
@@ -96,6 +97,7 @@ export default async function ExecutiveDashboardPage() {
     getPortfolioSnapshot(scope),
   ]);
 
+  const { t } = await getTranslations();
   const firstName = user.name.split(" ")[0] ?? user.name;
 
   return (
@@ -112,24 +114,22 @@ export default async function ExecutiveDashboardPage() {
     >
     <div className="space-y-5">
       <PageHeader
-        title={`Good morning, ${firstName}`}
+        title={t("dash.greeting", { name: firstName })}
         // Counted from the plants actually on screen. The figure was written by
         // hand and said four while the network had three, which the plant filter
         // beside it contradicted on sight.
-        description={`Operational health across ${plantHealth.length} plant${
-          plantHealth.length === 1 ? "" : "s"
-        }, with every number traceable to the cases behind it.`}
+        description={t("dash.subtitle", { count: plantHealth.length })}
         docKey="dashboard"
         meta={
           <>
             <MetaChip icon="Clock">
-              Data as at {formatTimestamp(DEMO_NOW)} UTC
+              {t("dash.dataAsAt", { time: formatTimestamp(DEMO_NOW) })}
             </MetaChip>
             <MetaChip icon="PlugZap">
-              Enterprise Data Platform · last sync 2h ago · 34 signals
+              {t("dash.lastSync")}
             </MetaChip>
             <MetaChip icon="Building2">
-              {user.plantScope.length} plants in scope
+              {t("dash.plantsInScope", { count: user.plantScope.length })}
             </MetaChip>
             <LiveSessionChip cases={caseBaseline} />
           </>
@@ -151,20 +151,20 @@ export default async function ExecutiveDashboardPage() {
       <ReleaseAnnouncement />
 
       {/* KPI band */}
-      <section aria-label="Headline indicators" data-tour="dashboard-kpi-band">
+      <section aria-label={t("dash.headlineIndicators")} data-tour="dashboard-kpi-band">
         <LiveKpiBand kpis={kpis} cases={caseBaseline} />
       </section>
 
       {/* Flow verdict — one band, added rather than replacing anything. The
           full flow region lives in Execution Analytics. */}
-      <section aria-label="Backlog flow" data-tour="dashboard-flow">
+      <section aria-label={t("dash.backlogFlow")} data-tour="dashboard-flow">
         <LiveFlowVerdict cases={caseBaseline} />
       </section>
 
       {/* Execution performance */}
       <section
         data-tour="dashboard-execution-strip"
-        aria-label="Execution performance"
+        aria-label={t("dash.executionPerformance")}
         className="min-w-0 overflow-hidden rounded-lg border border-line bg-surface"
       >
         <LiveExecutionMetrics metrics={executionMetrics} cases={caseBaseline} />
@@ -177,14 +177,14 @@ export default async function ExecutiveDashboardPage() {
         </div>
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
-            title="Operational health"
-            subtitle="On-time in full by plant, worst first"
+            title={t("dash.operationalHealth")}
+            subtitle={t("dash.operationalHealthSub")}
             icon="Factory"
             className="h-full"
             bodyClassName="p-2"
             footer={
               <p className="text-2xs text-content-tertiary">
-                KPI values are read from connected enterprise data and never recomputed here.
+                {t("dash.kpiFootnote")}
               </p>
             }
           >
@@ -197,8 +197,8 @@ export default async function ExecutiveDashboardPage() {
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
-            title="On-time in full — trend"
-            subtitle="Group level, against the 95% target"
+            title={t("dash.otifTrend")}
+            subtitle={t("dash.otifTrendSub")}
             icon="ChartNoAxesColumn"
             className="h-full"
           >
@@ -207,8 +207,8 @@ export default async function ExecutiveDashboardPage() {
         </div>
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
-            title="Priority distribution"
-            subtitle="Open cases by band"
+            title={t("dash.priorityDistribution")}
+            subtitle={t("dash.priorityDistributionSub")}
             icon="Target"
             className="h-full"
           >
@@ -221,15 +221,15 @@ export default async function ExecutiveDashboardPage() {
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
-            title="Critical bottlenecks"
-            subtitle="Highest priority open cases, scored by the rule set"
+            title={t("dash.bottlenecks")}
+            subtitle={t("dash.bottlenecksSub")}
             icon="TriangleAlert"
             flush
             className="h-full"
             action={
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/work?band=CRITICAL">
-                  View all
+                  {t("dash.viewAll")}
                   <Icon name="ArrowRight" size="sm" />
                 </Link>
               </Button>
@@ -240,15 +240,15 @@ export default async function ExecutiveDashboardPage() {
         </div>
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
-            title="Today's work"
-            subtitle="Actions due across your teams"
+            title={t("dash.todaysWork")}
+            subtitle={t("dash.todaysWorkSub")}
             icon="ListChecks"
             flush
             className="h-full"
             action={
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/my-work">
-                  My work
+                  {t("dash.myWork")}
                   <Icon name="ArrowRight" size="sm" />
                 </Link>
               </Button>
@@ -263,8 +263,8 @@ export default async function ExecutiveDashboardPage() {
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
-            title="Revenue impact by exception type"
-            subtitle="Exposure still open against value recovered through executed cases"
+            title={t("dash.revenueImpact")}
+            subtitle={t("dash.revenueImpactSub")}
             icon="DollarSign"
             className="h-full"
           >
@@ -273,8 +273,8 @@ export default async function ExecutiveDashboardPage() {
         </div>
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
-            title="Recent activity"
-            subtitle="Every change is audit logged"
+            title={t("dash.recentActivity")}
+            subtitle={t("dash.recentActivitySub")}
             icon="Activity"
             className="h-full"
             footer={
@@ -282,7 +282,7 @@ export default async function ExecutiveDashboardPage() {
                 href="/system/audit"
                 className="flex items-center gap-1.5 text-2xs font-medium text-accent hover:underline"
               >
-                Open full audit log
+                {t("dash.openAuditLog")}
                 <Icon name="ArrowRight" size="xs" />
               </Link>
             }
@@ -294,8 +294,8 @@ export default async function ExecutiveDashboardPage() {
 
       {/* Inventory health */}
       <SectionCard
-        title="Inventory health"
-        subtitle="Days of coverage against policy, with stockout and excess exposure"
+        title={t("dash.inventoryHealth")}
+        subtitle={t("dash.inventoryHealthSub")}
         icon="Boxes"
         flush
       >

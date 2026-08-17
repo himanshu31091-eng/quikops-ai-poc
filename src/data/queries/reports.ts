@@ -7,7 +7,7 @@ import {
 } from "@/src/domain/portfolio-metrics";
 import type { CaseListItem, ExecutionMetrics, Plant } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
-import { getCaseCorpus, getPlants } from "./corpus";
+import { getCaseCorpus, getPeople, getPlants } from "./corpus";
 import { EXECUTION_METRICS } from "../fixtures/metrics";
 import {
   CADENCE_META,
@@ -62,6 +62,7 @@ export interface ReportsData {
 export async function getReportsData(): Promise<ReportsData> {
   const all = await getCaseCorpus();
   const plants = await getPlants();
+  const people = await getPeople();
   const open = all.filter((item) => isOpenStatus(item.status));
 
   const bySupplier = new Map<string, { cases: number; revenue: number; recurrence: number }>();
@@ -87,9 +88,19 @@ export async function getReportsData(): Promise<ReportsData> {
       templateName: nameOf(schedule.templateId),
       cadenceLabel: CADENCE_META[schedule.cadence].label,
     })),
+    /* Run history is authored reference content — there is no report-run
+     * table — but one row names a person, and on an evaluation tenant that has
+     * to be one of their own rather than the demo organisation's. */
     runs: [...REPORT_RUNS]
       .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime())
-      .map((run) => ({ ...run, templateName: nameOf(run.templateId) })),
+      .map((run) => ({
+        ...run,
+        templateName: nameOf(run.templateId),
+        generatedBy:
+          run.generatedBy === "Scheduler"
+            ? run.generatedBy
+            : (people.find((person) => person.role === "OPS_MANAGER")?.name ?? run.generatedBy),
+      })),
     source: {
       counts: portfolioCounts(all, DEMO_NOW),
       metrics: EXECUTION_METRICS,

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -78,6 +79,7 @@ export const CaseHeader = React.memo(function CaseHeader({
   onOpenCopilot,
   pending,
 }: CaseHeaderProps) {
+  const { t } = useTranslation();
   const item = detail.case;
   const exception = EXCEPTION_META[item.exceptionType];
   const detection = DETECTION_SOURCE_META[item.detectedBy];
@@ -119,7 +121,7 @@ export const CaseHeader = React.memo(function CaseHeader({
               className="flex items-center gap-1 rounded-sm text-2xs font-medium text-content-tertiary transition-colors duration-150 hover:text-accent"
             >
               <Icon name="ArrowLeft" size="xs" />
-              Work Manager
+              {t("nav.work")}
             </Link>
             <span className="text-content-tertiary">·</span>
             <span className="font-mono text-2xs text-content-secondary">{item.caseNo}</span>
@@ -172,7 +174,7 @@ export const CaseHeader = React.memo(function CaseHeader({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-64">
-              <DropdownMenuLabel>Assign owner</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("action.assignOwner")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {detail.assignableUsers.map((user) => (
                 <DropdownMenuItem
@@ -247,36 +249,36 @@ export const CaseHeader = React.memo(function CaseHeader({
 
           <Button variant="secondary" size="sm" onClick={onExport}>
             <Icon name="Download" size="sm" />
-            Export
+            {t("common.export")}
           </Button>
 
           <Button variant="primary" size="sm" onClick={onOpenCopilot}>
             <Icon name="Sparkles" size="sm" />
-            Ask Copilot
+            {t("cd.askCopilot")}
           </Button>
         </div>
       </div>
 
       <div className="grid gap-x-4 gap-y-3 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <HeaderFact label="Owner" icon="UserCog">
+        <HeaderFact label={t("case.owner")} icon="UserCog">
           {owner ? (
             <span className="flex items-center gap-1.5">
               <OwnerAvatar user={owner} size="sm" showName={false} />
               <span className="truncate">{owner.name}</span>
             </span>
           ) : (
-            <span className="text-high-content">Unassigned</span>
+            <span className="text-high-content">{t("cd.unassigned")}</span>
           )}
         </HeaderFact>
 
-        <HeaderFact label="Reviewer" icon="ShieldCheck">
+        <HeaderFact label={t("case.reviewer")} icon="ShieldCheck">
           <span className="flex items-center gap-1.5">
             <OwnerAvatar user={reviewer} size="sm" showName={false} />
             <span className="truncate">{reviewer.name}</span>
           </span>
         </HeaderFact>
 
-        <HeaderFact label="Revenue at risk" icon="DollarSign">
+        <HeaderFact label={t("case.revenueAtRisk")} icon="DollarSign">
           <MoneyCell
             amount={item.revenueAtRisk}
             currency={item.currency}
@@ -286,7 +288,7 @@ export const CaseHeader = React.memo(function CaseHeader({
           />
         </HeaderFact>
 
-        <HeaderFact label="SLA remaining" icon="CalendarClock">
+        <HeaderFact label={t("cd.slaRemaining")} icon="CalendarClock">
           <span
             className={cn(
               "block",
@@ -306,13 +308,13 @@ export const CaseHeader = React.memo(function CaseHeader({
           />
         </HeaderFact>
 
-        <HeaderFact label="Created" icon="Clock">
+        <HeaderFact label={t("cd.created")} icon="Clock">
           <span title={formatTimestamp(item.openedAt)}>
             {formatWhen(item.openedAt, DEMO_NOW)}
           </span>
         </HeaderFact>
 
-        <HeaderFact label="Last updated" icon="History">
+        <HeaderFact label={t("cd.lastUpdated")} icon="History">
           <span title={formatTimestamp(lastUpdated)}>
             {formatWhen(lastUpdated, DEMO_NOW)}
           </span>

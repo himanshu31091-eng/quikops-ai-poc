@@ -17,6 +17,7 @@ import { computePlantRollup } from "@/src/domain/portfolio-metrics";
 import { PRIORITY_BANDS } from "@/src/domain/types";
 import { DEMO_NOW, OTIF_TARGET_PCT, SPARKLINE_POINTS } from "@/src/lib/constants";
 import { DEFAULT_TENANT_ID, getTenantConfig } from "@/src/config/tenant";
+import { getTranslations } from "@/src/i18n/server";
 import { USE_DATABASE } from "../db";
 import { getCaseCorpus, getPlants } from "./corpus";
 import { findAuditForTenant, findOpenActionsForTenant } from "./portfolio-db-mapper";
@@ -91,6 +92,10 @@ function tail(series: TrendPoint[], count = SPARKLINE_POINTS): TrendPoint[] {
 /* ------------------------------------------------------------------ KPI band */
 
 export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<KpiCardModel[]> {
+  // Labels and footnotes are translated here rather than in the card: the band
+  // is assembled server-side and the card is a client component, so composing
+  // the strings once at the source keeps both sides showing the same words.
+  const { t } = await getTranslations();
   const open = await openCases(scope);
   const revenueAtRisk = open.reduce((sum, c) => sum + c.revenueAtRisk, 0);
   const criticalOpen = open.filter((c) => c.priorityBand === "CRITICAL").length;
@@ -101,7 +106,7 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
   return [
     {
       key: "otif",
-      label: "On-time in full",
+      label: t("kpi.otif"),
       value: otif,
       unit: "PERCENT",
       target: OTIF_TARGET_PCT,
@@ -109,12 +114,12 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
       deltaUnit: "pts",
       higherIsBetter: true,
       series: tail(OTIF_SERIES_90D),
-      footnote: `${(OTIF_TARGET_PCT - otif).toFixed(1)} pts below target`,
+      footnote: t("kpi.otifFootnote", { points: (OTIF_TARGET_PCT - otif).toFixed(1) }),
       href: "/work?kpi=OTIF_PCT",
     },
     {
       key: "revenue",
-      label: "Revenue at risk",
+      label: t("kpi.revenueAtRisk"),
       value: revenueAtRisk,
       unit: "CURRENCY",
       currency: getTenantConfig().currency,
@@ -123,12 +128,12 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
       deltaUnit: "%",
       higherIsBetter: false,
       series: tail(REVENUE_AT_RISK_SERIES_90D),
-      footnote: `Across ${open.length} open cases`,
+      footnote: t("kpi.acrossOpenCases", { count: open.length }),
       href: "/work?sort=revenue",
     },
     {
       key: "critical",
-      label: "Open critical cases",
+      label: t("kpi.openCritical"),
       value: criticalOpen,
       unit: "COUNT",
       target: null,
@@ -136,12 +141,12 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
       deltaUnit: "abs",
       higherIsBetter: false,
       series: tail(OPEN_CRITICAL_SERIES_90D),
-      footnote: `${open.filter((c) => c.ownerId === null).length} unassigned overall`,
+      footnote: t("kpi.unassignedOverall", { count: open.filter((c) => c.ownerId === null).length }),
       href: "/work?band=CRITICAL",
     },
     {
       key: "breaches",
-      label: "SLA breaches",
+      label: t("kpi.slaBreaches"),
       value: breaches,
       unit: "COUNT",
       target: null,
@@ -149,7 +154,7 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
       deltaUnit: "abs",
       higherIsBetter: false,
       series: tail(SLA_BREACH_SERIES_90D),
-      footnote: `${EXECUTION_METRICS.slaAdherencePct.toFixed(1)}% adherence this quarter`,
+      footnote: t("kpi.adherenceThisQuarter", { percent: EXECUTION_METRICS.slaAdherencePct.toFixed(1) }),
       href: "/work?overdue=true",
     },
   ];

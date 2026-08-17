@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { formatNumber } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
@@ -31,10 +32,11 @@ export const WorkKpiHeader = React.memo(function WorkKpiHeader({
   kpis,
   onToggle,
 }: WorkKpiHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div
       role="group"
-      aria-label="Case counts and quick filters"
+      aria-label={t("work.kpiAria")}
       className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
     >
       {kpis.map((kpi) => {

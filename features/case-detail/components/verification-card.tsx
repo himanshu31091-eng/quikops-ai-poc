@@ -1,6 +1,7 @@
 "use client";
 
 import { KPI_LABEL } from "@/src/config/app-config";
+import { useTranslation } from "@/src/i18n/provider";
 import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
@@ -24,34 +25,35 @@ interface VerificationCardProps {
   onDecide: (draft: VerificationDraft) => void;
 }
 
-const DECISIONS: {
+/** Built per render so the decision wording follows the active language. */
+const buildDecisions = (t: (key: string) => string): {
   value: VerificationDecision;
   label: string;
   detail: string;
   icon: string;
   className: string;
   activeClassName: string;
-}[] = [
+}[] => [
   {
     value: "APPROVED",
-    label: "Approve",
-    detail: "The outcome holds against the measurement window. The case is verified.",
+    label: t("verification.approve"),
+    detail: t("cd.approveHint"),
     icon: "CircleCheck",
     className: "border-line hover:border-success-line hover:bg-success-subtle",
     activeClassName: "border-success bg-success-subtle text-success-content",
   },
   {
     value: "SENT_BACK",
-    label: "Send back",
-    detail: "The work is sound but the evidence is incomplete. Returns to the owner.",
+    label: t("verification.sendBack"),
+    detail: t("cd.sendBackHint"),
     icon: "Undo2",
     className: "border-line hover:border-high-line hover:bg-high-subtle",
     activeClassName: "border-high bg-high-subtle text-high-content",
   },
   {
     value: "REJECTED",
-    label: "Reject",
-    detail: "The corrective action did not resolve the condition. Returns to the owner.",
+    label: t("verification.reject"),
+    detail: t("cd.rejectHint"),
     icon: "CircleX",
     className: "border-line hover:border-critical-line hover:bg-critical-subtle",
     activeClassName: "border-critical bg-critical-subtle text-critical-content",
@@ -77,6 +79,8 @@ export const VerificationCard = React.memo(function VerificationCard({
   onRequest,
   onDecide,
 }: VerificationCardProps) {
+  const { t } = useTranslation();
+  const decisions = React.useMemo(() => buildDecisions(t), [t]);
   const [decision, setDecision] = React.useState<VerificationDecision | null>(null);
   const [comment, setComment] = React.useState("");
   const [notes, setNotes] = React.useState("");
@@ -113,8 +117,8 @@ export const VerificationCard = React.memo(function VerificationCard({
 
     return (
       <SectionCard
-        title="Verification"
-        subtitle="Second-person sign-off against the measurement window"
+        title={t("section.verification")}
+        subtitle={t("cd.verificationSub")}
         icon="ShieldCheck"
         flush
       >
@@ -185,7 +189,7 @@ export const VerificationCard = React.memo(function VerificationCard({
 
   return (
     <SectionCard
-      title="Verification"
+      title={t("section.verification")}
       subtitle={
         decided
           ? `${verification.decision === "APPROVED" ? "Approved" : "Returned"} by ${verification.reviewerName}`
@@ -207,7 +211,7 @@ export const VerificationCard = React.memo(function VerificationCard({
       <div className="grid gap-3 border-b border-line px-4 py-3.5 sm:grid-cols-3">
         <div className="min-w-0">
           <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-            Requested by
+            {t("cd.requestedBy")}
           </p>
           <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-content">
             {verification.requestedByName}
@@ -222,7 +226,7 @@ export const VerificationCard = React.memo(function VerificationCard({
 
         <div className="min-w-0">
           <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-            Reviewer
+            {t("case.reviewer")}
           </p>
           <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-content">
             <OwnerAvatar user={reviewer} size="sm" showName={false} />
@@ -247,7 +251,7 @@ export const VerificationCard = React.memo(function VerificationCard({
             where the KPI sits now; target is what was agreed.
           */}
           <p className="mt-1 flex flex-wrap items-baseline gap-x-1 text-xs font-medium tabular-nums text-content">
-            <span title="Captured when the case was opened">
+            <span title={t("cd.baselineCaptured")}>
               {verification.kpiBaseline}
               <span className="ml-0.5 text-2xs font-normal text-content-tertiary">
                 baseline
@@ -315,7 +319,7 @@ export const VerificationCard = React.memo(function VerificationCard({
               </p>
               {verification.notes ? (
                 <p className="mt-2 rounded-md border border-line bg-surface px-2.5 py-2 text-2xs leading-relaxed text-content-tertiary">
-                  <span className="font-medium text-content-secondary">What was checked. </span>
+                  <span className="font-medium text-content-secondary">{t("cd.whatWasChecked")} </span>
                   {verification.notes}
                 </p>
               ) : null}
@@ -325,10 +329,10 @@ export const VerificationCard = React.memo(function VerificationCard({
       ) : isReviewer ? (
         <form onSubmit={submit} className="px-4 py-3.5">
           <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-            Your decision
+            {t("cd.yourDecision")}
           </p>
           <div className="mt-2 grid gap-2 sm:grid-cols-3">
-            {DECISIONS.map((option) => (
+            {decisions.map((option) => (
               <button
                 key={option.value}
                 type="button"
@@ -356,14 +360,14 @@ export const VerificationCard = React.memo(function VerificationCard({
                 htmlFor="verify-comment"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                Decision comment <span className="text-critical">required</span>
+                {t("cd.decisionComment")} <span className="text-critical">required</span>
               </label>
               <textarea
                 id="verify-comment"
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
                 rows={3}
-                placeholder="What you concluded and why. The owner acts on this."
+                placeholder={t("cd.decisionCommentHint")}
                 className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
               />
             </div>
@@ -372,14 +376,14 @@ export const VerificationCard = React.memo(function VerificationCard({
                 htmlFor="verify-notes"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                Verification notes
+                {t("cd.verificationNotes")}
               </label>
               <textarea
                 id="verify-notes"
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 rows={3}
-                placeholder="What you checked — which evidence, which readings, which orders."
+                placeholder={t("cd.notesHint")}
                 className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
               />
             </div>

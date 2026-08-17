@@ -148,7 +148,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
 
   return (
     <SectionCard
-      title="Evidence"
+      title={t("section.evidence")}
       subtitle={`${evidence.length} file${evidence.length === 1 ? "" : "s"} on the case`}
       icon="Paperclip"
       flush
@@ -156,7 +156,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
         !readOnly ? (
           <Button variant="secondary" size="sm" onClick={() => setNoteMode((prev) => !prev)}>
             <Icon name="StickyNote" size="sm" />
-            {noteMode ? "Cancel note" : "Add note"}
+            {noteMode ? "Cancel note" : t("cd.addNote")}
           </Button>
         ) : null
       }
@@ -177,7 +177,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 htmlFor="evidence-action"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                File against
+                {t("cd.fileAgainst")}
               </label>
               <select
                 id="evidence-action"
@@ -185,7 +185,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 onChange={(event) => setLinkedAction(event.target.value)}
                 className={FIELD_CLASS}
               >
-                <option value="">The case as a whole</option>
+                <option value="">{t("cd.caseAsAWhole")}</option>
                 {actions.map((action) => (
                   <option key={action.id} value={action.id}>
                     {action.title}
@@ -198,13 +198,13 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 htmlFor="evidence-description"
                 className="mb-1 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
               >
-                What this proves
+                {t("cd.whatThisProves")}
               </label>
               <input
                 id="evidence-description"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="Written confirmation of the revised date"
+                placeholder={t("cd.evidenceProvesPlaceholder")}
                 className={FIELD_CLASS}
               />
             </div>
@@ -217,14 +217,14 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 onChange={(event) => setNote(event.target.value)}
                 rows={3}
                 autoFocus
-                aria-label="Evidence note"
-                placeholder="Record what was observed, measured or agreed — dates, quantities, who said it."
+                aria-label={t("cd.evidenceNote")}
+                placeholder={t("cd.evidenceNoteHint")}
                 className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
               />
               <div className="mt-2 flex justify-end">
                 <Button variant="primary" size="sm" type="submit" disabled={note.trim().length < 4}>
                   <Icon name="Plus" size="sm" />
-                  Attach note
+                  {t("cd.attachNote")}
                 </Button>
               </div>
             </form>
@@ -266,7 +266,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 {dragging ? "Drop to attach" : "Drag files here"}
               </p>
               <p className="mt-1 text-2xs text-content-tertiary">
-                Images, PDF, Excel and documents up to 25 MB
+                {t("cd.fileLimits")}
               </p>
               <Button
                 variant="secondary"
@@ -275,7 +275,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 onClick={() => inputRef.current?.click()}
               >
                 <Icon name="Paperclip" size="sm" />
-                Browse files
+                {t("cd.browseFiles")}
               </Button>
               <input
                 ref={inputRef}
@@ -283,7 +283,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                 multiple
                 // Visually hidden but still focusable, so it needs a name of
                 // its own — the Browse button beside it is not its label.
-                aria-label="Attach evidence files"
+                aria-label={t("cd.attachEvidence")}
                 accept={ACCEPT_ATTRIBUTE}
                 className="sr-only"
                 onChange={(event) => {
@@ -316,8 +316,8 @@ export const EvidenceCard = React.memo(function EvidenceCard({
       {evidence.length === 0 ? (
         <SectionEmpty
           icon="Paperclip"
-          title="No evidence attached"
-          description="Verification needs proof. Attach the confirmations, measurements and reports that show the corrective actions actually landed."
+          title={t("cd.noEvidence")}
+          description={t("cd.noEvidenceBody")}
         />
       ) : (
         <ul className="divide-y divide-line">
@@ -364,7 +364,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
                     {file.accepted ? (
                       <span className="flex items-center gap-1 text-2xs font-medium text-success-content">
                         <Icon name="CircleCheck" size="xs" />
-                        Accepted
+                        {t("cd.accepted")}
                       </span>
                     ) : null}
                   </div>

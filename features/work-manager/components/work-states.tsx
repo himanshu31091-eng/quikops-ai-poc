@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
 import { formatNumber } from "@/src/lib/format";
+import { useTranslation } from "@/src/i18n/provider";
 
 /** Filters are applied and nothing matched. Recoverable — say how. */
 export function NoResultsState({
@@ -16,17 +17,18 @@ export function NoResultsState({
   totalCount: number;
   onClearFilters: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <EmptyState
       icon="SearchX"
-      title="No cases match these filters"
+      title={t("work.noMatch")}
       description={`${formatNumber(filterCount)} filter${
         filterCount === 1 ? "" : "s"
       } are narrowing ${formatNumber(totalCount)} cases down to none. Remove one to widen the search.`}
       action={
         <Button variant="primary" size="md" onClick={onClearFilters}>
           <Icon name="X" size="sm" />
-          Clear all filters
+          {t("work.clearAllFilters")}
         </Button>
       }
       className="py-16"
@@ -36,21 +38,22 @@ export function NoResultsState({
 
 /** There is genuinely nothing in the store — a different problem entirely. */
 export function NoDataState({ onCreate }: { onCreate: () => void }) {
+  const { t } = useTranslation();
   return (
     <EmptyState
       icon="Inbox"
-      title="No operational cases yet"
-      description="Nothing has been ingested from the connected enterprise data platform and no case has been raised by hand. Cases appear here automatically as soon as the next connector run completes."
+      title={t("work.noCases")}
+      description={t("work.noCasesBody")}
       action={
         <div className="flex items-center gap-2">
           <Button variant="primary" size="md" onClick={onCreate}>
             <Icon name="Plus" size="sm" />
-            Create case
+            {t("work.createCase")}
           </Button>
           <Button variant="secondary" size="md" asChild>
             <Link href="/system/connectors">
               <Icon name="PlugZap" size="sm" />
-              Connector health
+              {t("work.connectorHealth")}
             </Link>
           </Button>
         </div>

@@ -29,7 +29,7 @@ import {
   reviewerFor,
 } from "../fixtures/case-detail";
 import { getCaseCorpus, getPeople, getPlants } from "./corpus";
-import { findCaseDetailRecords } from "./case-detail-db-mapper";
+import { chooseReviewer, findCaseDetailRecords } from "./case-detail-db-mapper";
 import {
   fillTemplate,
   RECOMMENDATION_TEMPLATES,
@@ -119,7 +119,11 @@ function supplierOpenCount(item: CaseListItem, all: CaseListItem[]): number {
   ).length;
 }
 
-function buildContext(item: CaseListItem): ActionCaseContext {
+/* The reviewer is resolved against the tenant's own people where they are
+ * known. `reviewerFor` reads the fixture directory, which put demo names on
+ * evaluation cases in every drawer on this screen; it survives only as the
+ * fixture-mode fallback. */
+function buildContext(item: CaseListItem, reviewer: User | null): ActionCaseContext {
   const summary = buildExecutiveSummary(item);
   return {
     caseNo: item.caseNo,
@@ -137,7 +141,7 @@ function buildContext(item: CaseListItem): ActionCaseContext {
     supplierName: item.supplierName,
     materialCode: item.materialCode,
     ownerId: item.ownerId,
-    reviewerId: reviewerFor(item).id,
+    reviewerId: reviewer?.id ?? reviewerFor(item).id,
     escalationLevel: item.escalationLevel,
     recurrenceCount: item.recurrenceCount,
     isBreached: item.slaBreachedAt !== null,
@@ -213,13 +217,23 @@ export async function getActionCenterData(scope: PlantScope = ALL_PLANTS): Promi
 
     const caseActions = records ? records.actions : buildCorrectiveActions(item);
     actions.push(...caseActions);
-    contextByCaseNo[item.caseNo] = buildContext(item);
+    contextByCaseNo[item.caseNo] = buildContext(
+      item,
+      records?.reviewer ?? chooseReviewer(item, people),
+    );
 
     const evidence = records ? records.evidence : buildEvidence(item, caseActions);
     const verification = records
       ? records.verification
       : buildVerification(item, caseActions);
-    const timeline = buildTimeline(item, caseActions, evidence, verification);
+    /* Without the directory the builder names actors from the fixture cast,
+     * which is how demo people appeared on evaluation timelines. */
+    const timeline = records
+      ? buildTimeline(item, caseActions, evidence, verification, {
+          userById: records.userById,
+          reviewer: records.reviewer ?? chooseReviewer(item, people) ?? reviewerFor(item),
+        })
+      : buildTimeline(item, caseActions, evidence, verification);
 
     drawerByCaseNo[item.caseNo] = {
       timeline,

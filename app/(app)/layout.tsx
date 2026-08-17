@@ -4,8 +4,8 @@ import { AppShell } from "@/components/shell/app-shell";
 import { TourInvitation, TourOverlay } from "@/components/tour/tour-overlay";
 import { getActiveSessionUser } from "@/src/auth/session";
 import { getPlantScope } from "@/src/scope/plant-scope";
-import { CASES } from "@/src/data/fixtures/cases";
-import { PLANTS } from "@/src/data/fixtures/organisation";
+import { USE_DATABASE } from "@/src/data/db";
+import { getCaseCorpus, getPlants } from "@/src/data/queries/corpus";
 import { getSignInPersonas } from "@/src/data/queries/personas";
 import { NOTIFICATIONS } from "@/src/data/fixtures/intelligence";
 import { getNavBadgeCounts } from "@/src/data/queries/dashboard";
@@ -30,14 +30,43 @@ export default async function AppLayout({
     getPlantScope(),
   ]);
 
-  const personas = await getSignInPersonas();
+  // The scope selector lists the tenant's own sites. Reading the fixture list
+  // here is what put Perma plants in the Sika evaluation environment.
+  const [personas, plants, corpus] = await Promise.all([
+    getSignInPersonas(),
+    getPlants(),
+    getCaseCorpus(),
+  ]);
 
   const localeCookie = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale = isLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;
   // Resolved on the server so the first HTML is already in the right language.
   const messages = await loadMessages(locale);
 
-  const searchableCases = CASES.filter((c) =>
+  // Built from the tenant's own corpus. Reading the fixture list here put
+  // another organisation's cases behind the global search box — invisible on
+  // the page, and the first thing a search would surface.
+  /* The seeded tray names the demo organisation's cases. Built from the
+   * tenant corpus instead: escalations and sign-offs waiting on somebody, which
+   * is what the bell is for. */
+  const notifications = USE_DATABASE
+    ? corpus
+        .filter((c) => c.escalationLevel > 0 || c.status === "PENDING_VERIFY")
+        .slice(0, 4)
+        .map((c) => ({
+          id: `ntf_${c.caseNo}`,
+          title:
+            c.status === "PENDING_VERIFY"
+              ? "Case awaiting verification"
+              : "Case escalated",
+          body: `${c.caseNo} — ${c.title}`,
+          at: c.lastDetectedAt,
+          unread: true,
+          tone: (c.priorityBand === "CRITICAL" ? "critical" : "info") as "critical" | "info",
+        }))
+    : NOTIFICATIONS;
+
+  const searchableCases = corpus.filter((c) =>
     ["NEW", "TRIAGED", "ASSIGNED", "IN_PROGRESS", "PENDING_VERIFY", "REOPENED"].includes(
       c.status,
     ),
@@ -60,10 +89,10 @@ export default async function AppLayout({
           <AppShell
             user={user}
             personas={personas}
-            plants={PLANTS}
+            plants={plants}
             badges={badges}
             plantScope={plantScope}
-            notifications={NOTIFICATIONS}
+            notifications={notifications}
             searchableCases={searchableCases}
           >
             {children}

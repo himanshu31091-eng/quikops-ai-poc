@@ -2,6 +2,7 @@ import { EXCEPTION_META } from "@/src/config/app-config";
 import type { ExceptionType, OperationalCase, Plant, User } from "@/src/domain/types";
 import { getCaseCorpus, getPeople, getPlants } from "./corpus";
 import { reviewerFor } from "../fixtures/case-detail";
+import { chooseReviewer } from "./case-detail-db-mapper";
 import { resolveMode } from "@/src/ai/services/copilot-service";
 
 /**
@@ -76,7 +77,9 @@ export async function getAdministrationData(): Promise<AdministrationData> {
         exceptionLabel: EXCEPTION_META[exceptionType].label,
         ownerId,
         ownerName: owner.name,
-        reviewerName: reviewerFor(matching[0]!).name,
+        // Chosen from the tenant's own people; the fixture router names the
+        // demo organisation's managers.
+        reviewerName: (chooseReviewer(matching[0]!, users) ?? reviewerFor(matching[0]!)).name,
         caseCount: matching.length,
       });
     }

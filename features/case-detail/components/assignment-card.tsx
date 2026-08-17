@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -63,6 +64,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
   onSetStatus,
   onAddNote,
 }: AssignmentCardProps) {
+  const { t } = useTranslation();
   const [note, setNote] = React.useState("");
   const sla = computeSla(session.dueAt, session.status, session.priorityBand, DEMO_NOW);
 
@@ -76,27 +78,27 @@ export const AssignmentCard = React.memo(function AssignmentCard({
 
   return (
     <SectionCard
-      title="Assignment"
-      subtitle="Ownership, review routing and the resolution target"
+      title={t("section.assignment")}
+      subtitle={t("cd.assignmentSub")}
       icon="UserCog"
       flush
       footer={
         <p className="flex items-center gap-1.5 text-2xs text-content-tertiary">
           <Icon name="ScrollText" size="xs" />
-          Every change here is written to the timeline and the audit log with your name against it.
+          {t("cd.auditNotice")}
         </p>
       }
     >
       <div className="grid gap-3 px-4 py-3.5 sm:grid-cols-2">
         <div className="min-w-0">
-          <Label htmlFor="assign-owner">Owner</Label>
+          <Label htmlFor="assign-owner">{t("case.owner")}</Label>
           <select
             id="assign-owner"
             value={session.ownerId ?? ""}
             onChange={(event) => onAssignOwner(event.target.value === "" ? null : event.target.value)}
             className={FIELD_CLASS}
           >
-            <option value="">Unassigned</option>
+            <option value="">{t("cd.unassigned")}</option>
             {users.map((user) => (
               <option key={user.id} value={user.id}>
                 {user.name} — {ROLE_META[user.role].label}
@@ -110,13 +112,13 @@ export const AssignmentCard = React.memo(function AssignmentCard({
             </p>
           ) : (
             <p className="mt-1.5 text-2xs font-medium text-high-content">
-              Nobody is accountable for this case yet.
+              {t("cd.nobodyAccountable")}
             </p>
           )}
         </div>
 
         <div className="min-w-0">
-          <Label htmlFor="assign-reviewer">Reviewer</Label>
+          <Label htmlFor="assign-reviewer">{t("case.reviewer")}</Label>
           <select
             id="assign-reviewer"
             value={session.reviewerId}
@@ -138,7 +140,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
         </div>
 
         <div className="min-w-0">
-          <Label htmlFor="assign-due">Due date (UTC)</Label>
+          <Label htmlFor="assign-due">{t("cd.dueDateUtc")}</Label>
           <input
             id="assign-due"
             type="datetime-local"
@@ -164,7 +166,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
         </div>
 
         <div className="min-w-0">
-          <Label htmlFor="assign-priority">Priority</Label>
+          <Label htmlFor="assign-priority">{t("case.priority")}</Label>
           <select
             id="assign-priority"
             value={session.priorityBand}
@@ -179,7 +181,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
           </select>
           <p className="mt-1.5 text-2xs text-content-tertiary">
             {session.priorityBand === scoredBand ? (
-              <>Matches the scored band. Overriding is recorded as a manual decision.</>
+              <>{t("cd.priorityHint")}</>
             ) : (
               <span className="font-medium text-high-content">
                 Overridden — the rule set scored this {PRIORITY_META[scoredBand].label.toLowerCase()}.
@@ -189,7 +191,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
         </div>
 
         <div className="min-w-0 sm:col-span-2">
-          <Label htmlFor="assign-status">Status</Label>
+          <Label htmlFor="assign-status">{t("case.status")}</Label>
           <div className="flex flex-wrap items-center gap-2">
             <select
               id="assign-status"
@@ -210,7 +212,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
             {session.status === "VERIFIED" || session.status === "CLOSED" ? (
               <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
                 <Icon name="Lock" size="xs" />
-                Verified and closed states are set by the reviewer, not by hand.
+                {t("cd.statusHint")}
               </span>
             ) : null}
           </div>
@@ -218,22 +220,22 @@ export const AssignmentCard = React.memo(function AssignmentCard({
       </div>
 
       <form onSubmit={submitNote} className="border-t border-line px-4 py-3.5">
-        <Label htmlFor="assign-note">Assignment note</Label>
+        <Label htmlFor="assign-note">{t("cd.assignmentNote")}</Label>
         <textarea
           id="assign-note"
           value={note}
           onChange={(event) => setNote(event.target.value)}
           rows={2}
-          placeholder="Context for the owner — what has already been tried, who to contact, what good looks like."
+          placeholder={t("cd.assignmentNoteHint")}
           className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
         />
         <div className="mt-2 flex items-center justify-between gap-3">
           <p className="text-2xs text-content-tertiary">
-            Posted to the case discussion so the whole team sees it.
+            {t("cd.assignmentNotePosted")}
           </p>
           <Button variant="secondary" size="sm" type="submit" disabled={note.trim() === ""}>
             <Icon name="Send" size="sm" />
-            Add note
+            {t("cd.addNote")}
           </Button>
         </div>
       </form>

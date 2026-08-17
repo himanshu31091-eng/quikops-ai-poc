@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -70,6 +71,7 @@ const CommentNode = React.memo(function CommentNode({
   recentIds: Set<string>;
   onReply: (comment: CaseComment) => void;
 }) {
+  const { t } = useTranslation();
   const author = users.find((user) => user.id === comment.authorId) ?? null;
 
   return (
@@ -119,8 +121,8 @@ const CommentNode = React.memo(function CommentNode({
             onClick={() => onReply(comment)}
             className="mt-1.5 flex items-center gap-1 rounded-sm text-2xs font-medium text-content-tertiary transition-colors duration-150 hover:text-accent"
           >
-            <Icon name="Reply" size="xs" />
-            Reply
+            <Icon name={t("cd.reply")} size="xs" />
+            {t("cd.reply")}
           </button>
         </div>
       </div>
@@ -156,6 +158,7 @@ export const CommentsCard = React.memo(function CommentsCard({
   recentIds,
   onAdd,
 }: CommentsCardProps) {
+  const { t } = useTranslation();
   const [body, setBody] = React.useState("");
   const [replyTo, setReplyTo] = React.useState<CaseComment | null>(null);
   const [mentionOpen, setMentionOpen] = React.useState(false);
@@ -201,7 +204,7 @@ export const CommentsCard = React.memo(function CommentsCard({
 
   return (
     <SectionCard
-      title="Discussion"
+      title={t("cd.discussion")}
       subtitle={`${comments.length} comment${comments.length === 1 ? "" : "s"}`}
       icon="MessageSquare"
       flush
@@ -209,8 +212,8 @@ export const CommentsCard = React.memo(function CommentsCard({
       {roots.length === 0 ? (
         <SectionEmpty
           icon="MessageSquare"
-          title="No discussion yet"
-          description="Decisions made in a chat thread are invisible to the next person who picks this case up. Record them here instead."
+          title={t("cd.noDiscussion")}
+          description={t("cd.noDiscussionBody")}
         />
       ) : (
         <ul className="divide-y divide-line px-4">
@@ -231,16 +234,16 @@ export const CommentsCard = React.memo(function CommentsCard({
       <form onSubmit={submit} className="border-t border-line bg-surface-subtle px-4 py-3.5">
         {replyTo ? (
           <div className="mb-2 flex items-center gap-2 rounded-md border border-line bg-surface px-2.5 py-1.5">
-            <Icon name="Reply" size="xs" className="text-content-tertiary" />
+            <Icon name={t("cd.reply")} size="xs" className="text-content-tertiary" />
             <span className="min-w-0 flex-1 truncate text-2xs text-content-secondary">
-              Replying to <span className="font-medium text-content">{replyTo.authorName}</span> —{" "}
+              {t("cd.replyingTo")} <span className="font-medium text-content">{replyTo.authorName}</span> —{" "}
               {replyTo.body.slice(0, 80)}
               {replyTo.body.length > 80 ? "…" : ""}
             </span>
             <button
               type="button"
               onClick={() => setReplyTo(null)}
-              aria-label="Cancel reply"
+              aria-label={t("cd.cancelReply")}
               className="shrink-0 rounded-sm text-content-tertiary transition-colors duration-150 hover:text-content"
             >
               <Icon name="X" size="xs" />
@@ -261,8 +264,8 @@ export const CommentsCard = React.memo(function CommentsCard({
                 }
               }}
               rows={2}
-              aria-label="Add a comment"
-              placeholder="Add context, a decision, or a question. Use @ to notify someone."
+              aria-label={t("cd.addComment")}
+              placeholder={t("cd.commentHint")}
               className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
             />
 
