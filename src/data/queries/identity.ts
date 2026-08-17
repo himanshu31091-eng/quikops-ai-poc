@@ -30,3 +30,25 @@ export async function findUserByPersona(
   });
   return row ? toUser(row) : null;
 }
+
+/**
+ * Resolves whatever the session cookie happens to hold.
+ *
+ * The cookie carries a persona key in fixture mode and a database id in
+ * database mode, because the sign-in screen offers whatever the tenant's
+ * directory gave it. Accepting both is what stops that difference becoming a
+ * sign-in loop: the cookie was written, the guard could not resolve it, and
+ * the redirect went back to the screen that had just written it.
+ *
+ * Both branches are scoped to the tenant, so widening what may be matched
+ * does not widen what may be reached.
+ */
+export async function findUserBySessionRef(
+  tenantId: string,
+  ref: string,
+): Promise<User | null> {
+  const row = await getPrisma().user.findFirst({
+    where: { tenantId, isActive: true, OR: [{ personaKey: ref }, { id: ref }] },
+  });
+  return row ? toUser(row) : null;
+}

@@ -4,7 +4,10 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ROLE_LANDING } from "@/src/config/app-config";
+import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
+import { USE_DATABASE } from "@/src/data/db";
 import { USER_BY_ID } from "@/src/data/fixtures/organisation";
+import { findUserBySessionRef } from "@/src/data/queries/identity";
 import { SESSION_COOKIE } from "./session";
 
 /**
@@ -34,7 +37,14 @@ async function writeSessionCookie(userId: string): Promise<void> {
  * is, which is the point of it — the same screen, seen as someone else.
  */
 export async function switchPersona(userId: string): Promise<void> {
-  if (!USER_BY_ID[userId]) return;
+  // Same resolution as sign-in, and for the same reason: in the evaluation
+  // tenant the switcher lists database people, and a fixture-only check would
+  // silently do nothing — the menu would close on the persona it started with.
+  const known = USE_DATABASE
+    ? Boolean(await findUserBySessionRef(DEFAULT_TENANT_ID, userId))
+    : Boolean(USER_BY_ID[userId]);
+
+  if (!known) return;
   await writeSessionCookie(userId);
 }
 
@@ -46,7 +56,15 @@ export async function switchPersona(userId: string): Promise<void> {
  * a dead card: the session was real, the screen just never changed.
  */
 export async function signInAsPersona(userId: string): Promise<void> {
-  const user = USER_BY_ID[userId];
+  /* Resolved from whichever directory the chooser was built from. Looking the
+   * id up in the fixture map alone is what stranded the evaluation tenant: its
+   * people come from the database, so no card on the screen matched, every
+   * sign-in fell through to the redirect below, and the browser bounced back
+   * to the login screen it had just left. */
+  const user = USE_DATABASE
+    ? await findUserBySessionRef(DEFAULT_TENANT_ID, userId)
+    : (USER_BY_ID[userId] ?? null);
+
   if (!user) redirect("/login");
   await writeSessionCookie(userId);
   redirect(ROLE_LANDING[user.role]);

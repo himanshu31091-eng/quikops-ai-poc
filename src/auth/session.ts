@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
 import { USE_DATABASE } from "@/src/data/db";
 import { DEFAULT_SESSION_USER_ID, USER_BY_ID } from "@/src/data/fixtures/organisation";
-import { findUserByPersona } from "@/src/data/queries/identity";
+import { findUserByPersona, findUserBySessionRef } from "@/src/data/queries/identity";
 import { getSignInPersonas } from "@/src/data/queries/personas";
 import type { User } from "@/src/domain/types";
 
@@ -28,7 +28,7 @@ export async function getActiveSessionUser(): Promise<User | null> {
   const personaId = store.get(SESSION_COOKIE)?.value;
   if (!personaId) return null;
 
-  if (USE_DATABASE) return findUserByPersona(DEFAULT_TENANT_ID, personaId);
+  if (USE_DATABASE) return findUserBySessionRef(DEFAULT_TENANT_ID, personaId);
 
   return USER_BY_ID[personaId] ?? null;
 }
