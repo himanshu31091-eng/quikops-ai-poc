@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import type { Translate } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,7 @@ function SliceRow({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useTranslation();
   const isValue = unit === "value";
   const detected = isValue ? slice.detectedValue : slice.detected;
   const resolved = isValue ? slice.resolvedValue : slice.resolved;
@@ -115,11 +118,11 @@ function SliceRow({
         <div className="anim-fade mx-2.5 mb-2 rounded-md border border-line bg-surface-subtle px-3 py-2.5">
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
             {[
-              { label: "Detected", value: show(detected), tone: "text-critical-content" },
-              { label: "Resolved", value: show(resolved), tone: "text-success-content" },
-              { label: "Open now", value: formatNumber(slice.open), tone: "text-content" },
+              { label: t("col.detected"), value: show(detected), tone: "text-critical-content" },
+              { label: t("analytics.resolved"), value: show(resolved), tone: "text-success-content" },
+              { label: t("analytics.openNow"), value: formatNumber(slice.open), tone: "text-content" },
               {
-                label: "Open exposure",
+                label: t("analytics.openExposure"),
                 value: formatMoney(slice.openValue, currency, { forceCompact: true }),
                 tone: "text-content",
               },
@@ -145,12 +148,12 @@ function SliceRow({
   );
 }
 
-const DIMENSIONS: { key: FlowDimension; label: string; icon: string }[] = [
+const buildDimensions = (t: Translate) => [
   { key: "plant", label: "Plant", icon: "Factory" },
-  { key: "exception", label: "Exception type", icon: "Layers" },
-  { key: "band", label: "Priority", icon: "Target" },
-  { key: "owner", label: "Owner", icon: "UserCog" },
-];
+  { key: "exception", label: t("administration.exceptionType"), icon: "Layers" },
+  { key: "band", label: t("col.priority"), icon: "Target" },
+  { key: "owner", label: t("col.owner"), icon: "UserCog" },
+] as const;
 
 export function FlowDrilldown({
   slices,
@@ -169,6 +172,7 @@ export function FlowDrilldown({
   onDimensionChange: (dimension: FlowDimension) => void;
   onSelect: (key: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const isValue = unit === "value";
   const maxMagnitude = slices.reduce(
     (max, slice) =>
@@ -183,8 +187,8 @@ export function FlowDrilldown({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-1.5 print:hidden">
-        <span className="text-2xs text-content-tertiary">Cut by</span>
-        {DIMENSIONS.map((entry) => (
+        <span className="text-2xs text-content-tertiary">{t("analytics.cutBy")}</span>
+        {buildDimensions(t).map((entry) => (
           <Button
             key={entry.key}
             variant={dimension === entry.key ? "subtle" : "ghost"}
@@ -201,18 +205,18 @@ export function FlowDrilldown({
       {slices.length === 0 ? (
         <EmptyState
           icon="SearchX"
-          title="Nothing to break down"
-          description="No cases fall inside the selected horizon."
+          title={t("analytics.nothingToBreakDown")}
+          description={t("analytics.noCasesFallInsideThe")}
         />
       ) : (
         <>
           <p className="flex items-center gap-3 px-2.5 text-2xs text-content-tertiary">
-            <span className="w-24 shrink-0 sm:w-40">Worst first</span>
+            <span className="w-24 shrink-0 sm:w-40">{t("analytics.worstFirst")}</span>
             <span className="flex flex-1 items-center justify-between">
               <span className="text-success-content">← resolved</span>
               <span className="text-critical-content">detected →</span>
             </span>
-            <span className="w-16 shrink-0 text-right">Net</span>
+            <span className="w-16 shrink-0 text-right">{t("analytics.net")}</span>
             <span className="w-3 shrink-0" />
           </p>
           <ul className="space-y-0.5">
@@ -249,6 +253,7 @@ export function BandMixture({
   bands: BandFlow[];
   currency: string;
 }) {
+  const { t } = useTranslation();
   const worst = bands.find((band) => band.band === "CRITICAL");
   const criticalGrowing = worst ? worst.detected > worst.resolved : false;
 
@@ -300,7 +305,7 @@ export function BandMixture({
             The critical band is growing regardless of the overall balance. A steady
             headline built on clearing low-band work is a deterioration, not stability.{" "}
             <Link href="/work?band=CRITICAL" className="underline underline-offset-2">
-              Open the critical queue
+              {t("analytics.openTheCriticalQueue")}
             </Link>
             .
           </span>

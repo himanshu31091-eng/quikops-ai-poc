@@ -1,4 +1,8 @@
+"use client";
+
 import { MoneyCell } from "@/components/patterns/money-cell";
+import { useT } from "@/src/i18n/provider";
+import type { Translate } from "@/src/domain/labels";
 import type { InventoryHealthRow } from "@/src/domain/types";
 import { formatNumber } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
@@ -10,22 +14,23 @@ import { cn } from "@/src/lib/cn";
  * ceiling, so the comparison between plants stays readable whatever the
  * absolute numbers are. Status thresholds live with the row data, not here.
  */
-const STATUS_META = {
-  AT_RISK: { label: "At risk", className: "bg-critical-subtle text-critical-content border-critical-line", bar: "bg-critical" },
+const buildStatusMeta = (t: Translate) => ({
+  AT_RISK: { label: t("health.atRisk"), className: "bg-critical-subtle text-critical-content border-critical-line", bar: "bg-critical" },
   WATCH: { label: "Watch", className: "bg-high-subtle text-high-content border-high-line", bar: "bg-high" },
-  HEALTHY: { label: "Healthy", className: "bg-success-subtle text-success-content border-success-line", bar: "bg-success" },
-} as const;
+  HEALTHY: { label: t("dashboard.healthy"), className: "bg-success-subtle text-success-content border-success-line", bar: "bg-success" },
+}) as const;
 
-const HEADERS = [
+const buildHeaders = (t: Translate) => [
   { key: "plant", label: "Plant", className: "" },
-  { key: "coverage", label: "Days of coverage", className: "w-[30%]" },
+  { key: "coverage", label: t("dashboard.daysOfCoverage"), className: "w-[30%]" },
   { key: "target", label: "Target", className: "w-[9%] text-right" },
-  { key: "skus", label: "Stockout-risk SKUs", className: "w-[14%] text-right" },
-  { key: "excess", label: "Excess value", className: "w-[13%] text-right" },
-  { key: "status", label: "Status", className: "w-[11%]" },
+  { key: "skus", label: t("dashboard.stockoutRiskSkus"), className: "w-[14%] text-right" },
+  { key: "excess", label: t("dashboard.excessValue"), className: "w-[13%] text-right" },
+  { key: "status", label: t("col.status"), className: "w-[11%]" },
 ] as const;
 
 export function InventoryHealthTable({ rows }: { rows: InventoryHealthRow[] }) {
+  const t = useT();
   const maxDays = Math.max(...rows.map((r) => Math.max(r.inventoryDays, r.targetDays)));
 
   return (
@@ -33,7 +38,7 @@ export function InventoryHealthTable({ rows }: { rows: InventoryHealthRow[] }) {
       <table className="w-full min-w-[720px] border-collapse text-left">
         <thead>
           <tr className="border-b border-line bg-surface-subtle">
-            {HEADERS.map((header) => (
+            {buildHeaders(t).map((header) => (
               <th
                 key={header.key}
                 scope="col"
@@ -49,7 +54,7 @@ export function InventoryHealthTable({ rows }: { rows: InventoryHealthRow[] }) {
         </thead>
         <tbody>
           {rows.map((row) => {
-            const status = STATUS_META[row.status];
+            const status = buildStatusMeta(t)[row.status];
             const widthPct = (row.inventoryDays / maxDays) * 100;
             const targetPct = (row.targetDays / maxDays) * 100;
 

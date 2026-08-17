@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +49,7 @@ export function CreateActionDialog({
   sessionUser,
   onCreate,
 }: CreateActionDialogProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = React.useState<NewActionDraft>(EMPTY);
 
   // Reset on open so a dismissed draft never reappears half-filled.
@@ -72,7 +74,7 @@ export function CreateActionDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
-        <DialogTitle>Create action</DialogTitle>
+        <DialogTitle>{t("actionCenter.createAction")}</DialogTitle>
         <DialogDescription>
           Raise a corrective action against an open case. Priority and plant are
           inherited from the case.
@@ -87,14 +89,14 @@ export function CreateActionDialog({
             onOpenChange(false);
           }}
         >
-          <FormField label="Case" htmlFor="action-case" required>
+          <FormField label={t("col.case")} htmlFor="action-case" required>
             <select
               id="action-case"
               value={draft.caseNo}
               onChange={(event) => set("caseNo", event.target.value)}
               className={FIELD_CLASS}
             >
-              <option value="">Select an open case…</option>
+              <option value="">{t("actionCenter.selectAnOpenCase")}</option>
               {openCases.map((entry) => (
                 <option key={entry.caseNo} value={entry.caseNo}>
                   {entry.caseNo} — {entry.caseTitle}
@@ -106,34 +108,34 @@ export function CreateActionDialog({
           {selected ? (
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border border-line bg-surface-subtle px-2.5 py-2 text-2xs text-content-secondary">
               <Icon name="Info" size="xs" className="text-content-tertiary" />
-              Inherits <span className="font-medium text-content">{selected.priorityBand}</span>{" "}
+              {t("actionCenter.inherits")} <span className="font-medium text-content">{selected.priorityBand}</span>{" "}
               priority at <span className="font-medium text-content">{selected.plantName}</span>
             </p>
           ) : null}
 
-          <FormField label="Action" htmlFor="action-title" required>
+          <FormField label={t("col.action")} htmlFor="action-title" required>
             <input
               id="action-title"
               value={draft.title}
               onChange={(event) => set("title", event.target.value)}
-              placeholder="Escalate to supplier account management"
+              placeholder={t("actionCenter.escalateToSupplierAccountManagement")}
               className={FIELD_CLASS}
             />
           </FormField>
 
-          <FormField label="Description" htmlFor="action-description">
+          <FormField label={t("actionCenter.description")} htmlFor="action-description">
             <textarea
               id="action-description"
               value={draft.description}
               onChange={(event) => set("description", event.target.value)}
               rows={3}
-              placeholder="What specifically needs to happen, and what does done look like?"
+              placeholder={t("actionCenter.whatSpecificallyNeedsToHappen")}
               className={`${FIELD_CLASS} h-auto resize-y py-2 leading-relaxed`}
             />
           </FormField>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <FormField label="Owner" htmlFor="action-owner" required>
+            <FormField label={t("col.owner")} htmlFor="action-owner" required>
               <select
                 id="action-owner"
                 value={draft.ownerId}
@@ -148,7 +150,7 @@ export function CreateActionDialog({
               </select>
             </FormField>
 
-            <FormField label="Due in (days)" htmlFor="action-due">
+            <FormField label={t("actionCenter.dueInDays")} htmlFor="action-due">
               <input
                 id="action-due"
                 type="number"
@@ -168,11 +170,11 @@ export function CreateActionDialog({
               size="md"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button type="submit" variant="primary" size="md" disabled={!canSubmit}>
               <Icon name="Plus" size="sm" />
-              Create action
+              {t("actionCenter.createAction")}
             </Button>
           </div>
         </form>

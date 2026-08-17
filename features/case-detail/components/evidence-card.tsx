@@ -9,7 +9,7 @@ import type { CaseEvidence, CorrectiveAction } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatTimestamp, formatWhen } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import type { EvidenceDraft } from "../types";
 import {
   ACCEPT_ATTRIBUTE,
@@ -57,6 +57,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
   caseNo,
   persistent,
 }: EvidenceCardProps) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = React.useState(false);
@@ -375,7 +376,7 @@ export const EvidenceCard = React.memo(function EvidenceCard({
 
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-content-tertiary">
                     <span title={formatTimestamp(file.uploadedAt)}>
-                      {file.uploadedByName} · {formatWhen(file.uploadedAt, DEMO_NOW)}
+                      {file.uploadedByName} · {formatWhen(file.uploadedAt, DEMO_NOW, fmt)}
                     </span>
                     <span>{formatBytes(file.sizeBytes)}</span>
                     {/* Only where a file was actually stored. A record filed

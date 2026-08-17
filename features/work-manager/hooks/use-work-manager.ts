@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useT } from "@/src/i18n/provider";
 import { usePathname, useRouter } from "next/navigation";
 import { createCaseAction } from "@/src/data/mutations/work-mutations";
 import { statusForGroup, type CaseStatusGroup } from "@/src/domain/case-status";
@@ -121,6 +122,9 @@ export function useWorkManager({
 }: WorkManagerInput): WorkManagerApi {
   const router = useRouter();
   const pathname = usePathname();
+  // The KPI tiles and the active-filter chips are sentences, so the derivations
+  // that build them take the translator and rebuild on a language change.
+  const t = useT();
 
   const [filters, setFilters] = React.useState<WorkFilters>(initial.filters);
   const [sort, setSort] = React.useState<WorkSort>(initial.sort);
@@ -178,15 +182,15 @@ export function useWorkManager({
   }, [allRows, queryFilters, sessionUser.id, sort]);
 
   const kpis = React.useMemo(
-    () => computeKpis(allRows, filters, sessionUser.id),
-    [allRows, filters, sessionUser.id],
+    () => computeKpis(allRows, filters, sessionUser.id, t),
+    [allRows, filters, sessionUser.id, t],
   );
 
   const quickStats = React.useMemo(() => computeQuickStats(rows, allRows), [rows, allRows]);
 
   const chips = React.useMemo(
-    () => buildFilterChips(filters, { plants, users: assignableUsers, sessionUser }),
-    [filters, plants, assignableUsers, sessionUser],
+    () => buildFilterChips(filters, { plants, users: assignableUsers, sessionUser }, t),
+    [filters, plants, assignableUsers, sessionUser, t],
   );
 
   const selectedRows = React.useMemo(

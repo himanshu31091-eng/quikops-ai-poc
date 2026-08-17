@@ -180,7 +180,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
             size="sm"
             className={isRefreshing ? "animate-spin" : undefined}
           />
-          {isRefreshing ? "Refreshing" : "Refresh"}
+          {isRefreshing ? t("common.refreshing") : t("common.refresh")}
         </Button>
 
         <span className="hidden h-5 w-px bg-line sm:block" />
@@ -202,7 +202,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
             }
           >
             <Icon name="UserPlus" size="sm" />
-            Bulk assign
+            {t("workManager.bulkAssign")}
             {hasSelection ? (
               <span className="rounded-sm bg-surface-active px-1 text-2xs font-semibold tabular-nums text-content-secondary">
                 {formatNumber(selectionCount)}
@@ -223,7 +223,7 @@ export const WorkToolbar = React.memo(function WorkToolbar({
           }
         >
           <Icon name="CheckCheck" size="sm" />
-          Bulk close
+          {t("workManager.bulkClose")}
           {hasSelection ? (
             <span className="rounded-sm bg-surface-active px-1 text-2xs font-semibold tabular-nums text-content-secondary">
               {formatNumber(selectionCount)}

@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useTranslation } from "@/src/i18n/provider";
+import { useLabels } from "@/src/i18n/provider";
+import { actionStatusLabel, roleLabel } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -13,9 +15,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ACTION_STATUS_META, ROLE_META } from "@/src/config/app-config";
+  DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ACTION_STATUS_META } from "@/src/config/app-config";
 import type { ActionStatus, CorrectiveAction, User } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatDue, formatTimestamp } from "@/src/lib/format";
@@ -79,6 +80,8 @@ const ActionRow = React.memo(function ActionRow({
   onReorder: (id: string, direction: -1 | 1) => void;
   onRemove: (id: string) => void;
 }) {
+  const labels = useLabels();
+  const fmt = useFormat();
   const { t } = useTranslation();
   const [editingNotes, setEditingNotes] = React.useState(false);
   const [draftNotes, setDraftNotes] = React.useState(action.notes);
@@ -171,7 +174,7 @@ const ActionRow = React.memo(function ActionRow({
             >
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name} — {ROLE_META[user.role].label}
+                  {user.name} — {roleLabel(user.role, labels)}
                 </option>
               ))}
             </select>
@@ -305,7 +308,7 @@ const ActionRow = React.memo(function ActionRow({
             <span className="flex items-center gap-1.5">
               <OwnerAvatar user={owner ?? null} size="sm" showName={false} />
               {owner?.name ?? "Unassigned"}
-              {owner ? ` · ${ROLE_META[owner.role].label}` : ""}
+              {owner ? ` · ${roleLabel(owner.role, labels)}` : ""}
             </span>
             <span
               title={formatTimestamp(action.dueAt)}
@@ -315,7 +318,7 @@ const ActionRow = React.memo(function ActionRow({
               )}
             >
               <Icon name="CalendarClock" size="xs" />
-              {formatDue(action.dueAt, DEMO_NOW)}
+              {formatDue(action.dueAt, DEMO_NOW, fmt)}
             </span>
             {action.evidenceCount > 0 ? (
               <span className="flex items-center gap-1">
@@ -432,7 +435,7 @@ const ActionRow = React.memo(function ActionRow({
                         ACTION_STATUS_META[status].dotClassName,
                       )}
                     />
-                    <span className="flex-1">{ACTION_STATUS_META[status].label}</span>
+                    <span className="flex-1">{actionStatusLabel(status, labels)}</span>
                     {status === action.status ? (
                       <Icon name="Check" size="sm" className="text-accent" />
                     ) : null}
@@ -476,6 +479,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
   onReorder,
   onRemove,
 }: CorrectiveActionsCardProps) {
+  const labels = useLabels();
   const { t } = useTranslation();
   const [adding, setAdding] = React.useState(false);
   const [draft, setDraft] = React.useState<NewActionDraft>(() => ({
@@ -608,7 +612,7 @@ export const CorrectiveActionsCard = React.memo(function CorrectiveActionsCard({
               >
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>
-                    {user.name} — {ROLE_META[user.role].label}
+                    {user.name} — {roleLabel(user.role, labels)}
                   </option>
                 ))}
               </select>

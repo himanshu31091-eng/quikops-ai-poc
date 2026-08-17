@@ -1,3 +1,4 @@
+import type { Translate } from "@/src/domain/labels";
 import { DETECTION_SOURCE_META, EXCEPTION_META, PRIORITY_META } from "@/src/config/app-config";
 import { CASE_STATUS_GROUPS, STATUS_GROUP_META } from "@/src/domain/case-status";
 import { SLA_TARGET_HOURS } from "@/src/domain/sla";
@@ -143,6 +144,7 @@ export function computeKpis(
   rows: WorkCaseRow[],
   filters: WorkFilters,
   sessionUserId: string,
+  t: Translate,
 ): WorkKpi[] {
   const open = rows.filter((row) => row.isOpen);
   const unassignedOpen = open.filter((row) => row.ownerId === null);
@@ -161,38 +163,38 @@ export function computeKpis(
       value: open.length,
       footnote:
         unassignedOpen.length > 0
-          ? `${unassignedOpen.length} still unassigned`
-          : "Every open case has an owner",
+          ? t("wm.foot.stillUnassigned", { count: unassignedOpen.length })
+          : t("wm.foot.allOwned"),
     },
     mine: {
       value: mine.length,
       footnote:
         mine.length === 0
-          ? "Nothing routed to you"
+          ? t("wm.foot.nothingRouted")
           : mineOverdue.length > 0
-            ? `${mineOverdue.length} past SLA`
-            : "All within SLA",
+            ? t("wm.foot.pastSla", { count: mineOverdue.length })
+            : t("wm.foot.withinSla"),
     },
     overdue: {
       value: overdue.length,
       footnote:
         overdue.length === 0
-          ? "No SLA breaches open"
-          : `${overdueCritical.length} of them critical`,
+          ? t("wm.foot.noBreaches")
+          : t("wm.foot.ofThemCritical", { count: overdueCritical.length }),
     },
     verification: {
       value: verification.length,
       footnote:
         verificationOverdue.length > 0
-          ? `${verificationOverdue.length} waiting past SLA`
-          : "Awaiting manager sign-off",
+          ? t("wm.foot.waitingPastSla", { count: verificationOverdue.length })
+          : t("wm.foot.awaitingSignOff"),
     },
     completed: {
       value: completed.length,
       footnote:
         completed.length === 0
-          ? "Nothing signed off yet today"
-          : `${verifiedToday} verified · ${closedToday} closed`,
+          ? t("wm.foot.noneSignedOff")
+          : t("wm.foot.verifiedClosed", { verified: verifiedToday, closed: closedToday }),
     },
   };
 
@@ -200,7 +202,7 @@ export function computeKpis(
     const preset = KPI_PRESETS[key];
     return {
       key,
-      label: preset.label,
+      label: t(`wm.kpi.${key}`),
       icon: preset.icon,
       tone: preset.tone,
       active: preset.isActive(filters),
@@ -270,13 +272,14 @@ export interface ChipContext {
 export function buildFilterChips(
   filters: WorkFilters,
   { plants, users, sessionUser }: ChipContext,
+  t: Translate,
 ): ActiveFilterChip[] {
   const chips: ActiveFilterChip[] = [];
   const plantName = (code: string) =>
     plants.find((plant) => plant.code === code)?.name ?? code;
   const userName = (id: string) =>
     id === UNASSIGNED_OWNER
-      ? "Unassigned"
+      ? t("wm.chip.unassigned")
       : (users.find((user) => user.id === id)?.name ?? id);
 
   if (filters.search.trim() !== "") {
@@ -331,13 +334,13 @@ export function buildFilterChips(
     });
   }
   if (filters.overdueOnly) {
-    chips.push({ id: "overdueOnly", group: "SLA", label: "Overdue only" });
+    chips.push({ id: "overdueOnly", group: "SLA", label: t("wm.chip.overdueOnly") });
   }
   if (filters.mineOnly) {
-    chips.push({ id: "mineOnly", group: "Owner", label: `Assigned to ${sessionUser.name}` });
+    chips.push({ id: "mineOnly", group: "Owner", label: t("wm.chip.assignedTo", { name: sessionUser.name }) });
   }
   if (filters.completedToday) {
-    chips.push({ id: "completedToday", group: "Outcome", label: "Completed today" });
+    chips.push({ id: "completedToday", group: "Outcome", label: t("wm.chip.completedToday") });
   }
   return chips;
 }

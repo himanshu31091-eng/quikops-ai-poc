@@ -59,7 +59,7 @@ export function PlantScopeSelector({ plants, scope }: PlantScopeSelectorProps) {
         >
           <Icon name="Factory" size="sm" className="text-content-tertiary" />
           <span className="whitespace-nowrap font-medium">
-            {current ? `${current.code} · ${current.name}` : "All plants"}
+            {current ? `${current.code} · ${current.name}` : t("shell.allPlants")}
           </span>
           <Icon name="ChevronsUpDown" size="xs" className="text-content-tertiary" />
         </button>
@@ -89,8 +89,7 @@ export function PlantScopeSelector({ plants, scope }: PlantScopeSelectorProps) {
 
         <DropdownMenuSeparator />
         <p className="px-2 py-1.5 text-2xs leading-relaxed text-content-tertiary">
-          Scoping to a plant recomputes every figure from that plant&rsquo;s cases.
-          Portfolio and plant numbers answer different questions and are never mixed.
+          {t("shell.plantScopeHint")}
         </p>
       </DropdownMenuContent>
     </DropdownMenu>

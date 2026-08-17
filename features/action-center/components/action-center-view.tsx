@@ -5,7 +5,7 @@ import { ActionToast } from "@/components/patterns/action-toast";
 import { AssignMenu } from "@/components/patterns/assign-menu";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ interface ActionCenterViewProps {
 }
 
 export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const api = useActionCenter(data, sessionUser);
   const [createOpen, setCreateOpen] = React.useState(false);
@@ -116,7 +117,7 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
         description={t("page.actions.description")}
         meta={
           <>
-            <MetaChip icon="Clock">Data as at {formatTimestamp(DEMO_NOW)} UTC</MetaChip>
+            <MetaChip icon="Clock">{t("shell.dataAsAt", { when: formatTimestamp(DEMO_NOW, fmt) })}</MetaChip>
             <MetaChip icon="ListChecks">
               {api.allRows.filter((row) => row.isOpen).length} open of {api.allRows.length}
             </MetaChip>
@@ -130,7 +131,7 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
         actions={
           <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
             <Icon name="Plus" size="sm" />
-            Create action
+            {t("actionCenter.createAction")}
           </Button>
         }
       />
@@ -182,7 +183,7 @@ export function ActionCenterView({ data, sessionUser }: ActionCenterViewProps) {
             >
               <Button variant="secondary" size="sm">
                 <Icon name="UserCog" size="sm" />
-                Assign
+                {t("actionCenter.assign")}
               </Button>
             </AssignMenu>
           </BulkActionBar>

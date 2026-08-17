@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useTranslation } from "@/src/i18n/provider";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { ROLE_META } from "@/src/config/app-config";
 import type { CaseTimelineEvent } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatTimestamp, formatWhen } from "@/src/lib/format";
@@ -33,6 +34,8 @@ const TimelineRow = React.memo(function TimelineRow({
   isLast: boolean;
   isRecent: boolean;
 }) {
+  const labels = useLabels();
+  const fmt = useFormat();
   const { t } = useTranslation();
   const tone = TIMELINE_TONE[event.kind];
 
@@ -67,7 +70,7 @@ const TimelineRow = React.memo(function TimelineRow({
             title={formatTimestamp(event.at)}
             className="text-2xs tabular-nums text-content-tertiary"
           >
-            {formatWhen(event.at, DEMO_NOW)}
+            {formatWhen(event.at, DEMO_NOW, fmt)}
           </span>
           {isRecent ? (
             <span className="rounded-sm bg-accent px-1.5 py-px text-2xs font-semibold text-white">
@@ -78,7 +81,7 @@ const TimelineRow = React.memo(function TimelineRow({
 
         <p className="mt-0.5 text-2xs text-content-tertiary">
           {event.actorName}
-          {event.actorRole ? ` · ${ROLE_META[event.actorRole].label}` : " · automated"}
+          {event.actorRole ? ` · ${roleLabel(event.actorRole, labels)}` : " · automated"}
         </p>
 
         {event.detail ? (

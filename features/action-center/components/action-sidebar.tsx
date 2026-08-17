@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
@@ -34,6 +35,7 @@ const RecommendationCard = React.memo(function RecommendationCard({
   applied: boolean;
   onApply: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const tone = CONFIDENCE_TONE(recommendation.confidence.score);
 
   return (
@@ -54,7 +56,7 @@ const RecommendationCard = React.memo(function RecommendationCard({
       </div>
 
       <p className="mt-2 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-        Suggested
+        {t("actionCenter.suggested")}
       </p>
       <p className="mt-1 text-xs leading-relaxed text-content-secondary">
         {recommendation.suggestion}
@@ -65,15 +67,15 @@ const RecommendationCard = React.memo(function RecommendationCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-help text-2xs font-medium text-content-tertiary underline decoration-dotted underline-offset-2">
-                Confidence
+                {t("actionCenter.confidence")}
               </span>
             </TooltipTrigger>
             <TooltipContent className="max-w-64">
-              <p className="text-xs font-medium">Why this score</p>
+              <p className="text-xs font-medium">{t("actionCenter.whyThisScore")}</p>
               <ul className="mt-1 space-y-0.5">
                 {recommendation.confidence.drivers.length === 0 ? (
                   <li className="text-2xs opacity-80">
-                    Baseline only — no corroborating signal on this case yet.
+                    {t("actionCenter.baselineOnlyNoCorroboratingSignal")}
                   </li>
                 ) : (
                   recommendation.confidence.drivers.map((driver) => (
@@ -84,7 +86,7 @@ const RecommendationCard = React.memo(function RecommendationCard({
                 )}
               </ul>
               <p className="mt-1.5 border-t border-line-inverse pt-1 text-2xs opacity-70">
-                Scored by a deterministic rule set, never by a model.
+                {t("actionCenter.scoredByADeterministicRule")}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -122,13 +124,14 @@ export function RecommendationsPanel({
   appliedIds: Set<string>;
   onApply: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = React.useState(false);
   const visible = showAll ? recommendations : recommendations.slice(0, 3);
 
   return (
     <SectionCard
       title="AI recommended actions"
-      subtitle="Highest confidence first, weighted by what is at stake"
+      subtitle={t("actionCenter.highestConfidenceFirstWeightedBy")}
       icon="Sparkles"
       className="h-full"
       {...(recommendations.length > 3
@@ -144,8 +147,8 @@ export function RecommendationsPanel({
       {recommendations.length === 0 ? (
         <EmptyState
           icon="Sparkles"
-          title="Nothing to recommend"
-          description="Every open case already has a corrective plan in flight."
+          title={t("actionCenter.nothingToRecommend")}
+          description={t("actionCenter.everyOpenCaseAlreadyHas")}
           size="sm"
         />
       ) : (
@@ -180,18 +183,20 @@ export function DeadlinesPanel({
   groups: DeadlineGroup[];
   onOpen: (id: string) => void;
 }) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   return (
     <SectionCard
-      title="Upcoming deadlines"
-      subtitle="Open actions by when they fall due"
+      title={t("actionCenter.upcomingDeadlines")}
+      subtitle={t("actionCenter.openActionsByWhenThey")}
       icon="CalendarSync"
       className="h-full"
     >
       {groups.length === 0 ? (
         <EmptyState
           icon="CalendarSync"
-          title="No open deadlines"
-          description="Nothing is scheduled against an open action right now."
+          title={t("actionCenter.noOpenDeadlines")}
+          description={t("actionCenter.nothingIsScheduledAgainstAn")}
           size="sm"
         />
       ) : (
@@ -220,7 +225,7 @@ export function DeadlinesPanel({
                         {action.title}
                       </span>
                       <span className="shrink-0 text-2xs tabular-nums text-content-tertiary">
-                        {formatDue(action.dueAt, DEMO_NOW)}
+                        {formatDue(action.dueAt, DEMO_NOW, fmt)}
                       </span>
                     </button>
                   </li>
@@ -258,37 +263,38 @@ export function QuickActionsPanel({
   onClose,
   onReport,
 }: QuickActionsPanelProps) {
+  const { t } = useTranslation();
   const needsSelection = selectedCount === 0;
 
   const items = [
-    { key: "create", label: "Create action", icon: "Plus", onClick: onCreate, disabled: false },
+    { key: "create", label: t("actionCenter.createAction"), icon: "Plus", onClick: onCreate, disabled: false },
     {
       key: "assign",
-      label: "Assign user",
+      label: t("actionCenter.assignUser"),
       icon: "UserCog",
       onClick: onAssign,
       disabled: needsSelection,
     },
     {
       key: "escalate",
-      label: "Escalate",
+      label: t("actionCenter.escalate"),
       icon: "TriangleAlert",
       onClick: onEscalate,
       disabled: needsSelection,
     },
     {
       key: "close",
-      label: "Close",
+      label: t("common.close"),
       icon: "CircleCheck",
       onClick: onClose,
       disabled: needsSelection,
     },
-    { key: "report", label: "Generate report", icon: "FileText", onClick: onReport, disabled: false },
+    { key: "report", label: t("actionCenter.generateReport"), icon: "FileText", onClick: onReport, disabled: false },
   ];
 
   return (
     <SectionCard
-      title="Quick actions"
+      title={t("cd.quickActions")}
       subtitle={
         needsSelection
           ? "Select actions in the queue to enable bulk operations"
@@ -332,6 +338,7 @@ export function BulkActionBar({
   /** The assign menu, supplied by the parent so it can own the user list. */
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   if (rows.length === 0) return null;
 
   const openCount = rows.filter((row) => row.isOpen).length;
@@ -350,13 +357,13 @@ export function BulkActionBar({
         {children}
         <Button variant="secondary" size="sm" onClick={onEscalate}>
           <Icon name="TriangleAlert" size="sm" />
-          Escalate
+          {t("actionCenter.escalate")}
         </Button>
         <Button variant="primary" size="sm" onClick={onComplete} disabled={openCount === 0}>
           <Icon name="CircleCheck" size="sm" />
-          Complete
+          {t("actionCenter.complete")}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onClear} aria-label="Clear selection">
+        <Button variant="ghost" size="sm" onClick={onClear} aria-label={t("actionCenter.clearSelection")}>
           <Icon name="X" size="sm" />
         </Button>
       </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { RouteError } from "@/components/patterns/route-error";
 
 /**
@@ -18,6 +19,7 @@ export default function LoginError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     console.error("[login]", error);
   }, [error]);
@@ -26,8 +28,8 @@ export default function LoginError({
     <div className="flex min-h-dvh items-center justify-center bg-canvas px-6">
       <div className="w-full max-w-md rounded-lg border border-line bg-surface">
         <RouteError
-          title="Sign-in is unavailable"
-          description="The identity provider did not respond. No credentials were submitted."
+          title={t("page.signInIsUnavailable")}
+          description={t("page.theIdentityProviderDidNot")}
           {...(error.digest ? { digest: error.digest } : {})}
           onRetry={reset}
           fallbackHref="/login"

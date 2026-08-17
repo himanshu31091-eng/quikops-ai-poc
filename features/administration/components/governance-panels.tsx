@@ -1,16 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel, roleShortLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
-import { ROLE_META } from "@/src/config/app-config";
 import {
   CAPABILITIES,
   CAPABILITY_AREAS,
   DEPARTMENTS,
   type Capability,
-  type SettingsGroup,
-} from "@/src/domain/platform-settings";
+  type SettingsGroup } from "@/src/domain/platform-settings";
 import { EXCEPTION_META } from "@/src/config/app-config";
 import type { ExceptionType, User, UserRole } from "@/src/domain/types";
 import { USER_ROLES } from "@/src/domain/types";
@@ -46,6 +47,7 @@ function CapabilityRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const labels = useLabels();
   const panelId = `cap-${capability.id}`;
 
   return (
@@ -74,7 +76,7 @@ function CapabilityRow({
                       : "border-line bg-surface-hover text-content-tertiary line-through opacity-60",
                   )}
                 >
-                  {ROLE_META[role].short}
+                  {roleShortLabel(role, labels)}
                 </span>
               );
             })}
@@ -104,6 +106,7 @@ function CapabilityRow({
 }
 
 export function PermissionMatrix() {
+  const { t } = useTranslation();
   const [openId, setOpenId] = React.useState<string | null>(null);
   const [area, setArea] = React.useState<string | null>(null);
 
@@ -125,7 +128,7 @@ export function PermissionMatrix() {
               : "border-line text-content-tertiary hover:bg-surface-hover",
           )}
         >
-          All
+          {t("common.all")}
         </button>
         {CAPABILITY_AREAS.map((entry) => (
           <button
@@ -335,14 +338,15 @@ export function SettingsGroupPanel({ group }: { group: SettingsGroup }) {
 
 /** Roles legend, so the short codes in the permission rows are readable. */
 export function RoleLegend() {
+  const labels = useLabels();
   return (
     <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
       {USER_ROLES.map((role: UserRole) => (
         <li key={role} className="flex items-center gap-1.5 text-2xs">
           <span className="rounded-sm border border-line bg-surface-hover px-1 py-px font-medium text-content-secondary">
-            {ROLE_META[role].short}
+            {roleShortLabel(role, labels)}
           </span>
-          <span className="text-content-tertiary">{ROLE_META[role].label}</span>
+          <span className="text-content-tertiary">{roleLabel(role, labels)}</span>
         </li>
       ))}
     </ul>

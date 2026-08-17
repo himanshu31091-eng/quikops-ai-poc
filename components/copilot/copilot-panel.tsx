@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { FIELD_CLASS } from "@/components/patterns/form-field";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
@@ -122,6 +123,7 @@ export function CopilotPanel({
   overlayRef,
   autoAsk = null,
 }: CopilotPanelProps) {
+  const { t } = useTranslation();
   const copilot = useCopilot({
     scope: subject.scope,
     ...(subject.caseNo !== undefined ? { caseNo: subject.caseNo } : {}),
@@ -183,7 +185,7 @@ export function CopilotPanel({
       {open ? (
         <button
           type="button"
-          aria-label="Close Copilot"
+          aria-label={t("copilot.closeCopilot")}
           onClick={onClose}
           className="anim-fade fixed inset-0 z-40 bg-surface-inverse/25 backdrop-blur-[1px] xl:hidden"
         />
@@ -198,7 +200,7 @@ export function CopilotPanel({
       */}
       <aside
         ref={trapRef as React.RefObject<HTMLElement>}
-        aria-label="QuikOps AI Copilot"
+        aria-label={t("copilot.quikopsAiCopilot")}
         inert={!open}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-line bg-surface shadow-overlay",
@@ -226,13 +228,13 @@ export function CopilotPanel({
                 variant="ghost"
                 size="icon-sm"
                 onClick={copilot.reset}
-                aria-label="Clear conversation"
-                title="Clear conversation"
+                aria-label={t("copilot.clearConversation")}
+                title={t("copilot.clearConversation")}
               >
                 <Icon name="RefreshCw" size="sm" />
               </Button>
             ) : null}
-            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close Copilot">
+            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("copilot.closeCopilot")}>
               <Icon name="X" size="sm" />
             </Button>
           </div>
@@ -250,12 +252,12 @@ export function CopilotPanel({
             <Icon name={copilot.mode === "live" ? "Zap" : "Bot"} size="xs" />
             {copilot.mode === "live" ? (
               <span>
-                Live · <span className="font-mono">{copilot.model}</span>
+                {t("copilot.live")} <span className="font-mono">{copilot.model}</span>
               </span>
             ) : (
               <span className="flex flex-wrap items-center gap-1.5">
                 <span className="rounded-sm border border-line bg-surface px-1.5 py-px font-semibold text-content-secondary">
-                  Demo AI
+                  {t("copilot.demoAi")}
                 </span>
                 <span>
                   Answers composed from {subject.offlineSource} — set{" "}
@@ -276,7 +278,7 @@ export function CopilotPanel({
               </div>
 
               <p className="mt-3.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                Suggested
+                {t("actionCenter.suggested")}
               </p>
               <ul className="mt-2 space-y-1.5">
                 {subject.suggestions.map((suggestion) => (
@@ -357,7 +359,7 @@ export function CopilotPanel({
               <Icon name="TriangleAlert" size="sm" className="mt-0.5 shrink-0 text-critical" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-medium text-critical-content">
-                  The Copilot could not answer
+                  {t("copilot.theCopilotCouldNotAnswer")}
                 </p>
                 <p className="mt-0.5 text-2xs leading-relaxed text-content-secondary">
                   {copilot.error.message}
@@ -371,7 +373,7 @@ export function CopilotPanel({
                     disabled={copilot.isStreaming}
                   >
                     <Icon name="RefreshCw" size="xs" />
-                    Try again
+                    {t("common.retry")}
                   </Button>
                 ) : null}
               </div>
@@ -413,17 +415,17 @@ export function CopilotPanel({
 
           <div className="mt-2 flex items-center justify-between gap-2">
             <span className="text-2xs text-content-tertiary">
-              Enter to send · Shift + Enter for a new line
+              {t("copilot.enterToSendShiftEnter")}
             </span>
             {copilot.isStreaming ? (
               <Button variant="secondary" size="sm" type="button" onClick={copilot.stop}>
                 <Icon name="CircleStop" size="sm" />
-                Stop
+                {t("copilot.stop")}
               </Button>
             ) : (
               <Button variant="primary" size="sm" type="submit" disabled={draft.trim() === ""}>
                 <Icon name="Send" size="sm" />
-                Ask
+                {t("copilot.ask")}
               </Button>
             )}
           </div>

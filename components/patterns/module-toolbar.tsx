@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { FilterMenu, type FilterOption } from "@/components/patterns/filter-menu";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ export function ModuleToolbar<Field extends string>({
   actions,
   className,
 }: ModuleToolbarProps<Field>) {
+  const { t } = useTranslation();
   return (
     <div className={cn("space-y-2 print:hidden", className)}>
       <div className="flex flex-wrap items-center gap-2">
@@ -91,7 +93,7 @@ export function ModuleToolbar<Field extends string>({
               <button
                 type="button"
                 onClick={() => search.onChange("")}
-                aria-label="Clear search"
+                aria-label={t("work.clearSearch")}
                 className="shrink-0 text-content-tertiary transition-colors duration-150 hover:text-content"
               >
                 <Icon name="X" size="xs" />
@@ -117,7 +119,7 @@ export function ModuleToolbar<Field extends string>({
         {isFiltered && onClearAll ? (
           <Button variant="ghost" size="sm" onClick={onClearAll}>
             <Icon name="X" size="xs" />
-            Clear filters
+            {t("common.clearFilters")}
           </Button>
         ) : null}
 
@@ -128,7 +130,7 @@ export function ModuleToolbar<Field extends string>({
           {onRefresh ? (
             <Button variant="secondary" size="sm" onClick={onRefresh} disabled={isRefreshing}>
               <Icon name="RefreshCw" size="sm" className={cn(isRefreshing && "animate-spin")} />
-              Refresh
+              {t("common.refresh")}
             </Button>
           ) : null}
           {actions}

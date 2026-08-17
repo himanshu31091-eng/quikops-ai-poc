@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "./icon";
 import { OwnerAvatar } from "./owner-avatar";
 import {
@@ -9,9 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ROLE_META } from "@/src/config/app-config";
+  DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { User } from "@/src/domain/types";
 
 interface AssignMenuProps {
@@ -37,6 +38,8 @@ export function AssignMenu({
   align = "end",
   children,
 }: AssignMenuProps) {
+  const labels = useLabels();
+  const { t } = useTranslation();
   // Self-assignment is always offered, even for roles that are not on the
   // routing list — a manager taking a case themselves is a legitimate outcome.
   const ordered = React.useMemo(
@@ -48,7 +51,7 @@ export function AssignMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent align={align} className="min-w-64">
-        <DropdownMenuLabel>Assign owner</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("action.assignOwner")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {ordered.map((user) => {
           const outOfScope = plantCodes.filter(
@@ -71,7 +74,7 @@ export function AssignMenu({
                   ) : null}
                 </span>
                 <span className="block truncate text-2xs text-content-tertiary">
-                  {ROLE_META[user.role].label} · {user.plantScope.join(", ")}
+                  {roleLabel(user.role, labels)} · {user.plantScope.join(", ")}
                 </span>
               </span>
               {outOfScope.length > 0 ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { RouteError } from "@/components/patterns/route-error";
 
 /** Error boundary for Work Manager; the shared `RouteError` panel does the rest. */
@@ -11,14 +12,15 @@ export default function WorkManagerError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     console.error("[work-manager]", error);
   }, [error]);
 
   return (
     <RouteError
-      title="Cases could not be loaded"
-      description="The case store did not respond. No case, assignment or status has been changed."
+      title={t("page.casesCouldNotBeLoaded")}
+      description={t("page.theCaseStoreDidNot3")}
       {...(error.digest ? { digest: error.digest } : {})}
       onRetry={reset}
       fallbackHref="/dashboard"

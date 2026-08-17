@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useTranslation } from "@/src/i18n/provider";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -15,9 +17,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DETECTION_SOURCE_META, EXCEPTION_META, ROLE_META } from "@/src/config/app-config";
+  DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DETECTION_SOURCE_META, EXCEPTION_META } from "@/src/config/app-config";
 import type { CaseDetailModel } from "@/src/data/queries/case-detail";
 import type { User } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
@@ -79,6 +80,8 @@ export const CaseHeader = React.memo(function CaseHeader({
   onOpenCopilot,
   pending,
 }: CaseHeaderProps) {
+  const labels = useLabels();
+  const fmt = useFormat();
   const { t } = useTranslation();
   const item = detail.case;
   const exception = EXCEPTION_META[item.exceptionType];
@@ -188,7 +191,7 @@ export const CaseHeader = React.memo(function CaseHeader({
                       {user.name}
                     </span>
                     <span className="block truncate text-2xs text-content-tertiary">
-                      {ROLE_META[user.role].label} · {user.plantScope.join(", ")}
+                      {roleLabel(user.role, labels)} · {user.plantScope.join(", ")}
                     </span>
                   </span>
                   {user.id === session.ownerId ? (
@@ -310,13 +313,13 @@ export const CaseHeader = React.memo(function CaseHeader({
 
         <HeaderFact label={t("cd.created")} icon="Clock">
           <span title={formatTimestamp(item.openedAt)}>
-            {formatWhen(item.openedAt, DEMO_NOW)}
+            {formatWhen(item.openedAt, DEMO_NOW, fmt)}
           </span>
         </HeaderFact>
 
         <HeaderFact label={t("cd.lastUpdated")} icon="History">
           <span title={formatTimestamp(lastUpdated)}>
-            {formatWhen(lastUpdated, DEMO_NOW)}
+            {formatWhen(lastUpdated, DEMO_NOW, fmt)}
           </span>
         </HeaderFact>
       </div>

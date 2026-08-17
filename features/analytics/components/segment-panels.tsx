@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
@@ -44,6 +45,7 @@ export function CustomerExposurePanel({
   data: CustomerConcentration;
   currency: string;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = React.useState(false);
   const visible = expanded ? data.customers : data.customers.slice(0, 5);
   const maxExposure = data.customers[0]?.openExposure ?? 0;
@@ -53,8 +55,8 @@ export function CustomerExposurePanel({
       <EmptyState
         icon="Users"
         size="sm"
-        title="No customer-linked cases"
-        description="Nothing in the current corpus names a customer. Inventory and capacity conditions often do not."
+        title={t("analytics.noCustomerLinkedCases")}
+        description={t("analytics.nothingInTheCurrentCorpus")}
       />
     );
   }
@@ -199,13 +201,14 @@ export function EscalationPanel({
   data: EscalationAnalytics;
   currency: string;
 }) {
+  const { t } = useTranslation();
   if (data.totalEscalatedOpen === 0) {
     return (
       <EmptyState
         icon="ShieldCheck"
         size="sm"
-        title="Nothing above its owner"
-        description="No open case has been escalated. Work is being resolved at the level it was assigned to."
+        title={t("analytics.nothingAboveItsOwner")}
+        description={t("analytics.noOpenCaseHasBeen")}
       />
     );
   }
@@ -217,21 +220,21 @@ export function EscalationPanel({
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {[
           {
-            label: "Escalated",
+            label: t("analytics.escalated"),
             value: String(data.totalEscalatedOpen),
             hint: `${formatPercent(data.escalationRatePct, 0)} of open work`,
           },
           {
-            label: "Exposure above owner",
+            label: t("analytics.exposureAboveOwner"),
             value: formatMoney(data.totalEscalatedExposure, currency, {
               forceCompact: true,
             }),
-            hint: "needs a decision, not effort",
+            hint: t("analytics.needsADecisionNotEffort"),
           },
           {
-            label: "Mean time escalated",
+            label: t("analytics.meanTimeEscalated"),
             value: data.meanDays === null ? "—" : `${data.meanDays}d`,
-            hint: "since breach or detection",
+            hint: t("analytics.sinceBreachOrDetection"),
           },
         ].map((entry) => (
           <div
@@ -319,6 +322,7 @@ export function AgeProfilePanel({
   bands: AgeBand[];
   currency: string;
 }) {
+  const { t } = useTranslation();
   const total = bands.reduce((sum, band) => sum + band.openCases, 0);
   const stale = bands[bands.length - 1];
 
@@ -327,8 +331,8 @@ export function AgeProfilePanel({
       <EmptyState
         icon="CircleCheck"
         size="sm"
-        title="Nothing open"
-        description="There is no open work to age."
+        title={t("analytics.nothingOpen")}
+        description={t("analytics.thereIsNoOpenWork")}
       />
     );
   }
@@ -385,7 +389,7 @@ export function AgeProfilePanel({
       <p className="flex items-start gap-1.5 text-2xs leading-relaxed text-content-secondary">
         <Icon name="Info" size="xs" className="mt-px shrink-0 text-content-tertiary" />
         <span>
-          Age is not the same as breach
+          {t("analytics.ageIsNotTheSame")}
           <TermHint term="sla" />. A low-band case can sit for three weeks inside its
           720-hour target, while a critical one is late in a day.
           {stale && stale.openCases > 0

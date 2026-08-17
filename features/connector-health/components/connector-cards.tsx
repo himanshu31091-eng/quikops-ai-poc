@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { connectorBandLabel, runStatusLabel } from "@/src/domain/labels";
+import { useFormat, useLabels, useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { ProgressBar } from "@/components/patterns/progress-bar";
@@ -43,6 +45,9 @@ const ConnectorCard = React.memo(function ConnectorCard({
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
+  const labels = useLabels();
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const health = CONNECTOR_HEALTH_META[connector.health.band];
   const status = CONNECTOR_STATUS_META[connector.lastStatus];
   const overdue = connector.minutesUntilNextRun < 0;
@@ -84,7 +89,7 @@ const ConnectorCard = React.memo(function ConnectorCard({
               )}
             >
               <Icon name={health.icon} size="xs" />
-              {health.label}
+              {connectorBandLabel(connector.health.band, health.label, labels)}
             </span>
           </TooltipTrigger>
           <TooltipContent className="max-w-72">
@@ -102,7 +107,7 @@ const ConnectorCard = React.memo(function ConnectorCard({
               ))}
             </ul>
             <p className="mt-1.5 border-t border-line-inverse pt-1 text-2xs opacity-70">
-              Scored by a deterministic rule set, never by a model.
+              {t("actionCenter.scoredByADeterministicRule")}
             </p>
           </TooltipContent>
         </Tooltip>
@@ -125,13 +130,13 @@ const ConnectorCard = React.memo(function ConnectorCard({
 
       <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2">
         <div className="min-w-0">
-          <dt className="text-2xs text-content-tertiary">Last sync</dt>
+          <dt className="text-2xs text-content-tertiary">{t("connectorHealth.lastSync")}</dt>
           <dd className="truncate text-2xs font-medium text-content">
-            {formatWhen(connector.lastRunAt, DEMO_NOW)}
+            {formatWhen(connector.lastRunAt, DEMO_NOW, fmt)}
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-2xs text-content-tertiary">Next sync</dt>
+          <dt className="text-2xs text-content-tertiary">{t("connectorHealth.nextSync")}</dt>
           <dd
             className={cn(
               "truncate text-2xs font-medium",
@@ -150,13 +155,13 @@ const ConnectorCard = React.memo(function ConnectorCard({
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-2xs text-content-tertiary">Records processed</dt>
+          <dt className="text-2xs text-content-tertiary">{t("connectorHealth.recordsProcessed")}</dt>
           <dd className="truncate text-2xs font-medium tabular-nums text-content">
             {formatNumber(connector.recordsProcessed)}
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-2xs text-content-tertiary">Failed records</dt>
+          <dt className="text-2xs text-content-tertiary">{t("connectorHealth.failedRecords")}</dt>
           <dd
             className={cn(
               "truncate text-2xs font-medium tabular-nums",
@@ -177,7 +182,7 @@ const ConnectorCard = React.memo(function ConnectorCard({
             )}
           >
             <Icon name={status.icon} size="xs" />
-            {status.label}
+            {runStatusLabel(connector.lastStatus, status.label, labels)}
           </span>
           {connector.deadLetterDepth > 0 ? (
             <span className="inline-flex items-center gap-1 rounded-sm border border-critical-line bg-critical-subtle px-1.5 py-0.5 text-2xs font-medium text-critical-content">
@@ -221,11 +226,12 @@ export function ConnectorCards({
   onClearFilters: () => void;
   isFiltered: boolean;
 }) {
+  const { t } = useTranslation();
   if (connectors.length === 0) {
     return (
       <EmptyState
         icon="PlugZap"
-        title="No connectors match these filters"
+        title={t("connectorHealth.noConnectorsMatchTheseFilters")}
         description={
           isFiltered
             ? "Widen the filters, or clear them to see every feed."
@@ -239,7 +245,7 @@ export function ConnectorCards({
                   onClick={onClearFilters}
                   className="text-xs font-medium text-accent hover:underline"
                 >
-                  Clear filters
+                  {t("common.clearFilters")}
                 </button>
               ),
             }

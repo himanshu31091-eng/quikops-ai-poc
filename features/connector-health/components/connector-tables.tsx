@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { runStatusLabel } from "@/src/domain/labels";
+import { useFormat, useLabels, useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -35,16 +37,17 @@ const CELL_CLASS = "px-3 py-2 align-middle";
  * as bars than as anything Recharts would produce.
  */
 export function IngestionFunnelPanel({ funnel }: { funnel: IngestionFunnel }) {
+  const { t } = useTranslation();
   const stages = [
-    { key: "received", label: "Signals received", value: funnel.received, tone: "bg-chart-1" },
+    { key: "received", label: t("connectorHealth.signalsReceived"), value: funnel.received, tone: "bg-chart-1" },
     {
       key: "deduplicated",
-      label: "Deduplicated away",
+      label: t("connectorHealth.deduplicatedAway"),
       value: funnel.deduplicated,
       tone: "bg-chart-3",
     },
-    { key: "rejected", label: "Rejected", value: funnel.rejected, tone: "bg-critical" },
-    { key: "processed", label: "Records applied", value: funnel.processed, tone: "bg-chart-6" },
+    { key: "rejected", label: t("connectorHealth.rejected"), value: funnel.rejected, tone: "bg-critical" },
+    { key: "processed", label: t("connectorHealth.recordsApplied"), value: funnel.processed, tone: "bg-chart-6" },
   ];
   const peak = Math.max(1, ...stages.map((stage) => stage.value));
 
@@ -70,7 +73,7 @@ export function IngestionFunnelPanel({ funnel }: { funnel: IngestionFunnel }) {
       </ul>
 
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-3">
-        <span className="text-2xs text-content-tertiary">Cases raised from signals</span>
+        <span className="text-2xs text-content-tertiary">{t("connectorHealth.casesRaisedFromSignals")}</span>
         <span className="text-sm font-semibold tabular-nums text-content">
           {formatNumber(funnel.casesRaised)}
         </span>
@@ -95,6 +98,9 @@ export function SyncHistoryTable({
   connectors: ConnectorView[];
   limit?: number;
 }) {
+  const labels = useLabels();
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const nameById = React.useMemo(
     () => Object.fromEntries(connectors.map((connector) => [connector.id, connector.name])),
     [connectors],
@@ -104,8 +110,8 @@ export function SyncHistoryTable({
     return (
       <EmptyState
         icon="History"
-        title="No runs match these filters"
-        description="Widen the connector or status filters to see sync history."
+        title={t("connectorHealth.noRunsMatchTheseFilters")}
+        description={t("connectorHealth.widenTheConnectorOrStatus")}
         size="sm"
       />
     );
@@ -116,14 +122,14 @@ export function SyncHistoryTable({
       <table className="w-full min-w-160 border-collapse">
         <thead>
           <tr className="border-b border-line bg-surface-subtle">
-            <th scope="col" className={HEAD_CLASS}>Started</th>
-            <th scope="col" className={HEAD_CLASS}>Connector</th>
-            <th scope="col" className={HEAD_CLASS}>Status</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Received</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Applied</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Failed</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Cases</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Duration</th>
+            <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.started")}</th>
+            <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.connector")}</th>
+            <th scope="col" className={HEAD_CLASS}>{t("col.status")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("connectorHealth.received")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("connectorHealth.applied")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("connectorHealth.failed")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("shell.cases")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("connectorHealth.duration")}</th>
           </tr>
         </thead>
         <tbody>
@@ -135,7 +141,7 @@ export function SyncHistoryTable({
                 className="border-b border-line transition-colors duration-150 last:border-0 hover:bg-surface-hover"
               >
                 <td className={cn(CELL_CLASS, "text-2xs text-content-secondary")}>
-                  {formatWhen(run.startedAt, DEMO_NOW)}
+                  {formatWhen(run.startedAt, DEMO_NOW, fmt)}
                 </td>
                 <td className={cn(CELL_CLASS, "min-w-0")}>
                   <span className="block truncate text-2xs text-content">
@@ -152,7 +158,7 @@ export function SyncHistoryTable({
                         )}
                       >
                         <Icon name={status.icon} size="xs" />
-                        {status.label}
+                        {runStatusLabel(run.status, status.label, labels)}
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-72">
@@ -204,6 +210,8 @@ export function DeadLetterTable({
   onReplay: (id: string) => void;
   onReplayAll: (ids: string[]) => void;
 }) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const open = rows.filter((row) => !row.isReplayed);
   const replayable = open.filter((row) => !row.isUnreplayable);
 
@@ -211,8 +219,8 @@ export function DeadLetterTable({
     return (
       <EmptyState
         icon="CircleCheck"
-        title="Dead-letter queue is empty"
-        description="Every message received has been delivered downstream."
+        title={t("connectorHealth.deadLetterQueueIsEmpty")}
+        description={t("connectorHealth.everyMessageReceivedHasBeen")}
         size="sm"
       />
     );
@@ -232,7 +240,7 @@ export function DeadLetterTable({
             onClick={() => onReplayAll(replayable.map((row) => row.id))}
           >
             <Icon name="RefreshCw" size="sm" />
-            Replay all replayable
+            {t("connectorHealth.replayAllReplayable")}
           </Button>
         </div>
       ) : null}
@@ -241,12 +249,12 @@ export function DeadLetterTable({
         <table className="w-full min-w-160 border-collapse">
           <thead>
             <tr className="border-b border-line bg-surface-subtle">
-              <th scope="col" className={HEAD_CLASS}>Reference</th>
-              <th scope="col" className={HEAD_CLASS}>Connector</th>
-              <th scope="col" className={HEAD_CLASS}>Reason</th>
-              <th scope="col" className={HEAD_CLASS}>Received</th>
-              <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Attempts</th>
-              <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Action</th>
+              <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.reference")}</th>
+              <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.connector")}</th>
+              <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.reason")}</th>
+              <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.received")}</th>
+              <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("connectorHealth.attempts")}</th>
+              <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("col.action")}</th>
             </tr>
           </thead>
           <tbody>
@@ -287,7 +295,7 @@ export function DeadLetterTable({
                   <span className="text-2xs text-content">{row.reasonLabel}</span>
                 </td>
                 <td className={cn(CELL_CLASS, "text-2xs text-content-tertiary")}>
-                  {formatWhen(row.receivedAt, DEMO_NOW)}
+                  {formatWhen(row.receivedAt, DEMO_NOW, fmt)}
                 </td>
                 <td className={cn(CELL_CLASS, "text-right text-2xs tabular-nums text-content-secondary")}>
                   {row.attempts}
@@ -296,13 +304,13 @@ export function DeadLetterTable({
                   {row.isReplayed ? (
                     <span className="inline-flex items-center gap-1 text-2xs font-medium text-success-content">
                       <Icon name="Check" size="xs" />
-                      Replayed
+                      {t("connectorHealth.replayed")}
                     </span>
                   ) : row.isUnreplayable ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="cursor-help text-2xs text-content-tertiary underline decoration-dotted underline-offset-2">
-                          Not replayable
+                          {t("connectorHealth.notReplayable")}
                         </span>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-72">
@@ -315,7 +323,7 @@ export function DeadLetterTable({
                   ) : (
                     <Button variant="secondary" size="xs" onClick={() => onReplay(row.id)}>
                       <Icon name="RefreshCw" size="xs" />
-                      Replay
+                      {t("connectorHealth.replay")}
                     </Button>
                   )}
                 </td>
@@ -339,6 +347,7 @@ export function FieldMappingTable({
   connectors: ConnectorView[];
   selectedId: string | null;
 }) {
+  const { t } = useTranslation();
   const scoped = selectedId
     ? mappings.filter((mapping) => mapping.connectorId === selectedId)
     : mappings;
@@ -351,8 +360,8 @@ export function FieldMappingTable({
     return (
       <EmptyState
         icon="ArrowRight"
-        title="No field mapping"
-        description="This connector does not declare a field mapping."
+        title={t("connectorHealth.noFieldMapping")}
+        description={t("connectorHealth.thisConnectorDoesNotDeclare")}
         size="sm"
       />
     );
@@ -363,12 +372,12 @@ export function FieldMappingTable({
       <table className="w-full min-w-160 border-collapse">
         <thead>
           <tr className="border-b border-line bg-surface-subtle">
-            {selectedId === null ? <th scope="col" className={HEAD_CLASS}>Connector</th> : null}
-            <th scope="col" className={HEAD_CLASS}>Source field</th>
+            {selectedId === null ? <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.connector")}</th> : null}
+            <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.sourceField")}</th>
             <th scope="col" className={HEAD_CLASS}>Type</th>
-            <th scope="col" className={HEAD_CLASS}>QuikOps field</th>
+            <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.quikopsField")}</th>
             <th scope="col" className={HEAD_CLASS}>Type</th>
-            <th scope="col" className={HEAD_CLASS}>Transform</th>
+            <th scope="col" className={HEAD_CLASS}>{t("connectorHealth.transform")}</th>
           </tr>
         </thead>
         <tbody>
@@ -403,7 +412,7 @@ export function FieldMappingTable({
                 {mapping.targetType}
               </td>
               <td className={cn(CELL_CLASS, "text-2xs text-content-secondary")}>
-                {mapping.transform ?? <span className="text-content-tertiary">Direct</span>}
+                {mapping.transform ?? <span className="text-content-tertiary">{t("connectorHealth.direct")}</span>}
               </td>
             </tr>
           ))}

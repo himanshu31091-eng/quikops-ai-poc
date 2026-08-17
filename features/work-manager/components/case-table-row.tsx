@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -51,6 +52,8 @@ export const CaseTableRow = React.memo(function CaseTableRow({
   onClose,
   onNotify,
 }: CaseTableRowProps) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const exception = EXCEPTION_META[row.exceptionType];
   const detection = DETECTION_SOURCE_META[row.detectedBy];
 
@@ -102,12 +105,12 @@ export const CaseTableRow = React.memo(function CaseTableRow({
           </Link>
           {row.isDraft ? (
             <span
-              title="Created in this session"
+              title={t("workManager.createdInThisSession")}
               className="size-1.5 shrink-0 rounded-full bg-accent"
             />
           ) : row.isDirty ? (
             <span
-              title="Changed in this session"
+              title={t("workManager.changedInThisSession")}
               className="size-1.5 shrink-0 rounded-full bg-high"
             />
           ) : null}
@@ -202,7 +205,7 @@ export const CaseTableRow = React.memo(function CaseTableRow({
                 : "text-content-secondary",
           )}
         >
-          {formatDue(row.dueAt, DEMO_NOW)}
+          {formatDue(row.dueAt, DEMO_NOW, fmt)}
         </span>
       </td>
 
@@ -216,7 +219,7 @@ export const CaseTableRow = React.memo(function CaseTableRow({
           className="flex items-center gap-1.5 text-xs text-content-secondary"
         >
           <Icon name={detection.icon} size="xs" className="shrink-0 text-content-tertiary" />
-          <span className="truncate">{formatWhen(row.lastDetectedAt, DEMO_NOW)}</span>
+          <span className="truncate">{formatWhen(row.lastDetectedAt, DEMO_NOW, fmt)}</span>
         </span>
       </td>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ function RecommendationCard({
   recommendation: FlowRecommendation;
   index: number;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = React.useState(false);
   const panelId = `flow-rec-${recommendation.id}`;
 
@@ -103,7 +105,7 @@ function RecommendationCard({
           <div className="mt-2 flex items-center gap-1.5">
             <Button variant="ghost" size="xs" asChild>
               <Link href={recommendation.href}>
-                Open
+                {t("analytics.open")}
                 <Icon name="ArrowRight" size="xs" />
               </Link>
             </Button>
@@ -137,6 +139,7 @@ export function ExecutiveBriefing({
   comparison: FlowComparison;
   onAskCopilot?: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid gap-4 xl:grid-cols-12">
       <div className="min-w-0 xl:col-span-7">
@@ -188,7 +191,7 @@ export function ExecutiveBriefing({
             {onAskCopilot ? (
               <Button variant="secondary" size="xs" onClick={onAskCopilot}>
                 <Icon name="Bot" size="xs" />
-                Ask the Copilot
+                {t("analytics.askTheCopilot")}
               </Button>
             ) : null}
           </div>
@@ -197,19 +200,19 @@ export function ExecutiveBriefing({
         <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[
             {
-              label: "Detected",
+              label: t("col.detected"),
               value: comparison.detected,
               prior: comparison.detectedPrior,
               higherIsBetter: false,
             },
             {
-              label: "Resolved",
+              label: t("analytics.resolved"),
               value: comparison.resolved,
               prior: comparison.resolvedPrior,
               higherIsBetter: true,
             },
             {
-              label: "Net movement",
+              label: t("analytics.netMovement"),
               value: ledger.net,
               prior: comparison.netPrior,
               higherIsBetter: false,
@@ -253,7 +256,7 @@ export function ExecutiveBriefing({
       <div className="min-w-0 xl:col-span-5">
         <p className="mb-2 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
           <Icon name="ListChecks" size="xs" />
-          What moves it most
+          {t("analytics.whatMovesItMost")}
         </p>
         {recommendations.length === 0 ? (
           <p className="rounded-lg border border-line bg-surface px-3.5 py-3 text-xs text-content-secondary">

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/src/lib/cn";
@@ -35,6 +36,7 @@ export function AnalyticsHeatmap({
   tone,
   formatValue = (value) => String(value),
 }: AnalyticsHeatmapProps) {
+  const { t } = useTranslation();
   const cellByKey = React.useMemo(
     () => new Map(grid.cells.map((cell) => [`${cell.rowKey}:${cell.columnKey}`, cell])),
     [grid.cells],
@@ -44,7 +46,7 @@ export function AnalyticsHeatmap({
     return (
       <EmptyState
         icon="Grid3x3"
-        title="Nothing to plot"
+        title={t("analytics.nothingToPlot")}
         description={grid.emptyLabel}
         size="sm"
       />
@@ -58,7 +60,7 @@ export function AnalyticsHeatmap({
           <thead>
             <tr>
               <th scope="col" className="w-32 px-1 py-1 text-left text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                Plant
+                {t("col.plant")}
               </th>
               {grid.columns.map((column) => (
                 <th
@@ -128,7 +130,7 @@ export function AnalyticsHeatmap({
       <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-2xs text-content-tertiary">{grid.scaleLabel}</span>
         <div className="flex items-center gap-1.5">
-          <span className="text-2xs text-content-tertiary">Low</span>
+          <span className="text-2xs text-content-tertiary">{t("priority.LOW")}</span>
           {[0.08, 0.3, 0.52, 0.74, 0.94].map((alpha) => (
             <span
               key={alpha}
@@ -136,7 +138,7 @@ export function AnalyticsHeatmap({
               style={{ backgroundColor: `rgb(${TONE_RGB[tone]} / ${alpha})` }}
             />
           ))}
-          <span className="text-2xs text-content-tertiary">High</span>
+          <span className="text-2xs text-content-tertiary">{t("priority.HIGH")}</span>
         </div>
       </div>
     </div>

@@ -9,11 +9,11 @@ export default function NotFound() {
       <div className="w-full max-w-md rounded-lg border border-line bg-surface">
         <EmptyState
           icon="CircleHelp"
-          title="Page not found"
-          description="The route you requested does not exist in this build. Check the navigation for available modules."
+          title={"Page not found"}
+          description={"The route you requested does not exist in this build. Check the navigation for available modules."}
           action={
             <Button variant="primary" size="md" asChild>
-              <Link href="/dashboard">Back to dashboard</Link>
+              <Link href="/dashboard">{"Back to dashboard"}</Link>
             </Button>
           }
         />

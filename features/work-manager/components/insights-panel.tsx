@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -73,10 +74,11 @@ export const InsightsPanel = React.memo(function InsightsPanel({
   onRemoveChip,
   onClearAll,
 }: InsightsPanelProps) {
+  const { t } = useTranslation();
   return (
     <div className={cn("grid gap-4", className)}>
       <SectionCard
-        title="Selected filters"
+        title={t("workManager.selectedFilters")}
         subtitle={
           chips.length === 0
             ? "Showing every case"
@@ -91,7 +93,7 @@ export const InsightsPanel = React.memo(function InsightsPanel({
               onClick={onClearAll}
               className="text-2xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover"
             >
-              Clear all
+              {t("actionCenter.clearAll")}
             </button>
           ) : null
         }
@@ -129,8 +131,8 @@ export const InsightsPanel = React.memo(function InsightsPanel({
       </SectionCard>
 
       <SectionCard
-        title="Quick stats"
-        subtitle="Across the cases currently shown"
+        title={t("workManager.quickStats")}
+        subtitle={t("workManager.acrossTheCasesCurrentlyShown")}
         icon="ChartNoAxesColumn"
         flush
         bodyClassName="divide-y divide-line"
@@ -142,7 +144,7 @@ export const InsightsPanel = React.memo(function InsightsPanel({
         }
       >
         <StatRow
-          label="Total revenue at risk"
+          label={t("workManager.totalRevenueAtRisk")}
           icon="DollarSign"
           value={
             <MoneyCell
@@ -159,7 +161,7 @@ export const InsightsPanel = React.memo(function InsightsPanel({
         />
 
         <StatRow
-          label="Critical cases"
+          label={t("workManager.criticalCases")}
           icon="TriangleAlert"
           tone={quickStats.criticalCount > 0 ? "critical" : "default"}
           value={formatNumber(quickStats.criticalCount)}
@@ -183,7 +185,7 @@ export const InsightsPanel = React.memo(function InsightsPanel({
         />
 
         <StatRow
-          label="Average resolution time"
+          label={t("workManager.averageResolutionTime")}
           icon="Clock"
           value={
             quickStats.averageResolutionHours === null

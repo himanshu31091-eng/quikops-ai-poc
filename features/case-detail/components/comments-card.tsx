@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useTranslation } from "@/src/i18n/provider";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { ROLE_META } from "@/src/config/app-config";
 import type { CaseComment, CaseCommentAttachment, User } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatTimestamp, formatWhen } from "@/src/lib/format";
@@ -71,6 +72,8 @@ const CommentNode = React.memo(function CommentNode({
   recentIds: Set<string>;
   onReply: (comment: CaseComment) => void;
 }) {
+  const labels = useLabels();
+  const fmt = useFormat();
   const { t } = useTranslation();
   const author = users.find((user) => user.id === comment.authorId) ?? null;
 
@@ -89,13 +92,13 @@ const CommentNode = React.memo(function CommentNode({
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <span className="text-xs font-semibold text-content">{comment.authorName}</span>
             <span className="text-2xs text-content-tertiary">
-              {ROLE_META[comment.authorRole].label}
+              {roleLabel(comment.authorRole, labels)}
             </span>
             <span
               title={formatTimestamp(comment.at)}
               className="text-2xs tabular-nums text-content-tertiary"
             >
-              {formatWhen(comment.at, DEMO_NOW)}
+              {formatWhen(comment.at, DEMO_NOW, fmt)}
             </span>
           </div>
 
@@ -121,7 +124,7 @@ const CommentNode = React.memo(function CommentNode({
             onClick={() => onReply(comment)}
             className="mt-1.5 flex items-center gap-1 rounded-sm text-2xs font-medium text-content-tertiary transition-colors duration-150 hover:text-accent"
           >
-            <Icon name={t("cd.reply")} size="xs" />
+            <Icon name="Reply" size="xs" />
             {t("cd.reply")}
           </button>
         </div>
@@ -234,7 +237,7 @@ export const CommentsCard = React.memo(function CommentsCard({
       <form onSubmit={submit} className="border-t border-line bg-surface-subtle px-4 py-3.5">
         {replyTo ? (
           <div className="mb-2 flex items-center gap-2 rounded-md border border-line bg-surface px-2.5 py-1.5">
-            <Icon name={t("cd.reply")} size="xs" className="text-content-tertiary" />
+            <Icon name="Reply" size="xs" className="text-content-tertiary" />
             <span className="min-w-0 flex-1 truncate text-2xs text-content-secondary">
               {t("cd.replyingTo")} <span className="font-medium text-content">{replyTo.authorName}</span> —{" "}
               {replyTo.body.slice(0, 80)}

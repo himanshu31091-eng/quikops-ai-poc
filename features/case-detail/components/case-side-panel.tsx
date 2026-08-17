@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useTranslation } from "@/src/i18n/provider";
+import { useLabels } from "@/src/i18n/provider";
+import { priorityLabel } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -131,6 +133,8 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
   onExport,
   className,
 }: CaseSidePanelProps) {
+  const labels = useLabels();
+  const fmt = useFormat();
   const { t } = useTranslation();
   const item = detail.case;
   const tone = HEALTH_TONE[health.band];
@@ -217,7 +221,7 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
                   PRIORITY_META[session.priorityBand].className,
                 )}
               >
-                {PRIORITY_META[session.priorityBand].label}
+                {priorityLabel(session.priorityBand, labels)}
               </span>
             </p>
             <ProgressBar
@@ -309,7 +313,7 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
                   {insight.label}
                 </span>
                 <span className="shrink-0 text-2xs text-content-tertiary">
-                  {formatWhen(insight.generatedAt, DEMO_NOW)}
+                  {formatWhen(insight.generatedAt, DEMO_NOW, fmt)}
                 </span>
               </p>
               <p className="mt-1.5 text-xs leading-relaxed text-content-secondary">

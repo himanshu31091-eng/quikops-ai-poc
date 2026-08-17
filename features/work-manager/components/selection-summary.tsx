@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export const SelectionSummary = React.memo(function SelectionSummary({
   selectedRows,
   onClear,
 }: SelectionSummaryProps) {
+  const { t } = useTranslation();
   const summary = React.useMemo(() => {
     const plantCodes = [...new Set(selectedRows.map((row) => row.plantCode))].sort();
     return {
@@ -67,10 +69,10 @@ export const SelectionSummary = React.memo(function SelectionSummary({
       </span>
 
       <span className="ml-auto flex items-center gap-1.5 text-2xs text-content-tertiary">
-        <span className="hidden sm:inline">Use Bulk assign or Bulk close in the toolbar</span>
+        <span className="hidden sm:inline">{t("workManager.useBulkAssignOrBulk")}</span>
         <Button variant="ghost" size="sm" onClick={onClear}>
           <Icon name="X" size="sm" />
-          Clear
+          {t("workManager.clear")}
         </Button>
       </span>
     </div>

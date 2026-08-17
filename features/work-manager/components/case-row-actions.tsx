@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import {
@@ -12,14 +15,11 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ROLE_META } from "@/src/config/app-config";
+  DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   CASE_STATUS_GROUPS,
   STATUS_GROUP_META,
-  type CaseStatusGroup,
-} from "@/src/domain/case-status";
+  type CaseStatusGroup } from "@/src/domain/case-status";
 import type { User } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 import type { WorkCaseRow } from "../types";
@@ -52,6 +52,8 @@ export const CaseRowActions = React.memo(function CaseRowActions({
   onNotify,
   variant = "icon",
 }: CaseRowActionsProps) {
+  const labels = useLabels();
+  const { t } = useTranslation();
   const ids = React.useMemo(() => [row.id], [row.id]);
 
   const copyCaseNo = React.useCallback(() => {
@@ -92,13 +94,13 @@ export const CaseRowActions = React.memo(function CaseRowActions({
         <DropdownMenuItem asChild>
           <Link href={caseHref(row.caseNo)}>
             <Icon name="ExternalLink" size="sm" />
-            Open case
+            {t("workManager.openCase")}
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem onSelect={copyCaseNo}>
           <Icon name="Copy" size="sm" />
-          Copy case number
+          {t("workManager.copyCaseNumber")}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
@@ -106,7 +108,7 @@ export const CaseRowActions = React.memo(function CaseRowActions({
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Icon name="UserPlus" size="sm" />
-            <span className="flex-1">Assign to</span>
+            <span className="flex-1">{t("workManager.assignTo")}</span>
             <Icon name="ChevronRight" size="sm" />
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -126,7 +128,7 @@ export const CaseRowActions = React.memo(function CaseRowActions({
                     ) : null}
                   </span>
                   <span className="block truncate text-2xs text-content-tertiary">
-                    {ROLE_META[user.role].label}
+                    {roleLabel(user.role, labels)}
                   </span>
                 </span>
                 {row.ownerId === user.id ? (
@@ -140,7 +142,7 @@ export const CaseRowActions = React.memo(function CaseRowActions({
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Icon name="Activity" size="sm" />
-            <span className="flex-1">Move to</span>
+            <span className="flex-1">{t("workManager.moveTo")}</span>
             <Icon name="ChevronRight" size="sm" />
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -172,7 +174,7 @@ export const CaseRowActions = React.memo(function CaseRowActions({
           disabled={row.statusGroup === "CLOSED"}
         >
           <Icon name="CheckCheck" size="sm" />
-          Close case
+          {t("workManager.closeCase")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

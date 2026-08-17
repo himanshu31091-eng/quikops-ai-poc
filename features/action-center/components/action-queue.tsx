@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import type { Translate } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { AssignMenu } from "@/components/patterns/assign-menu";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
@@ -31,15 +33,15 @@ interface Column {
   sortable: boolean;
 }
 
-const COLUMNS: Column[] = [
+const buildColumns = (t: Translate): Column[] => [
   { key: "select", label: "", className: "w-9", sortable: false },
-  { key: "priority", label: "Priority", className: "w-24", sortable: true },
+  { key: "priority", label: t("col.priority"), className: "w-24", sortable: true },
   { key: "case", label: "Case", className: "w-40", sortable: true },
-  { key: "action", label: "Action", className: "min-w-0", sortable: true },
-  { key: "owner", label: "Owner", className: "w-40", sortable: true },
-  { key: "due", label: "Due date", className: "w-28", sortable: true },
+  { key: "action", label: t("col.action"), className: "min-w-0", sortable: true },
+  { key: "owner", label: t("col.owner"), className: "w-40", sortable: true },
+  { key: "due", label: t("col.dueDate"), className: "w-28", sortable: true },
   { key: "sla", label: "SLA", className: "w-28", sortable: true },
-  { key: "status", label: "Status", className: "w-32", sortable: true },
+  { key: "status", label: t("col.status"), className: "w-32", sortable: true },
 ];
 
 const HEAD_CLASS =
@@ -101,6 +103,8 @@ const ActionQueueRow = React.memo(function ActionQueueRow({
   onComplete: (ids: string[]) => void;
   onAssign: (ids: string[], userId: string) => void;
 }) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const sla = ACTION_SLA_META[row.slaState];
 
   return (
@@ -184,7 +188,7 @@ const ActionQueueRow = React.memo(function ActionQueueRow({
             row.isOverdue ? "font-semibold text-critical-content" : "text-content-secondary",
           )}
         >
-          {formatDue(row.dueAt, DEMO_NOW)}
+          {formatDue(row.dueAt, DEMO_NOW, fmt)}
         </span>
       </td>
 
@@ -207,7 +211,7 @@ const ActionQueueRow = React.memo(function ActionQueueRow({
             <button
               type="button"
               aria-label={`Complete ${row.title}`}
-              title="Mark complete"
+              title={t("action.markComplete")}
               onClick={(event) => {
                 event.stopPropagation();
                 onComplete([row.id]);
@@ -266,6 +270,7 @@ export function ActionQueue({
   onSetPage,
   onClearFilters,
 }: ActionQueueProps) {
+  const { t } = useTranslation();
   const visibleIds = rows.map((row) => row.id);
   const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
   const someSelected = !allSelected && visibleIds.some((id) => selectedIds.has(id));
@@ -285,7 +290,7 @@ export function ActionQueue({
               action: (
                 <Button variant="secondary" size="md" onClick={onClearFilters}>
                   <Icon name="X" size="sm" />
-                  Clear filters
+                  {t("common.clearFilters")}
                 </Button>
               ),
             }
@@ -300,7 +305,7 @@ export function ActionQueue({
         <table className="w-full min-w-240 border-collapse">
           <thead>
             <tr className="border-b border-line bg-surface-subtle">
-              {COLUMNS.map((column) => {
+              {buildColumns(t).map((column) => {
                 if (column.key === "select") {
                   return (
                     <th scope="col" key="select" className={cn(HEAD_CLASS, column.className)}>
@@ -308,7 +313,7 @@ export function ActionQueue({
                         checked={allSelected}
                         indeterminate={someSelected}
                         onChange={onToggleAll}
-                        label="Select all visible actions"
+                        label={t("actionCenter.selectAllVisibleActions")}
                       />
                     </th>
                   );
@@ -373,7 +378,7 @@ export function ActionQueue({
               disabled={page <= 1}
             >
               <Icon name="ChevronLeft" size="xs" />
-              Previous
+              {t("actionCenter.previous")}
             </Button>
             <Button
               variant="ghost"
@@ -381,7 +386,7 @@ export function ActionQueue({
               onClick={() => onSetPage(page + 1)}
               disabled={page >= pageCount}
             >
-              Next
+              {t("actionCenter.next")}
               <Icon name="ChevronRight" size="xs" />
             </Button>
           </div>

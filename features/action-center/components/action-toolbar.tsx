@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { FilterMenu, type FilterOption } from "@/components/patterns/filter-menu";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ export function ActionToolbar({
   onRefresh,
   onExport,
 }: ActionToolbarProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2 print:hidden">
       <div className="flex flex-wrap items-center gap-2">
@@ -59,15 +61,15 @@ export function ActionToolbar({
           <input
             value={filters.search}
             onChange={(event) => onSearch(event.target.value)}
-            placeholder="Search actions, cases, owners, suppliers"
-            aria-label="Search actions"
+            placeholder={t("actionCenter.searchActionsCasesOwnersSuppliers")}
+            aria-label={t("actionCenter.searchActions")}
             className="w-full bg-transparent text-xs text-content outline-none placeholder:text-content-tertiary"
           />
           {filters.search !== "" ? (
             <button
               type="button"
               onClick={() => onSearch("")}
-              aria-label="Clear search"
+              aria-label={t("work.clearSearch")}
               className="shrink-0 text-content-tertiary transition-colors duration-150 hover:text-content"
             >
               <Icon name="X" size="xs" />
@@ -76,7 +78,7 @@ export function ActionToolbar({
         </div>
 
         <FilterMenu
-          label="Plant"
+          label={t("col.plant")}
           icon="Factory"
           field="plants"
           options={facets.plants}
@@ -85,7 +87,7 @@ export function ActionToolbar({
           onClear={onClearField}
         />
         <FilterMenu
-          label="Priority"
+          label={t("col.priority")}
           icon="Target"
           field="priorities"
           options={facets.priorities}
@@ -94,7 +96,7 @@ export function ActionToolbar({
           onClear={onClearField}
         />
         <FilterMenu
-          label="Status"
+          label={t("col.status")}
           icon="CircleCheck"
           field="statuses"
           options={facets.statuses}
@@ -103,7 +105,7 @@ export function ActionToolbar({
           onClear={onClearField}
         />
         <FilterMenu
-          label="Owner"
+          label={t("col.owner")}
           icon="UserCog"
           field="owners"
           options={facets.owners}
@@ -128,11 +130,11 @@ export function ActionToolbar({
               size="sm"
               className={cn(isRefreshing && "animate-spin")}
             />
-            Refresh
+            {t("common.refresh")}
           </Button>
           <Button variant="secondary" size="sm" onClick={onExport}>
             <Icon name="Download" size="sm" />
-            Export
+            {t("common.export")}
           </Button>
         </span>
       </div>
@@ -153,7 +155,7 @@ export function ActionToolbar({
           ))}
           {isFiltered ? (
             <Button variant="ghost" size="xs" onClick={onClearAll}>
-              Clear all
+              {t("actionCenter.clearAll")}
             </Button>
           ) : null}
         </div>

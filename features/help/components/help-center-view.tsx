@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
@@ -76,6 +77,7 @@ function ArticleBody({ article }: { article: HelpArticle }) {
 }
 
 export function HelpCenterView() {
+  const { t } = useTranslation();
   const [query, setQuery] = React.useState("");
   const [openId, setOpenId] = React.useState<string | null>(HELP_ARTICLES[0]?.id ?? null);
 
@@ -88,8 +90,8 @@ export function HelpCenterView() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Help Center"
-        description="How QuikOps AI works, what each screen is for, and the answers to the questions that come up most."
+        title={t("shell.helpCenter")}
+        description={t("help.howQuikopsAiWorksWhat")}
         meta={
           <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
             <Icon name="BookMarked" size="xs" />
@@ -111,12 +113,12 @@ export function HelpCenterView() {
       />
 
       {query.trim() !== "" ? (
-        <SectionCard title="Search results" subtitle={`for “${query.trim()}”`} icon="Search">
+        <SectionCard title={t("help.searchResults")} subtitle={`for “${query.trim()}”`} icon="Search">
           {results.length === 0 ? (
             <EmptyState
               icon="SearchX"
-              title="Nothing found"
-              description="Try a screen name, a metric, or a question in your own words."
+              title={t("help.nothingFound")}
+              description={t("help.tryAScreenNameA")}
               size="sm"
             />
           ) : (
@@ -218,8 +220,8 @@ export function HelpCenterView() {
 
         <div className="min-w-0 space-y-4 xl:col-span-4">
           <SectionCard
-            title="Downloadable guides"
-            subtitle="Printed through the browser — choose Save as PDF"
+            title={t("help.downloadableGuides")}
+            subtitle={t("help.printedThroughTheBrowserChoose")}
             icon="FileText"
           >
             <ul className="space-y-1.5">
@@ -256,8 +258,8 @@ export function HelpCenterView() {
           </SectionCard>
 
           <SectionCard
-            title="Walkthrough videos"
-            subtitle="Chapters and transcripts, once recorded"
+            title={t("help.walkthroughVideos")}
+            subtitle={t("help.chaptersAndTranscriptsOnceRecorded")}
             icon="Play"
           >
             <ul className="space-y-2">

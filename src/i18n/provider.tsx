@@ -3,6 +3,8 @@
 import * as React from "react";
 import en from "./messages/en.json";
 import { DEFAULT_LOCALE, LOCALE_META, type Locale } from "./config";
+import type { LabelContext } from "@/src/domain/labels";
+import type { FormatContext } from "@/src/lib/format";
 
 /**
  * Locale context and the translation hook.
@@ -75,6 +77,44 @@ export function I18nProvider({
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+/**
+ * The date helpers' context, memoised.
+ *
+ * `src/lib/format.ts` takes the translator as an argument rather than reaching
+ * for a hook, so it stays framework-free and callable from the server. This is
+ * the client half of that contract; `getTranslations()` is the server half and
+ * satisfies the same shape.
+ */
+/**
+ * The translator alone.
+ *
+ * `const { t } = useTranslation()` is the ordinary way to reach it, but a
+ * destructured binding cannot be added to a component that already holds one —
+ * this returns the function directly so wiring a component that renders one
+ * stray label never collides with an existing declaration.
+ */
+export function useT(): I18nStore["t"] {
+  return useTranslation().t;
+}
+
+export function useFormat(): FormatContext {
+  const { t, locale } = useTranslation();
+  return React.useMemo(() => ({ t, locale }), [t, locale]);
+}
+
+/**
+ * The enum-label context for `src/domain/labels.ts`.
+ *
+ * Carries `messages` as well as `t` because those helpers distinguish a key the
+ * catalogue actually holds from one it would merely echo back — that is what
+ * lets an untranslated band fall back to its authored English label instead of
+ * rendering `priority.SOMETHING_NEW` at a client.
+ */
+export function useLabels(): LabelContext {
+  const { t, messages } = useTranslation();
+  return React.useMemo(() => ({ t, messages }), [t, messages]);
 }
 
 /**

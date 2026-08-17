@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import dynamic from "next/dynamic";
 import type { CopilotSubject } from "@/components/copilot/types";
 import { Icon } from "@/components/patterns/icon";
@@ -129,11 +130,12 @@ export function DashboardCopilotProvider({
 
 /** The Dashboard header action. */
 export function AskCopilotButton() {
+  const { t } = useTranslation();
   const { open } = useDashboardCopilot();
   return (
     <Button variant="primary" size="md" onClick={() => open()} data-tour="dashboard-copilot">
       <Icon name="Sparkles" size="sm" />
-      Ask Copilot
+      {t("cd.askCopilot")}
     </Button>
   );
 }
@@ -144,6 +146,7 @@ export function AskCopilotButton() {
  * the label has always implied.
  */
 export function RegenerateSummaryButton() {
+  const { t } = useTranslation();
   const { open } = useDashboardCopilot();
   const prompt =
     PORTFOLIO_PROMPTS.find((entry) => entry.id === "board-brief")?.prompt ??
@@ -152,7 +155,7 @@ export function RegenerateSummaryButton() {
   return (
     <Button variant="secondary" size="sm" onClick={() => open(prompt)}>
       <Icon name="RefreshCw" size="sm" />
-      Regenerate
+      {t("dashboard.regenerate")}
     </Button>
   );
 }

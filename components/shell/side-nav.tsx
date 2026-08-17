@@ -96,7 +96,7 @@ function NavRow({
     <Tooltip>
       <TooltipTrigger asChild>{row}</TooltipTrigger>
       <TooltipContent side="right">
-        Specified for Phase 2 — navigable, not yet built
+        {t("shell.specifiedForPhase2Navigable")}
       </TooltipContent>
     </Tooltip>
   );

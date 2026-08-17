@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import type { Translate } from "@/src/domain/labels";
+import { useFormat, useT } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
@@ -18,19 +22,21 @@ import { cn } from "@/src/lib/cn";
  * case titles vary in length — the manager scans down a column, and a column
  * that moves between rows defeats that.
  */
-const HEADERS = [
+const buildHeaders = (t: Translate) => [
   // Percentages resolve against the table's min-width, so they are what decides
   // whether a badge fits. At 14% of 760px the status cell offered 82px to a
   // 132px "Pending verification" badge, which wrapped out of its fixed height.
   { key: "case", label: "Case", className: "w-[33%]" },
   { key: "plant", label: "Plant", className: "w-[7%]" },
-  { key: "priority", label: "Priority", className: "w-[15%]" },
-  { key: "status", label: "Status", className: "w-[18%]" },
-  { key: "owner", label: "Owner", className: "w-[15%]" },
-  { key: "risk", label: "At risk", className: "w-[12%] text-right whitespace-nowrap" },
+  { key: "priority", label: t("col.priority"), className: "w-[15%]" },
+  { key: "status", label: t("col.status"), className: "w-[18%]" },
+  { key: "owner", label: t("col.owner"), className: "w-[15%]" },
+  { key: "risk", label: t("health.atRisk"), className: "w-[12%] text-right whitespace-nowrap" },
 ] as const;
 
 export function CriticalBottlenecksTable({ cases }: { cases: CaseListItem[] }) {
+  const t = useT();
+  const fmt = useFormat();
   return (
     <div className="w-full min-w-0 overflow-x-auto">
       {/*
@@ -42,7 +48,7 @@ export function CriticalBottlenecksTable({ cases }: { cases: CaseListItem[] }) {
       <table className="w-full min-w-[880px] table-fixed border-collapse text-left">
         <thead>
           <tr className="border-b border-line bg-surface-subtle">
-            {HEADERS.map((header) => (
+            {buildHeaders(t).map((header) => (
               <th
                 key={header.key}
                 scope="col"
@@ -123,7 +129,7 @@ export function CriticalBottlenecksTable({ cases }: { cases: CaseListItem[] }) {
                         overdue ? "font-medium text-critical" : "text-content-tertiary",
                       )}
                     >
-                      {formatDue(item.dueAt, DEMO_NOW)}
+                      {formatDue(item.dueAt, DEMO_NOW, fmt)}
                     </span>
                   </div>
                 </td>

@@ -9,7 +9,7 @@ import { Icon } from "@/components/patterns/icon";
 import { KpiTileRow, type KpiTileModel } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { SavedReportsPanel } from "./saved-reports-panel";
@@ -46,6 +46,7 @@ import { caseHref } from "@/src/lib/routes";
  */
 
 export function ReportsView({ data }: { data: ReportsData }) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const [selectedId, setSelectedId] = React.useState<string>(
     data.templates[0]?.id ?? "",
@@ -91,7 +92,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
     () => [
       {
         key: "templates",
-        label: "Report templates",
+        label: t("reports.reportTemplates"),
         value: data.templates.length,
         format: "count",
         footnote: "Composable from 7 section types",
@@ -100,7 +101,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
       },
       {
         key: "schedules",
-        label: "Active schedules",
+        label: t("reports.activeSchedules"),
         value: data.schedules.filter((s) => s.isEnabled).length,
         format: "count",
         footnote: `${data.schedules.length} configured in total`,
@@ -109,7 +110,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
       },
       {
         key: "runs",
-        label: "Generated (30 days)",
+        label: t("reports.generated30Days"),
         value: data.runs.length,
         format: "count",
         footnote: `${data.runs.filter((r) => r.status === "FAILED").length} failed`,
@@ -118,7 +119,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
       },
       {
         key: "recipients",
-        label: "Recipients",
+        label: t("reports.recipients"),
         value: new Set(data.schedules.flatMap((s) => s.recipients)).size,
         format: "count",
         footnote: "Distinct people on a distribution list",
@@ -126,7 +127,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
         tone: "neutral",
       },
     ],
-    [data],
+    [data, t],
   );
 
   /**
@@ -179,26 +180,26 @@ export function ReportsView({ data }: { data: ReportsData }) {
         name: "Headline",
         rows: [source.counts],
         columns: [
-          { header: "Open cases", value: (r) => r.open },
-          { header: "Revenue at risk", value: (r) => r.revenueAtRisk, width: 16 },
-          { header: "Past SLA", value: (r) => r.breached },
-          { header: "Unassigned", value: (r) => r.unassigned },
-          { header: "Critical", value: (r) => r.openCritical },
+          { header: t("mw.openCases"), value: (r) => r.open },
+          { header: t("case.revenueAtRisk"), value: (r) => r.revenueAtRisk, width: 16 },
+          { header: t("analytics.pastSla"), value: (r) => r.breached },
+          { header: t("cd.unassigned"), value: (r) => r.unassigned },
+          { header: t("priority.CRITICAL"), value: (r) => r.openCritical },
         ],
       }));
     }
 
     if (sections.has("plant-performance")) {
       sheets.push(sheet({
-        name: "Plant performance",
+        name: t("reports.plantPerformance"),
         rows: source.plants,
         columns: [
-          { header: "Plant", value: (r) => r.code },
+          { header: t("col.plant"), value: (r) => r.code },
           { header: "Name", value: (r) => r.name, width: 20 },
           { header: "Country", value: (r) => r.country, width: 16 },
-          { header: "Open cases", value: (r) => r.openCases },
-          { header: "Critical", value: (r) => r.criticalCases },
-          { header: "Revenue at risk", value: (r) => r.revenueAtRisk, width: 16 },
+          { header: t("mw.openCases"), value: (r) => r.openCases },
+          { header: t("priority.CRITICAL"), value: (r) => r.criticalCases },
+          { header: t("case.revenueAtRisk"), value: (r) => r.revenueAtRisk, width: 16 },
           { header: "SLA adherence %", value: (r) => r.slaAdherencePct, width: 16 },
         ],
       }));
@@ -206,16 +207,16 @@ export function ReportsView({ data }: { data: ReportsData }) {
 
     if (sections.has("case-list")) {
       sheets.push(sheet({
-        name: "Open cases",
+        name: t("mw.openCases"),
         rows: source.openCases,
         columns: [
           { header: "Case", value: (r) => r.caseNo, width: 16 },
           { header: "Title", value: (r) => r.title, width: 44 },
-          { header: "Plant", value: (r) => r.plantCode },
+          { header: t("col.plant"), value: (r) => r.plantCode },
           { header: "Priority", value: (r) => r.priorityBand },
           { header: "Score", value: (r) => r.priorityScore },
           { header: "Owner", value: (r) => r.owner?.name ?? "Unassigned", width: 20 },
-          { header: "Revenue at risk", value: (r) => r.revenueAtRisk, width: 16 },
+          { header: t("case.revenueAtRisk"), value: (r) => r.revenueAtRisk, width: 16 },
           { header: "Opened", value: (r) => r.openedAt, width: 22 },
         ],
       }));
@@ -224,7 +225,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
     if (sheets.length === 0) return;
     const filename = exportWorkbook(`report-${selected.id}`, sheets);
     setNotice(`Exported ${filename}`);
-  }, [selected, sections, source]);
+  }, [selected, sections, source, t]);
 
   const exportCsv = React.useCallback(() => {
     if (!selected) return;
@@ -232,60 +233,60 @@ export function ReportsView({ data }: { data: ReportsData }) {
 
     if (sections.has("headline")) {
       parts.push({
-        title: "Headline position",
+        title: t("reports.headlinePosition"),
         csv: buildCsv(
           [source.counts],
           [
-            { header: "Open cases", value: (r) => String(r.open) },
-            { header: "Revenue at risk", value: (r) => String(r.revenueAtRisk) },
-            { header: "Past SLA", value: (r) => String(r.breached) },
-            { header: "Unassigned", value: (r) => String(r.unassigned) },
-            { header: "Critical", value: (r) => String(r.openCritical) },
+            { header: t("mw.openCases"), value: (r) => String(r.open) },
+            { header: t("case.revenueAtRisk"), value: (r) => String(r.revenueAtRisk) },
+            { header: t("analytics.pastSla"), value: (r) => String(r.breached) },
+            { header: t("cd.unassigned"), value: (r) => String(r.unassigned) },
+            { header: t("priority.CRITICAL"), value: (r) => String(r.openCritical) },
           ],
         ),
       });
     }
     if (sections.has("plant-performance")) {
       parts.push({
-        title: "Plant performance",
+        title: t("reports.plantPerformance"),
         csv: buildCsv(source.plants, [
-          { header: "Plant", value: (r) => r.name },
-          { header: "Open cases", value: (r) => String(r.openCases) },
-          { header: "Critical", value: (r) => String(r.criticalCases) },
-          { header: "Revenue at risk", value: (r) => String(r.revenueAtRisk) },
+          { header: t("col.plant"), value: (r) => r.name },
+          { header: t("mw.openCases"), value: (r) => String(r.openCases) },
+          { header: t("priority.CRITICAL"), value: (r) => String(r.criticalCases) },
+          { header: t("case.revenueAtRisk"), value: (r) => String(r.revenueAtRisk) },
           { header: "SLA adherence %", value: (r) => r.slaAdherencePct.toFixed(1) },
         ]),
       });
     }
     if (sections.has("supplier-exposure")) {
       parts.push({
-        title: "Supplier exposure",
+        title: t("reports.supplierExposure"),
         csv: buildCsv(source.supplierExposure, [
-          { header: "Supplier", value: (r) => r.supplierName },
-          { header: "Open cases", value: (r) => String(r.openCases) },
-          { header: "Revenue at risk", value: (r) => String(r.revenueAtRisk) },
-          { header: "Worst recurrence", value: (r) => String(r.maxRecurrence) },
+          { header: t("case.supplier"), value: (r) => r.supplierName },
+          { header: t("mw.openCases"), value: (r) => String(r.openCases) },
+          { header: t("case.revenueAtRisk"), value: (r) => String(r.revenueAtRisk) },
+          { header: t("reports.worstRecurrence"), value: (r) => String(r.maxRecurrence) },
         ]),
       });
     }
     if (sections.has("case-list")) {
       parts.push({
-        title: "Open cases",
+        title: t("mw.openCases"),
         csv: buildCsv(source.openCases, [
           { header: "Case", value: (r) => r.caseNo },
           { header: "Title", value: (r) => r.title },
           { header: "Priority", value: (r) => r.priorityBand },
           { header: "Score", value: (r) => r.priorityScore.toFixed(1) },
-          { header: "Plant", value: (r) => r.plant.name },
+          { header: t("col.plant"), value: (r) => r.plant.name },
           { header: "Owner", value: (r) => r.owner?.name ?? "Unassigned" },
-          { header: "Revenue at risk", value: (r) => String(r.revenueAtRisk) },
+          { header: t("case.revenueAtRisk"), value: (r) => String(r.revenueAtRisk) },
         ]),
       });
     }
 
     const filename = exportSectionsCsv("report", selected.name, parts);
     setNotice(`Exported ${filename}`);
-  }, [selected, sections, source]);
+  }, [selected, sections, source, t]);
 
   React.useEffect(() => {
     if (notice === null) return;
@@ -329,7 +330,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
             </Button>
             <Button variant="primary" size="sm" onClick={exportPdf} disabled={!selected}>
               <Icon name="FileText" size="sm" />
-              Generate PDF
+              {t("reports.generatePdf")}
             </Button>
           </>
         }
@@ -354,7 +355,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
               <EmptyState
                 icon="SearchX"
                 title={t("reports.noTemplates")}
-                description="Try a different search term."
+                description={t("administration.tryADifferentSearchTerm")}
                 size="sm"
               />
             ) : (
@@ -456,27 +457,27 @@ export function ReportsView({ data }: { data: ReportsData }) {
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
             title={selected ? selected.name : "Preview"}
-            subtitle={`Generated ${formatWhen(DEMO_NOW.toISOString(), DEMO_NOW)} · ${sections.size} sections`}
+            subtitle={`Generated ${formatWhen(DEMO_NOW.toISOString(), DEMO_NOW, fmt)} · ${sections.size} sections`}
             icon="Sparkles"
           >
             {sections.size === 0 ? (
               <EmptyState
                 icon="FileText"
                 title={t("reports.noSections")}
-                description="Choose at least one section to compose a report."
+                description={t("reports.chooseAtLeastOneSection")}
                 size="sm"
               />
             ) : (
               <div className="space-y-5">
                 {sections.has("headline") ? (
                   <section>
-                    <h3 className="text-xs font-semibold text-content">Headline position</h3>
+                    <h3 className="text-xs font-semibold text-content">{t("reports.headlinePosition")}</h3>
                     <dl className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
                       {[
-                        { label: "Open cases", value: String(source.counts.open) },
-                        { label: "Revenue at risk", value: formatMoney(source.counts.revenueAtRisk) },
-                        { label: "Past SLA", value: String(source.counts.breached) },
-                        { label: "Unassigned", value: String(source.counts.unassigned) },
+                        { label: t("mw.openCases"), value: String(source.counts.open) },
+                        { label: t("case.revenueAtRisk"), value: formatMoney(source.counts.revenueAtRisk) },
+                        { label: t("analytics.pastSla"), value: String(source.counts.breached) },
+                        { label: t("cd.unassigned"), value: String(source.counts.unassigned) },
                       ].map((entry) => (
                         <div key={entry.label} className="rounded-md border border-line p-2.5">
                           <dt className="text-2xs text-content-tertiary">{entry.label}</dt>
@@ -503,17 +504,17 @@ export function ReportsView({ data }: { data: ReportsData }) {
 
                 {sections.has("plant-performance") ? (
                   <section>
-                    <h3 className="text-xs font-semibold text-content">Plant performance</h3>
+                    <h3 className="text-xs font-semibold text-content">{t("reports.plantPerformance")}</h3>
                     <div className="mt-2">
                       <DataTable
                         rows={source.plants}
                         columns={[
-                          { key: "plant", label: "Plant", render: (r) => r.name },
-                          { key: "open", label: "Open", align: "right", render: (r) => r.openCases },
-                          { key: "crit", label: "Critical", align: "right", render: (r) => r.criticalCases },
+                          { key: "plant", label: t("col.plant"), render: (r) => r.name },
+                          { key: "open", label: t("analytics.open"), align: "right", render: (r) => r.openCases },
+                          { key: "crit", label: t("priority.CRITICAL"), align: "right", render: (r) => r.criticalCases },
                           {
                             key: "risk",
-                            label: "At risk",
+                            label: t("health.atRisk"),
                             align: "right",
                             render: (r) => formatMoney(r.revenueAtRisk, undefined, { forceCompact: true }),
                           },
@@ -526,7 +527,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
                         ]}
                         rowKey={(r) => r.code}
                         minWidthClass="min-w-0"
-                        empty={{ icon: "Factory", title: "No plants", description: "" }}
+                        empty={{ icon: "Factory", title: t("reports.noPlants"), description: "" }}
                       />
                     </div>
                   </section>
@@ -534,27 +535,27 @@ export function ReportsView({ data }: { data: ReportsData }) {
 
                 {sections.has("supplier-exposure") ? (
                   <section>
-                    <h3 className="text-xs font-semibold text-content">Supplier exposure</h3>
+                    <h3 className="text-xs font-semibold text-content">{t("reports.supplierExposure")}</h3>
                     <div className="mt-2">
                       <DataTable
                         rows={source.supplierExposure}
                         columns={[
-                          { key: "s", label: "Supplier", render: (r) => r.supplierName },
-                          { key: "c", label: "Open cases", align: "right", render: (r) => r.openCases },
+                          { key: "s", label: t("case.supplier"), render: (r) => r.supplierName },
+                          { key: "c", label: t("mw.openCases"), align: "right", render: (r) => r.openCases },
                           {
                             key: "r",
-                            label: "At risk",
+                            label: t("health.atRisk"),
                             align: "right",
                             render: (r) => formatMoney(r.revenueAtRisk, undefined, { forceCompact: true }),
                           },
-                          { key: "rec", label: "Worst recurrence", align: "right", render: (r) => r.maxRecurrence },
+                          { key: "rec", label: t("reports.worstRecurrence"), align: "right", render: (r) => r.maxRecurrence },
                         ]}
                         rowKey={(r) => r.supplierName}
                         minWidthClass="min-w-0"
                         empty={{
                           icon: "TruckElectric",
-                          title: "No concentrated exposure",
-                          description: "No supplier carries more than one open case.",
+                          title: t("reports.noConcentratedExposure"),
+                          description: t("reports.noSupplierCarriesMoreThan"),
                         }}
                       />
                     </div>
@@ -563,7 +564,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
 
                 {sections.has("execution-metrics") ? (
                   <section>
-                    <h3 className="text-xs font-semibold text-content">Execution metrics</h3>
+                    <h3 className="text-xs font-semibold text-content">{t("reports.executionMetrics")}</h3>
                     <p className="mt-1.5 text-2xs leading-relaxed text-content-secondary">
                       Verification pass rate {formatPercent(source.metrics.verificationPassRatePct)},
                       recurrence {formatPercent(source.metrics.recurrenceRatePct)}.{" "}
@@ -610,11 +611,11 @@ export function ReportsView({ data }: { data: ReportsData }) {
 
                 {sections.has("audit-extract") ? (
                   <section>
-                    <h3 className="text-xs font-semibold text-content">Audit extract</h3>
+                    <h3 className="text-xs font-semibold text-content">{t("reports.auditExtract")}</h3>
                     <p className="mt-1.5 text-2xs leading-relaxed text-content-secondary">
                       The full append-only record is available on the{" "}
                       <Link href="/system/audit" className="text-accent hover:underline">
-                        Audit Log
+                        {t("page.audit.title")}
                       </Link>
                       , filterable by actor, action, source and plant, and exportable to CSV.
                     </p>
@@ -637,26 +638,26 @@ export function ReportsView({ data }: { data: ReportsData }) {
           <DataTable<ScheduleView>
             rows={data.schedules}
             columns={[
-              { key: "t", label: "Report", render: (r) => r.templateName },
-              { key: "c", label: "Cadence", className: "w-28", render: (r) => r.cadenceLabel },
+              { key: "t", label: t("reports.report"), render: (r) => r.templateName },
+              { key: "c", label: t("reports.cadence"), className: "w-28", render: (r) => r.cadenceLabel },
               {
                 key: "r",
-                label: "Recipients",
+                label: t("reports.recipients"),
                 className: "w-24",
                 align: "right",
                 render: (r) => r.recipients.length,
               },
               {
                 key: "n",
-                label: "Next run",
+                label: t("reports.nextRun"),
                 className: "w-32",
                 render: (r) =>
                   r.isEnabled && r.nextRunAt ? (
                     <span className="text-2xs text-content-secondary">
-                      {formatWhen(r.nextRunAt, DEMO_NOW)}
+                      {formatWhen(r.nextRunAt, DEMO_NOW, fmt)}
                     </span>
                   ) : (
-                    <span className="text-2xs text-content-tertiary">Paused</span>
+                    <span className="text-2xs text-content-tertiary">{t("reports.paused")}</span>
                   ),
               },
             ]}
@@ -664,8 +665,8 @@ export function ReportsView({ data }: { data: ReportsData }) {
             minWidthClass="min-w-0"
             empty={{
               icon: "CalendarSync",
-              title: "No schedules",
-              description: "Every report is generated on demand.",
+              title: t("reports.noSchedules"),
+              description: t("reports.everyReportIsGeneratedOn"),
             }}
           />
         </SectionCard>
@@ -679,20 +680,20 @@ export function ReportsView({ data }: { data: ReportsData }) {
           <DataTable<RunView>
             rows={data.runs}
             columns={[
-              { key: "t", label: "Report", render: (r) => r.templateName },
+              { key: "t", label: t("reports.report"), render: (r) => r.templateName },
               {
                 key: "w",
-                label: "Generated",
+                label: t("reports.generated"),
                 className: "w-32",
                 render: (r) => (
                   <span className="text-2xs text-content-secondary">
-                    {formatWhen(r.generatedAt, DEMO_NOW)}
+                    {formatWhen(r.generatedAt, DEMO_NOW, fmt)}
                   </span>
                 ),
               },
               {
                 key: "s",
-                label: "Status",
+                label: t("col.status"),
                 className: "w-28",
                 render: (r) => (
                   <span
@@ -709,15 +710,15 @@ export function ReportsView({ data }: { data: ReportsData }) {
                   </span>
                 ),
               },
-              { key: "r", label: "Rows", className: "w-20", align: "right", render: (r) => r.rowCount },
-              { key: "f", label: "Format", className: "w-20", render: (r) => r.format },
+              { key: "r", label: t("reports.rows"), className: "w-20", align: "right", render: (r) => r.rowCount },
+              { key: "f", label: t("reports.format"), className: "w-20", render: (r) => r.format },
             ]}
             rowKey={(r) => r.id}
             minWidthClass="min-w-0"
             empty={{
               icon: "History",
-              title: "No runs yet",
-              description: "No report has been generated in this period.",
+              title: t("reports.noRunsYet"),
+              description: t("reports.noReportHasBeenGenerated"),
             }}
           />
         </SectionCard>

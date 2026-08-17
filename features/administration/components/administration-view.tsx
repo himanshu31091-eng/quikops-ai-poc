@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { ROLE_META } from "@/src/config/app-config";
 import Link from "next/link";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table";
@@ -20,33 +23,28 @@ import {
   PermissionMatrix,
   RoleLegend,
   SettingsGroupPanel,
-  type DepartmentLoad,
-} from "./governance-panels";
+  type DepartmentLoad } from "./governance-panels";
 import {
   buildSettingsGroups,
   departmentForJobTitle,
-  DEPARTMENTS,
-} from "@/src/domain/platform-settings";
+  DEPARTMENTS } from "@/src/domain/platform-settings";
 import {
   COPILOT_EFFORT,
   COPILOT_MAX_TOKENS,
   COPILOT_MODEL,
   MAX_CONTEXT_CHARS,
   MAX_HISTORY_TURNS,
-  MAX_QUESTION_CHARS,
-} from "@/src/ai/config";
+  MAX_QUESTION_CHARS } from "@/src/ai/config";
 import { isOpenStatus } from "@/src/domain/case-status";
 import { hasBreachedSla } from "@/src/domain/portfolio-metrics";
 import { KPI_MEASUREMENT_WINDOW_DAYS, DEFAULT_CURRENCY } from "@/src/lib/constants";
-import { ROLE_META } from "@/src/config/app-config";
 import {
   previewSlaChange,
   previewWeightChange,
   PRIORITY_WEIGHTS,
   SLA_TARGET_HOURS,
   type PriorityWeights,
-  type SlaTargets,
-} from "@/src/domain/config-preview";
+  type SlaTargets } from "@/src/domain/config-preview";
 import type { AdministrationData } from "@/src/data/queries/administration";
 import type { User } from "@/src/domain/types";
 import { PRIORITY_BANDS } from "@/src/domain/types";
@@ -67,6 +65,9 @@ import { caseHref } from "@/src/lib/routes";
 const USER_CSV: CsvColumn<User>[] = [
   { header: "Name", value: (row) => row.name },
   { header: "Email", value: (row) => row.email },
+  // English, deliberately: this is the exported CSV a client opens in Excel and
+  // sorts on, not on-screen copy. A localised column value would change what a
+  // saved spreadsheet filter matches.
   { header: "Role", value: (row) => ROLE_META[row.role].label },
   { header: "Job title", value: (row) => row.jobTitle },
   { header: "Plant scope", value: (row) => row.plantScope.join(" ") },
@@ -83,6 +84,7 @@ const WEIGHT_LABELS: { key: keyof PriorityWeights; label: string; hint: string }
 ];
 
 export function AdministrationView({ data }: { data: AdministrationData }) {
+  const labels = useLabels();
   const { t } = useTranslation();
   const [search, setSearch] = React.useState("");
   const [notice, setNotice] = React.useState<string | null>(null);
@@ -109,17 +111,17 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
     const needle = search.trim().toLowerCase();
     if (needle === "") return data.users;
     return data.users.filter((user) =>
-      `${user.name} ${user.email} ${user.jobTitle} ${ROLE_META[user.role].label}`
+      `${user.name} ${user.email} ${user.jobTitle} ${roleLabel(user.role, labels)}`
         .toLowerCase()
         .includes(needle),
     );
-  }, [data.users, search]);
+  }, [data.users, search, labels]);
 
   const kpis = React.useMemo<KpiTileModel[]>(
     () => [
       {
         key: "users",
-        label: "Users",
+        label: t("administration.users"),
         value: data.users.length,
         format: "count",
         footnote: `${data.users.filter((u) => u.isActive).length} active`,
@@ -128,7 +130,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       },
       {
         key: "assignable",
-        label: "Assignable owners",
+        label: t("administration.assignableOwners"),
         value: data.assignableCount,
         format: "count",
         footnote: "Executives sponsor work; they do not own it",
@@ -137,7 +139,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       },
       {
         key: "plants",
-        label: "Plants",
+        label: t("administration.plants"),
         value: data.plants.length,
         format: "count",
         footnote: data.plants.map((p) => p.code).join(" · "),
@@ -146,7 +148,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       },
       {
         key: "rules",
-        label: "Routing rules",
+        label: t("administration.routingRules"),
         value: data.routingRules.length,
         format: "count",
         footnote: "Plant and exception type to default owner",
@@ -154,14 +156,14 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
         tone: "success",
       },
     ],
-    [data],
+    [data, t],
   );
 
   const userColumns = React.useMemo<DataTableColumn<User>[]>(
     () => [
       {
         key: "name",
-        label: "User",
+        label: t("col.user"),
         render: (row) => (
           <span className="flex min-w-0 items-center gap-2">
             <OwnerAvatar user={row} size="sm" showName={false} />
@@ -174,12 +176,12 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       },
       {
         key: "role",
-        label: "Role",
+        label: t("administration.role"),
         className: "w-44",
         render: (row) => (
           <span className="block min-w-0">
             <span className="block truncate text-2xs text-content">
-              {ROLE_META[row.role].label}
+              {roleLabel(row.role, labels)}
             </span>
             <span className="block truncate text-2xs text-content-tertiary">{row.jobTitle}</span>
           </span>
@@ -187,7 +189,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       },
       {
         key: "scope",
-        label: "Plant scope",
+        label: t("shell.plantScope"),
         className: "w-40",
         render: (row) => (
           <span className="flex flex-wrap gap-1">
@@ -204,7 +206,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       },
       {
         key: "status",
-        label: "Status",
+        label: t("col.status"),
         className: "w-24",
         render: (row) => (
           <span
@@ -220,7 +222,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
         ),
       },
     ],
-    [],
+    [t, labels],
   );
 
   const exportUsers = React.useCallback(() => {
@@ -331,7 +333,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       {/* Users */}
       <SectionCard
         title={t("admin.usersRoles")}
-        subtitle="Only operations managers, task owners and analysts can be assigned a case"
+        subtitle={t("administration.onlyOperationsManagersTaskOwners")}
         icon="Users"
         flush
         action={
@@ -368,8 +370,8 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
           resultLabel={`${visibleUsers.length} users`}
           empty={{
             icon: "SearchX",
-            title: "No users match",
-            description: "Try a different search term.",
+            title: t("administration.noUsersMatch"),
+            description: t("administration.tryADifferentSearchTerm"),
           }}
         />
       </SectionCard>
@@ -378,13 +380,13 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       <div data-tour="admin-weights">
         <SectionCard
           title={t("admin.priorityWeights")}
-          subtitle="Re-scored across every open case as you change them. Nothing is saved until you apply."
+          subtitle={t("administration.reScoredAcrossEveryOpen")}
           icon="Target"
           action={
             weightsDirty ? (
               <Button variant="ghost" size="xs" onClick={resetWeights}>
                 <Icon name="RefreshCw" size="xs" />
-                Reset
+                {t("administration.reset")}
               </Button>
             ) : null
           }
@@ -413,7 +415,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
 
             <div className="min-w-0 rounded-md border border-line bg-surface-subtle p-3">
               <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                Preview
+                {t("administration.preview")}
               </p>
 
               <ul className="mt-2 space-y-1.5">
@@ -477,13 +479,13 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       {/* SLA targets */}
       <SectionCard
         title={t("admin.slaThresholds")}
-        subtitle="Resolution target per band, in hours. Breaching escalates a case above its owner."
+        subtitle={t("administration.resolutionTargetPerBandIn")}
         icon="Clock"
         action={
           targetsDirty ? (
             <Button variant="ghost" size="xs" onClick={resetTargets}>
               <Icon name="RefreshCw" size="xs" />
-              Reset
+              {t("administration.reset")}
             </Button>
           ) : null
         }
@@ -517,7 +519,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
 
           <div className="min-w-0 rounded-md border border-line bg-surface-subtle p-3">
             <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-              Preview
+              {t("administration.preview")}
             </p>
             <p className="mt-2 text-xs text-content">
               <span className="font-semibold tabular-nums">{slaPreview.breachedBefore}</span>{" "}
@@ -540,7 +542,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
             {slaPreview.newlyBreached.length > 0 ? (
               <>
                 <p className="mt-3 text-2xs font-medium text-critical-content">
-                  Newly in breach
+                  {t("administration.newlyInBreach")}
                 </p>
                 <ul className="mt-1 space-y-1">
                   {slaPreview.newlyBreached.slice(0, 5).map((entry) => (
@@ -574,24 +576,24 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
       {/* Routing */}
       <SectionCard
         title={t("admin.routing")}
-        subtitle="Default owner by plant and exception type, applied when a case is raised"
+        subtitle={t("administration.defaultOwnerByPlantAnd")}
         icon="Settings2"
         flush
       >
         <DataTable
           rows={data.routingRules}
           columns={[
-            { key: "plant", label: "Plant", className: "w-40", render: (row) => row.plantName },
+            { key: "plant", label: t("col.plant"), className: "w-40", render: (row) => row.plantName },
             {
               key: "type",
-              label: "Exception type",
+              label: t("administration.exceptionType"),
               render: (row) => (
                 <span className="text-2xs text-content">{row.exceptionLabel}</span>
               ),
             },
             {
               key: "owner",
-              label: "Default owner",
+              label: t("administration.defaultOwner"),
               className: "w-52",
               render: (row) => (
                 <span className="text-2xs text-content-secondary">{row.ownerName}</span>
@@ -599,7 +601,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
             },
             {
               key: "reviewer",
-              label: "Default reviewer",
+              label: t("administration.defaultReviewer"),
               className: "w-52",
               render: (row) => (
                 <span className="text-2xs text-content-secondary">{row.reviewerName}</span>
@@ -610,8 +612,8 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
           minWidthClass="min-w-160"
           empty={{
             icon: "Settings2",
-            title: "No routing rules",
-            description: "Cases are routed by plant scope alone.",
+            title: t("administration.noRoutingRules"),
+            description: t("administration.casesAreRoutedByPlant"),
           }}
         />
       </SectionCard>
@@ -621,7 +623,7 @@ export function AdministrationView({ data }: { data: AdministrationData }) {
         <div className="min-w-0 xl:col-span-7" data-tour="admin-permissions">
           <SectionCard
             title={t("admin.permissions")}
-            subtitle="Derived from the rules the product enforces, not declared here"
+            subtitle={t("administration.derivedFromTheRulesThe")}
             icon="Lock"
             className="h-full"
             footer={<RoleLegend />}

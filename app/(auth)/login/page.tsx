@@ -63,12 +63,12 @@ export default async function LoginPage() {
 
         <div className="max-w-md">
           <p className="text-2xs font-semibold uppercase tracking-wider text-content-inverse-secondary">
-            The execution layer
+            {"The execution layer"}
           </p>
           <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.02em] text-content-inverse">
-            Your enterprise data identifies operational bottlenecks.
+            {"Your enterprise data identifies operational bottlenecks."}
             <span className="block text-content-inverse-secondary">
-              QuikOps AI turns them into executed, verified outcomes.
+              {"QuikOps AI turns them into executed, verified outcomes."}
             </span>
           </h1>
 
@@ -90,7 +90,7 @@ export default async function LoginPage() {
         </div>
 
         <div className="flex items-center gap-4 text-2xs text-content-inverse-secondary">
-          <span>Complements SAP · Oracle · Dynamics</span>
+          <span>{"Complements SAP · Oracle · Dynamics"}</span>
           <span className="size-1 rounded-full bg-content-inverse-secondary" />
           <span>Built by {APP.vendor}</span>
         </div>
@@ -104,10 +104,10 @@ export default async function LoginPage() {
           </div>
 
           <h2 className="mt-6 text-xl font-semibold tracking-[-0.014em] text-content lg:mt-0">
-            Sign in
+            {"Sign in"}
           </h2>
           <p className="mt-1.5 text-sm text-content-secondary">
-            Access is federated through your corporate identity provider.
+            {"Access is federated through your corporate identity provider."}
           </p>
 
           <button
@@ -121,18 +121,18 @@ export default async function LoginPage() {
               <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
               <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
             </svg>
-            Continue with Microsoft Entra ID
+            {"Continue with Microsoft Entra ID"}
           </button>
 
           <p className="mt-2 flex items-center gap-1.5 text-2xs text-content-tertiary">
             <Icon name="Info" size="xs" />
-            SSO and SCIM provisioning are configured in Phase 5.
+            {"SSO and SCIM provisioning are configured in Phase 5."}
           </p>
 
           <div className="my-7 flex items-center gap-3">
             <span className="h-px flex-1 bg-line" />
             <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
-              Demonstration personas
+              {"Demonstration personas"}
             </span>
             <span className="h-px flex-1 bg-line" />
           </div>
@@ -154,7 +154,7 @@ export default async function LoginPage() {
             {tenant.industry ? `, ${tenant.industry.toLowerCase()}` : ""} —{" "}
             {tenant.dataDisclosure.toLowerCase()}.{" "}
             <SkipToDefaultPersona userId={personas[0]?.id ?? ""}>
-              Skip to dashboard
+              {"Skip to dashboard"}
             </SkipToDefaultPersona>
           </p>
         </div>

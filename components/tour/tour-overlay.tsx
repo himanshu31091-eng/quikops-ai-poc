@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
 import { useTour } from "@/src/tour/tour-store";
@@ -224,6 +225,7 @@ function TourCard({
   onPrevious: () => void;
   onSkip: () => void;
 }) {
+  const { t } = useTranslation();
   const cardRef = React.useRef<HTMLDivElement | null>(null);
   const [position, setPosition] = React.useState<{ top: number; left: number } | null>(
     null,
@@ -345,7 +347,7 @@ function TourCard({
           <button
             type="button"
             onClick={onSkip}
-            aria-label="Skip tour"
+            aria-label={t("ui.skipTour")}
             className="shrink-0 text-content-tertiary transition-colors duration-150 hover:text-content"
           >
             <Icon name="X" size="xs" />
@@ -399,12 +401,12 @@ function TourCard({
 
           <div className="flex items-center justify-end gap-1.5">
             <Button variant="ghost" size="sm" onClick={onSkip}>
-              Skip
+              {t("ui.skip")}
             </Button>
             {index > 0 ? (
               <Button variant="secondary" size="sm" onClick={onPrevious}>
                 <Icon name="ChevronLeft" size="xs" />
-                Back
+                {t("ui.back")}
               </Button>
             ) : null}
             <Button variant="primary" size="sm" onClick={onNext}>
@@ -420,6 +422,7 @@ function TourCard({
 
 /** Offers the tour on first visit; afterwards it lives in the user menu. */
 export function TourInvitation() {
+  const { t } = useTranslation();
   const { hasCompleted, isOpen, start, skip, tour } = useTour();
   if (hasCompleted || isOpen) return null;
 
@@ -427,7 +430,7 @@ export function TourInvitation() {
     <div className="anim-settle fixed bottom-4 right-4 z-[70] w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-accent-line bg-surface p-3.5 shadow-overlay">
       <p className="flex items-center gap-1.5 text-xs font-semibold text-content">
         <Icon name="Sparkles" size="sm" className="text-accent" />
-        First time here?
+        {t("ui.firstTimeHere")}
       </p>
       <p className="mt-1 text-2xs leading-relaxed text-content-secondary">
         {tour.description} {tour.steps.length} steps, about{" "}
@@ -435,10 +438,10 @@ export function TourInvitation() {
       </p>
       <div className="mt-2.5 flex items-center justify-end gap-1.5">
         <Button variant="ghost" size="sm" onClick={skip}>
-          Not now
+          {t("ui.notNow")}
         </Button>
         <Button variant="primary" size="sm" onClick={start}>
-          Start tour
+          {t("ui.startTour")}
         </Button>
       </div>
     </div>

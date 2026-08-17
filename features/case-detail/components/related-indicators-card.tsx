@@ -1,4 +1,7 @@
+"use client";
+
 import { Icon } from "@/components/patterns/icon";
+import { useTranslation } from "@/src/i18n/provider";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { RelatedIndicator } from "@/src/data/queries/case-detail";
 import { cn } from "@/src/lib/cn";
@@ -24,12 +27,13 @@ export function RelatedIndicatorsCard({
 }: {
   indicators: RelatedIndicator[];
 }) {
+  const { t } = useTranslation();
   if (indicators.length === 0) return null;
 
   return (
     <SectionCard
-      title="Related indicators"
-      subtitle="Moving at this plant over the same period — surfaced for management review, not attributed to this case"
+      title={t("caseDetail.relatedIndicators")}
+      subtitle={t("caseDetail.movingAtThisPlantOver")}
       icon="Gauge"
     >
       <ul className="space-y-3">

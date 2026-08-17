@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { useFocusTrap } from "@/src/a11y/use-focus-trap";
  */
 
 export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const doc = SCREEN_DOCS[moduleKey];
   const trapRef = useFocusTrap(open);
@@ -43,13 +45,13 @@ export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <div ref={trapRef as React.RefObject<HTMLDivElement>}>
-            <DialogTitle>What does this screen do?</DialogTitle>
+            <DialogTitle>{t("ui.whatDoesThisScreenDo")}</DialogTitle>
             <DialogDescription>{doc.title}</DialogDescription>
 
             <div className="mt-4 max-h-[60vh] space-y-4 overflow-y-auto pr-1">
               <section>
                 <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                  Purpose
+                  {t("ui.purpose")}
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-content-secondary">
                   {doc.purpose}
@@ -58,7 +60,7 @@ export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
 
               <section>
                 <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                  Business value
+                  {t("ui.businessValue")}
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-content-secondary">
                   {doc.businessValue}
@@ -83,7 +85,7 @@ export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
 
               <section>
                 <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                  Workflow
+                  {t("ui.workflow")}
                 </h3>
                 <ol className="mt-1 space-y-1">
                   {doc.workflow.map((step, index) => (
@@ -101,7 +103,7 @@ export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
 
               <section>
                 <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                  Best practices
+                  {t("ui.bestPractices")}
                 </h3>
                 <ul className="mt-1 space-y-1">
                   {doc.bestPractices.map((practice) => (
@@ -117,7 +119,7 @@ export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
 
               <section>
                 <h3 className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                  Related screens
+                  {t("ui.relatedScreens")}
                 </h3>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {doc.relatedScreens.map((related) => (
@@ -135,7 +137,7 @@ export function ScreenDocButton({ moduleKey }: { moduleKey: string }) {
                     onClick={() => setOpen(false)}
                     className="rounded-sm border border-accent-line bg-accent-subtle px-2 py-1 text-2xs text-accent-content"
                   >
-                    Help Center
+                    {t("shell.helpCenter")}
                   </Link>
                 </div>
               </section>

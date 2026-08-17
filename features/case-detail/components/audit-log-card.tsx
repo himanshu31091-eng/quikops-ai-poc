@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleShortLabel } from "@/src/domain/labels";
 import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { AUDIT_SOURCE_LABEL, ROLE_META } from "@/src/config/app-config";
+import { AUDIT_SOURCE_LABEL } from "@/src/config/app-config";
 import type { CaseAuditEntry } from "@/src/domain/types";
 import { formatTimestamp } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
@@ -34,6 +36,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
   entries: CaseAuditEntry[];
   recentIds: Set<string>;
 }) {
+  const labels = useLabels();
   const { t } = useTranslation();
   const [limit, setLimit] = React.useState(PAGE_SIZE);
   const [source, setSource] = React.useState<CaseAuditEntry["source"] | "ALL">("ALL");
@@ -154,7 +157,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
                         {entry.actorName}
                       </span>
                       <span className="block truncate text-2xs text-content-tertiary">
-                        {entry.actorRole ? ROLE_META[entry.actorRole].short : "System"}
+                        {entry.actorRole ? roleShortLabel(entry.actorRole, labels) : "System"}
                       </span>
                     </td>
                     <td className="px-3 py-2 align-top">

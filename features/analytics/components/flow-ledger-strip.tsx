@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/patterns/icon";
+import { useTranslation } from "@/src/i18n/provider";
 import type { FlowLedger, FlowUnit } from "@/src/domain/flow-balance";
 import { formatMoney, formatNumber } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
@@ -84,6 +85,7 @@ export function FlowLedgerStrip({
   unit: FlowUnit;
   currency: string;
 }) {
+  const { t } = useTranslation();
   const isValue = unit === "value";
   const show = (count: number, value: number): string =>
     isValue ? formatMoney(value, currency, { forceCompact: true }) : formatNumber(count);
@@ -96,28 +98,28 @@ export function FlowLedgerStrip({
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-2">
         <Term
-          label="Open at start"
+          label={t("analytics.openAtStart")}
           value={show(ledger.opening, ledger.openingValue)}
           hint={`${ledger.horizon.days} days ago`}
           tone="neutral"
         />
         <Operator symbol="plus" />
         <Term
-          label="Detected"
+          label={t("col.detected")}
           value={show(ledger.detected, ledger.detectedValue)}
-          hint="arrived in the window"
+          hint={t("analytics.arrivedInTheWindow")}
           tone="critical"
         />
         <Operator symbol="minus" />
         <Term
-          label="Resolved"
+          label={t("analytics.resolved")}
           value={show(ledger.resolved, ledger.resolvedValue)}
-          hint="verified or closed"
+          hint={t("analytics.verifiedOrClosed")}
           tone="success"
         />
         <Operator symbol="equals" />
         <Term
-          label="Open now"
+          label={t("analytics.openNow")}
           value={show(ledger.closing, ledger.closingValue)}
           hint={`${cleared ? "down" : "up"} ${Math.abs(Math.round(netPct))}% on the window`}
           tone="accent"

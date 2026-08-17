@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { RouteError } from "@/components/patterns/route-error";
 
 /** Error boundary for the Playbook library; the shared `RouteError` panel does the rest. */
@@ -11,14 +12,15 @@ export default function PlaybooksError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     console.error("[playbooks]", error);
   }, [error]);
 
   return (
     <RouteError
-      title="Playbook library could not be loaded"
-      description="The template store did not respond. Existing case plans are unaffected."
+      title={t("page.playbookLibraryCouldNotBe")}
+      description={t("page.theTemplateStoreDidNot")}
       {...(error.digest ? { digest: error.digest } : {})}
       onRetry={reset}
       fallbackHref="/dashboard"

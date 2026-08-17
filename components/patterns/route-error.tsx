@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "@/src/i18n/provider";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "./icon";
@@ -35,6 +36,7 @@ export function RouteError({
   fallbackLabel,
   fallbackIcon,
 }: RouteErrorProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="w-full max-w-md rounded-lg border border-line bg-surface p-8 text-center">
@@ -49,7 +51,7 @@ export function RouteError({
         <div className="mt-5 flex justify-center gap-2">
           <Button variant="primary" size="md" onClick={onRetry}>
             <Icon name="RefreshCw" size="sm" />
-            Retry
+            {t("ui.retry")}
           </Button>
           <Button variant="secondary" size="md" asChild>
             <Link href={fallbackHref}>

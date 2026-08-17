@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -54,6 +55,8 @@ export const CaseBoardCard = React.memo(function CaseBoardCard({
   onDragStart,
   onDragEnd,
 }: CaseBoardCardProps) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const exception = EXCEPTION_META[row.exceptionType];
 
   return (
@@ -107,7 +110,7 @@ export const CaseBoardCard = React.memo(function CaseBoardCard({
         <span className="ml-auto flex items-center gap-1">
           {row.isOverdue ? (
             <span
-              title="Past SLA"
+              title={t("analytics.pastSla")}
               className="flex items-center gap-1 rounded-sm border border-critical-line bg-critical-subtle px-1 text-2xs font-medium text-critical-content"
             >
               <Icon name="TriangleAlert" size="xs" />
@@ -180,7 +183,7 @@ export const CaseBoardCard = React.memo(function CaseBoardCard({
             row.isOverdue ? "font-medium text-critical" : "text-content-tertiary",
           )}
         >
-          {formatDue(row.dueAt, DEMO_NOW)}
+          {formatDue(row.dueAt, DEMO_NOW, fmt)}
         </span>
       </footer>
     </article>

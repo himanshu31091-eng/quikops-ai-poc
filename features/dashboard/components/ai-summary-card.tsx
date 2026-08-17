@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { AiExecutiveSummary } from "@/src/domain/types";
@@ -34,16 +37,18 @@ const CALLOUT_TONE = {
 } as const;
 
 export function AiSummaryCard({ summary }: { summary: AiExecutiveSummary }) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   return (
     <SectionCard
-      title="AI executive summary"
-      subtitle={`${summary.scope} · generated ${formatWhen(summary.generatedAt, DEMO_NOW)}`}
+      title={t("dash.aiExecutiveSummary")}
+      subtitle={`${summary.scope} · generated ${formatWhen(summary.generatedAt, DEMO_NOW, fmt)}`}
       icon="Sparkles"
       action={<RegenerateSummaryButton />}
       footer={
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-2xs text-content-tertiary">Grounded in</span>
+            <span className="text-2xs text-content-tertiary">{t("dashboard.groundedIn")}</span>
             {summary.citations.map((citation) =>
               citation.type === "case" ? (
                 <Link

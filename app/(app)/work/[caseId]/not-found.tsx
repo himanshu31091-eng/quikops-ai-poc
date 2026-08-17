@@ -13,18 +13,18 @@ export default function CaseNotFound() {
       <div className="w-full max-w-md rounded-lg border border-line bg-surface">
         <EmptyState
           icon="SearchX"
-          title="Case not found"
-          description="No case with that number exists in this deployment. It may have been closed and archived, or the number may be from another environment."
+          title={"Case not found"}
+          description={"No case with that number exists in this deployment. It may have been closed and archived, or the number may be from another environment."}
           action={
             <div className="flex items-center gap-2">
               <Button variant="primary" size="md" asChild>
                 <Link href="/work">
                   <Icon name="Rows3" size="sm" />
-                  Open Work Manager
+                  {"Open Work Manager"}
                 </Link>
               </Button>
               <Button variant="secondary" size="md" asChild>
-                <Link href="/dashboard">Back to dashboard</Link>
+                <Link href="/dashboard">{"Back to dashboard"}</Link>
               </Button>
             </div>
           }

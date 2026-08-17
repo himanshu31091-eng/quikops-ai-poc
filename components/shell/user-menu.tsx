@@ -1,6 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Icon } from "@/components/patterns/icon";
 import {
@@ -9,9 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ROLE_META } from "@/src/config/app-config";
+  DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { User } from "@/src/domain/types";
 import { signOut, switchPersona } from "@/src/auth/session-actions";
 import { initials } from "@/src/lib/format";
@@ -28,6 +29,8 @@ interface UserMenuProps {
  * affordance in the build. Compiled out of production via the persona list.
  */
 export function UserMenu({ user, personas }: UserMenuProps) {
+  const labels = useLabels();
+  const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -54,7 +57,7 @@ export function UserMenu({ user, personas }: UserMenuProps) {
               {user.name}
             </span>
             <span className="block truncate text-2xs leading-3.5 text-content-tertiary">
-              {ROLE_META[user.role].label}
+              {roleLabel(user.role, labels)}
             </span>
           </span>
           <Icon name="ChevronDown" size="xs" className="text-content-tertiary" />
@@ -73,7 +76,7 @@ export function UserMenu({ user, personas }: UserMenuProps) {
         </div>
 
         <div className="mx-2 mb-1 rounded-md border border-line bg-surface-subtle px-2 py-1.5">
-          <p className="text-2xs text-content-tertiary">Job title</p>
+          <p className="text-2xs text-content-tertiary">{t("shell.jobTitle")}</p>
           <p className="text-xs font-medium text-content">{user.jobTitle}</p>
           <p className="mt-1 text-2xs text-content-tertiary">
             Plant scope · {user.plantScope.join(", ")}
@@ -81,7 +84,7 @@ export function UserMenu({ user, personas }: UserMenuProps) {
         </div>
 
         <DropdownMenuSeparator />
-        <DropdownMenuLabel>Demo — present as</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("shell.presentAs")}</DropdownMenuLabel>
 
         {personas.map((persona) => (
           <DropdownMenuItem
@@ -98,7 +101,7 @@ export function UserMenu({ user, personas }: UserMenuProps) {
                 {persona.name}
               </span>
               <span className="block truncate text-2xs text-content-tertiary">
-                {ROLE_META[persona.role].label}
+                {roleLabel(persona.role, labels)}
               </span>
             </span>
             {persona.id === user.id ? <Icon name="Check" className="text-accent!" /> : null}
@@ -116,7 +119,7 @@ export function UserMenu({ user, personas }: UserMenuProps) {
           }
         >
           <Icon name="LogOut" />
-          Sign out
+          {t("shell.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

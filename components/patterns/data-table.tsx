@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   empty,
   resultLabel,
 }: DataTableProps<TRow, TSortKey>) {
+  const { t } = useTranslation();
   const selectable = selectedIds !== undefined && onToggleRow !== undefined;
   const ids = rows.map(rowKey);
   const allSelected = selectable && ids.length > 0 && ids.every((id) => selectedIds.has(id));
@@ -162,7 +164,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
                     checked={allSelected}
                     indeterminate={someSelected}
                     onChange={() => onToggleAll?.()}
-                    label="Select all visible rows"
+                    label={t("ui.selectAllVisibleRows")}
                   />
                 </th>
               ) : null}
@@ -290,7 +292,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
               disabled={page <= 1}
             >
               <Icon name="ChevronLeft" size="xs" />
-              Previous
+              {t("actionCenter.previous")}
             </Button>
             <Button
               variant="ghost"
@@ -298,7 +300,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
               onClick={() => onSetPage(page + 1)}
               disabled={page >= pageCount}
             >
-              Next
+              {t("actionCenter.next")}
               <Icon name="ChevronRight" size="xs" />
             </Button>
           </div>

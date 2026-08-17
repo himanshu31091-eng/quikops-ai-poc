@@ -1,5 +1,8 @@
+"use client";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ROLE_META } from "@/src/config/app-config";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
 import type { User } from "@/src/domain/types";
 import { initials } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
@@ -27,6 +30,7 @@ export function OwnerAvatar({
   showRole = false,
   className,
 }: OwnerAvatarProps) {
+  const labels = useLabels();
   const dimension = size === "sm" ? "size-5" : "size-6";
 
   if (!user) {
@@ -62,7 +66,7 @@ export function OwnerAvatar({
           </span>
           {showRole ? (
             <span className="block truncate text-2xs text-content-tertiary">
-              {ROLE_META[user.role].label}
+              {roleLabel(user.role, labels)}
             </span>
           ) : null}
         </span>

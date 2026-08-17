@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,8 @@ export function SavedReportsPanel({
   onRemove: (id: string) => void;
   templateNameFor: (templateId: string) => string;
 }) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const [name, setName] = React.useState("");
   const [isNaming, setIsNaming] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -64,7 +67,7 @@ export function SavedReportsPanel({
             htmlFor="saved-report-name"
             className="block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
           >
-            Name this report
+            {t("reports.nameThisReport")}
           </label>
           <input
             id="saved-report-name"
@@ -77,7 +80,7 @@ export function SavedReportsPanel({
                 setName("");
               }
             }}
-            placeholder="Monthly board pack"
+            placeholder={t("reports.monthlyBoardPack")}
             className={FIELD_CLASS}
           />
           <p className="text-2xs text-content-tertiary">
@@ -87,7 +90,7 @@ export function SavedReportsPanel({
           <div className="flex items-center gap-1.5">
             <Button variant="primary" size="sm" type="submit" disabled={name.trim() === ""}>
               <Icon name="Check" size="sm" />
-              Save
+              {t("common.save")}
             </Button>
             <Button
               variant="ghost"
@@ -98,7 +101,7 @@ export function SavedReportsPanel({
                 setName("");
               }}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
           </div>
         </form>
@@ -111,7 +114,7 @@ export function SavedReportsPanel({
           className="w-full"
         >
           <Icon name="Plus" size="sm" />
-          Save the current selection
+          {t("reports.saveTheCurrentSelection")}
         </Button>
       )}
 
@@ -119,8 +122,8 @@ export function SavedReportsPanel({
         <EmptyState
           icon="BookMarked"
           size="sm"
-          title="Nothing saved yet"
-          description="Pick a template, choose the sections you want, and save it. It will be here next time."
+          title={t("reports.nothingSavedYet")}
+          description={t("reports.pickATemplateChooseThe")}
         />
       ) : (
         <ul className="space-y-1.5">
@@ -140,7 +143,7 @@ export function SavedReportsPanel({
                 <span className="block truncate text-2xs text-content-tertiary">
                   {templateNameFor(report.templateId)} · {report.sections.length} section
                   {report.sections.length === 1 ? "" : "s"} ·{" "}
-                  {formatWhen(report.savedAt, DEMO_NOW)}
+                  {formatWhen(report.savedAt, DEMO_NOW, fmt)}
                 </span>
               </button>
 

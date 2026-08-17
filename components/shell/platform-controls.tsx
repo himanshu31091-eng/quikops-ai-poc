@@ -92,7 +92,7 @@ function DemoResetControl() {
         }}
       >
         <Icon name="RefreshCw" size="sm" />
-        Confirm reset
+        {t("shell.confirmReset")}
       </Button>
     );
   }

@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
 import Link from "next/link";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { EmptyState } from "@/components/patterns/empty-state";
@@ -8,13 +10,12 @@ import { Icon } from "@/components/patterns/icon";
 import { KpiTileRow, type KpiTileModel } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { ProgressBar } from "@/components/patterns/progress-bar";
 import { SectionCard } from "@/components/patterns/section-card";
 import { KnowledgePanels } from "./knowledge-panels";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ROLE_META } from "@/src/config/app-config";
 import { MIN_RANKABLE_SAMPLE } from "@/src/domain/playbook-effectiveness";
 import type { PlaybookLibraryData, PlaybookView } from "@/src/data/queries/playbooks";
 import { DEMO_NOW } from "@/src/lib/constants";
@@ -73,6 +74,9 @@ const PlaybookCard = React.memo(function PlaybookCard({
   expanded: boolean;
   onToggle: (id: string) => void;
 }) {
+  const labels = useLabels();
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const { effectiveness: fx } = playbook;
   const rankable = fx.score !== null;
 
@@ -86,7 +90,7 @@ const PlaybookCard = React.memo(function PlaybookCard({
           <p className="truncate text-xs font-semibold text-content">{playbook.name}</p>
           <p className="truncate text-2xs text-content-tertiary">
             {playbook.exceptionLabel} · {playbook.version} · updated{" "}
-            {formatWhen(playbook.updatedAt, DEMO_NOW)}
+            {formatWhen(playbook.updatedAt, DEMO_NOW, fmt)}
           </p>
         </div>
         <span className="shrink-0 rounded-sm border border-line bg-surface-subtle px-1.5 py-0.5 text-2xs text-content-secondary">
@@ -100,20 +104,20 @@ const PlaybookCard = React.memo(function PlaybookCard({
 
       <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5 px-3.5">
         <div className="min-w-0">
-          <dt className="text-2xs text-content-tertiary">Cases applied</dt>
+          <dt className="text-2xs text-content-tertiary">{t("playbooks.casesApplied")}</dt>
           <dd className="text-xs font-semibold tabular-nums text-content">
             {fx.sampleSize}
           </dd>
         </div>
         <div className="min-w-0">
-          <dt className="text-2xs text-content-tertiary">Mean resolution</dt>
+          <dt className="text-2xs text-content-tertiary">{t("playbooks.meanResolution")}</dt>
           <dd className="text-xs font-semibold tabular-nums text-content">
             {fx.meanResolutionHours === null ? "—" : formatHours(fx.meanResolutionHours)}
           </dd>
         </div>
         <div className="col-span-2 min-w-0">
           <dt className="flex items-baseline justify-between text-2xs text-content-tertiary">
-            SLA adherence <SampleNote size={fx.sampleSize} />
+            {t("kpi.slaAdherence")} <SampleNote size={fx.sampleSize} />
           </dt>
           <dd className="mt-1 flex items-center gap-2">
             <ProgressBar
@@ -134,7 +138,7 @@ const PlaybookCard = React.memo(function PlaybookCard({
         </div>
         <div className="col-span-2 min-w-0">
           <dt className="flex items-baseline justify-between text-2xs text-content-tertiary">
-            Recurrence after application <SampleNote size={fx.sampleSize} />
+            {t("playbooks.recurrenceAfterApplication")} <SampleNote size={fx.sampleSize} />
           </dt>
           <dd className="mt-1 flex items-center gap-2">
             <ProgressBar
@@ -168,7 +172,7 @@ const PlaybookCard = React.memo(function PlaybookCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-help text-2xs text-content-tertiary underline decoration-dotted underline-offset-2">
-                Not ranked
+                {t("playbooks.notRanked")}
               </span>
             </TooltipTrigger>
             <TooltipContent className="max-w-72">
@@ -200,7 +204,7 @@ const PlaybookCard = React.memo(function PlaybookCard({
                     {step.description}
                   </p>
                   <p className="mt-0.5 text-2xs text-content-tertiary">
-                    {ROLE_META[step.ownerRole].label} · due day {step.dueOffsetDays}
+                    {roleLabel(step.ownerRole, labels)} · due day {step.dueOffsetDays}
                   </p>
                 </div>
               </li>
@@ -210,7 +214,7 @@ const PlaybookCard = React.memo(function PlaybookCard({
           {playbook.activeCases.length > 0 ? (
             <div className="mt-3 border-t border-line pt-2.5">
               <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
-                Running now
+                {t("playbooks.runningNow")}
               </p>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {playbook.activeCases.map((item) => (
@@ -275,7 +279,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
     return [
       {
         key: "playbooks",
-        label: "Playbooks",
+        label: t("page.playbooks.title"),
         value: data.playbooks.length,
         format: "count",
         footnote: `${data.playbooks.reduce((s, p) => s + p.steps.length, 0)} steps in total`,
@@ -284,7 +288,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
       },
       {
         key: "applied",
-        label: "Cases running a playbook",
+        label: t("playbooks.casesRunningAPlaybook"),
         value: applied,
         format: "count",
         footnote:
@@ -296,7 +300,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
       },
       {
         key: "best",
-        label: "Most effective",
+        label: t("playbooks.mostEffective"),
         display: best ? best.name.split(" ")[0]! : "—",
         footnote: best
           ? `Score ${best.effectiveness.score} over ${best.effectiveness.sampleSize} cases`
@@ -306,7 +310,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
       },
       {
         key: "exposure",
-        label: "Exposure under management",
+        label: t("playbooks.exposureUnderManagement"),
         value: exposure,
         format: "currency-compact",
         footnote: "Open revenue at risk on cases running a playbook",
@@ -314,7 +318,7 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
         tone: "neutral",
       },
     ];
-  }, [data.playbooks, data.uncovered]);
+  }, [data.playbooks, data.uncovered, t]);
 
   const exportCsv = React.useCallback(() => {
     const filename = exportTableCsv({
@@ -381,19 +385,19 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
       ) : null}
 
       <SectionCard
-        title="Library"
-        subtitle="Every figure is shown with the sample it was measured over"
+        title={t("playbooks.library")}
+        subtitle={t("playbooks.everyFigureIsShownWith")}
         icon="BookMarked"
       >
         {visible.length === 0 ? (
           <EmptyState
             icon="SearchX"
-            title="No playbooks match"
-            description="Try a different search, or clear it to see the whole library."
+            title={t("playbooks.noPlaybooksMatch")}
+            description={t("playbooks.tryADifferentSearchOr")}
             size="sm"
             action={
               <Button variant="secondary" size="md" onClick={() => setSearch("")}>
-                Clear search
+                {t("work.clearSearch")}
               </Button>
             }
           />
@@ -413,8 +417,8 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
 
       {data.uncovered.length > 0 ? (
         <SectionCard
-          title="Coverage gaps"
-          subtitle="Exception types raising cases with no playbook behind them"
+          title={t("playbooks.coverageGaps")}
+          subtitle={t("playbooks.exceptionTypesRaisingCasesWith")}
           icon="TriangleAlert"
         >
           <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -443,8 +447,8 @@ export function PlaybooksView({ data }: { data: PlaybookLibraryData }) {
           the reasoning behind both. One search spans all three. */}
       <div data-tour="playbooks-knowledge">
       <SectionCard
-        title="Knowledge"
-        subtitle="Standing procedure, what stops the condition recurring, and why it is done that way"
+        title={t("playbooks.knowledge")}
+        subtitle={t("playbooks.standingProcedureWhatStopsThe")}
         icon="BookMarked"
       >
         <KnowledgePanels />

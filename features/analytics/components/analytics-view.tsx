@@ -4,7 +4,7 @@ import * as React from "react";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { AnalyticsData } from "@/src/data/queries/analytics";
@@ -43,6 +43,7 @@ function MetaChip({ icon, children }: { icon: string; children: React.ReactNode 
 const FILTERED_NOTE = "Reflects the current filter selection.";
 
 export function AnalyticsView({ data }: { data: AnalyticsData }) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const api = useAnalytics(data);
   const { model, filters, facets } = api;
@@ -57,7 +58,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
         description={t("page.analytics.description")}
         meta={
           <>
-            <MetaChip icon="Clock">Data as at {formatTimestamp(DEMO_NOW)} UTC</MetaChip>
+            <MetaChip icon="Clock">{t("shell.dataAsAt", { when: formatTimestamp(DEMO_NOW, fmt) })}</MetaChip>
             <MetaChip icon="Filter">{api.scopeLabel}</MetaChip>
             <MetaChip icon="Rows3">
               {model.cases.length} of {data.cases.length} cases

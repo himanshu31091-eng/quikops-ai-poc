@@ -9,7 +9,7 @@ import {
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatWhen } from "@/src/lib/format";
 import { cn } from "@/src/lib/cn";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 
 /**
  * The notification bell and its dropdown.
@@ -35,6 +35,7 @@ const TONE_CLASS: Record<NotificationModel["tone"], string> = {
 };
 
 export function NotificationTray({ items }: { items: NotificationModel[] }) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const unreadCount = items.filter((item) => item.unread).length;
 
@@ -79,7 +80,7 @@ export function NotificationTray({ items }: { items: NotificationModel[] }) {
                   {item.body}
                 </p>
                 <p className="mt-1 text-2xs text-content-tertiary">
-                  {formatWhen(item.at, DEMO_NOW)}
+                  {formatWhen(item.at, DEMO_NOW, fmt)}
                 </p>
               </div>
             </li>
@@ -88,7 +89,7 @@ export function NotificationTray({ items }: { items: NotificationModel[] }) {
 
         <div className="border-t border-line bg-surface-subtle px-3 py-2">
           <p className="text-2xs text-content-tertiary">
-            Email and Microsoft Teams delivery arrive in Phase 2
+            {t("shell.emailAndMicrosoftTeamsDelivery")}
           </p>
         </div>
       </DropdownMenuContent>

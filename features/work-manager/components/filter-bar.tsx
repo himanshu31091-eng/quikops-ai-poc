@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import type { Translate } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import {
   DropdownMenu,
@@ -42,19 +44,23 @@ interface FilterBarProps {
   onSort: (key: SortKey) => void;
 }
 
-const MENUS: {
+/** Built rather than declared, because the menu labels come from the catalogue
+ *  and a module-scope table is evaluated before a locale is known. */
+const buildMenus = (
+  t: Translate,
+): {
   field: MultiFilterField;
   label: string;
   icon: string;
   searchable?: boolean;
-}[] = [
-  { field: "plants", label: "Plant", icon: "Factory" },
-  { field: "priorities", label: "Priority", icon: "Target" },
-  { field: "statusGroups", label: "Status", icon: "Activity" },
-  { field: "categories", label: "Category", icon: "Tag" },
-  { field: "revenueBands", label: "Revenue impact", icon: "DollarSign" },
-  { field: "owners", label: "Owner", icon: "Users", searchable: true },
-  { field: "detectedBy", label: "Detected by", icon: "PlugZap" },
+}[] => [
+  { field: "plants", label: t("col.plant"), icon: "Factory" },
+  { field: "priorities", label: t("col.priority"), icon: "Target" },
+  { field: "statusGroups", label: t("col.status"), icon: "Activity" },
+  { field: "categories", label: t("col.category"), icon: "Tag" },
+  { field: "revenueBands", label: t("col.revenueImpact"), icon: "DollarSign" },
+  { field: "owners", label: t("col.owner"), icon: "Users", searchable: true },
+  { field: "detectedBy", label: t("case.detectedBy"), icon: "PlugZap" },
 ];
 
 const SORT_OPTIONS: SortKey[] = [
@@ -81,14 +87,15 @@ export const FilterBar = React.memo(function FilterBar({
   onClearAll,
   onSort,
 }: FilterBarProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="flex items-center gap-1.5 pr-0.5 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
         <Icon name="Filter" size="xs" />
-        Filter
+        {t("workManager.filter")}
       </span>
 
-      {MENUS.map((menu) => (
+      {buildMenus(t).map((menu) => (
         <FilterMenu
           key={menu.field}
           label={menu.label}
@@ -109,7 +116,7 @@ export const FilterBar = React.memo(function FilterBar({
           className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-content-secondary transition-colors duration-150 hover:bg-surface-hover hover:text-content"
         >
           <Icon name="X" size="sm" />
-          Clear all
+          {t("actionCenter.clearAll")}
         </button>
       ) : null}
 
@@ -142,7 +149,7 @@ export const FilterBar = React.memo(function FilterBar({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("workManager.sortBy")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {SORT_OPTIONS.map((key) => (
               <DropdownMenuItem key={key} onSelect={() => onSort(key)}>

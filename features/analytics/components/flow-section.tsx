@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import type { CaseListItem, Plant } from "@/src/domain/types";
@@ -45,6 +46,7 @@ export function FlowSection({
   plants: Plant[];
   onAskCopilot?: () => void;
 }) {
+  const { t } = useTranslation();
   const flow = useFlow(cases, plants);
   const currency = cases[0]?.currency ?? DEFAULT_CURRENCY;
 
@@ -57,7 +59,7 @@ export function FlowSection({
 
   return (
     <section
-      aria-label="Flow balance and forecast"
+      aria-label={t("analytics.flowBalanceAndForecast")}
       data-tour="analytics-flow"
       className="space-y-4"
     >
@@ -67,7 +69,7 @@ export function FlowSection({
             <span className="flex size-6 items-center justify-center rounded-md bg-accent-subtle text-accent-content">
               <Icon name="Activity" size="sm" />
             </span>
-            Flow &amp; forecast
+            {t("analytics.flowAmpForecast")}
           </h2>
           <p className="mt-0.5 text-2xs text-content-secondary">
             Detection against resolution — whether the operation is gaining on its
@@ -83,7 +85,7 @@ export function FlowSection({
       </div>
 
       <SectionCard
-        title="The balance"
+        title={t("analytics.theBalance")}
         subtitle={`Open at the start of the window, what arrived, what left, and where it stands now`}
         icon="Gauge"
       >
@@ -103,8 +105,8 @@ export function FlowSection({
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">
           <SectionCard
-            title="Detection against resolution"
-            subtitle="Above the line arrived; below it was cleared"
+            title={t("analytics.detectionAgainstResolution")}
+            subtitle={t("analytics.aboveTheLineArrivedBelow")}
             icon="ChartNoAxesColumn"
             className="h-full"
           >
@@ -113,8 +115,8 @@ export function FlowSection({
         </div>
         <div className="min-w-0 xl:col-span-5">
           <SectionCard
-            title="Backlog trajectory"
-            subtitle="Measured, then extrapolated at the current rate"
+            title={t("analytics.backlogTrajectory")}
+            subtitle={t("analytics.measuredThenExtrapolatedAtThe")}
             icon="TrendingDown"
             className="h-full"
             footer={<ForecastVerdict ledger={flow.ledger} forecast={flow.forecast} />}
@@ -132,8 +134,8 @@ export function FlowSection({
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">
           <SectionCard
-            title="Where the net came from"
-            subtitle="Select a row to open it without losing the comparison"
+            title={t("analytics.whereTheNetCameFrom")}
+            subtitle={t("analytics.selectARowToOpen")}
             icon="Layers"
             className="h-full"
           >
@@ -150,8 +152,8 @@ export function FlowSection({
         </div>
         <div className="min-w-0 xl:col-span-5">
           <SectionCard
-            title="Band mixture"
-            subtitle="A steady total can still be a worsening portfolio"
+            title={t("analytics.bandMixture")}
+            subtitle={t("analytics.aSteadyTotalCanStill")}
             icon="Target"
             className="h-full"
           >
@@ -163,8 +165,8 @@ export function FlowSection({
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">
           <SectionCard
-            title="Customer exposure"
-            subtitle="Which accounts are actually carrying the open risk"
+            title={t("analytics.customerExposure")}
+            subtitle={t("analytics.whichAccountsAreActuallyCarrying")}
             icon="Users"
             className="h-full"
           >
@@ -173,8 +175,8 @@ export function FlowSection({
         </div>
         <div className="min-w-0 xl:col-span-5">
           <SectionCard
-            title="Days in trouble"
-            subtitle="How long open work has been open — distinct from late"
+            title={t("analytics.daysInTrouble")}
+            subtitle={t("analytics.howLongOpenWorkHas")}
             icon="Clock"
             className="h-full"
           >
@@ -184,8 +186,8 @@ export function FlowSection({
       </div>
 
       <SectionCard
-        title="Escalation depth"
-        subtitle="Work that has been pushed above its owner, and for how long"
+        title={t("analytics.escalationDepth")}
+        subtitle={t("analytics.workThatHasBeenPushed")}
         icon="TrendingUp"
       >
         <EscalationPanel data={escalations} currency={currency} />

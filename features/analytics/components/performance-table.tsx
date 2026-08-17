@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -54,11 +55,12 @@ export function PlantPerformanceTable({
   rows: PlantPerformanceRow[];
   emptyMessage: string;
 }) {
+  const { t } = useTranslation();
   if (rows.length === 0) {
     return (
       <EmptyState
         icon="Factory"
-        title="No plants in this selection"
+        title={t("analytics.noPlantsInThisSelection")}
         description={emptyMessage}
         size="sm"
       />
@@ -70,12 +72,12 @@ export function PlantPerformanceTable({
       <table className="w-full min-w-140 border-collapse">
         <thead>
           <tr className="border-b border-line">
-            <th scope="col" className={HEAD_CLASS}>Plant</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Cases</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Past SLA</th>
-            <th scope="col" className={HEAD_CLASS}>SLA adherence</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Avg resolve</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>At risk</th>
+            <th scope="col" className={HEAD_CLASS}>{t("col.plant")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("shell.cases")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("analytics.pastSla")}</th>
+            <th scope="col" className={HEAD_CLASS}>{t("kpi.slaAdherence")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("analytics.avgResolve")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("health.atRisk")}</th>
           </tr>
         </thead>
         <tbody>
@@ -139,6 +141,7 @@ export function PersonPerformanceTable({
   /** What the count column is counting — "Owned" or "Reviewed". */
   loadLabel: string;
 }) {
+  const { t } = useTranslation();
   const byId = React.useMemo(
     () => Object.fromEntries(people.map((person) => [person.id, person])),
     [people],
@@ -148,7 +151,7 @@ export function PersonPerformanceTable({
     return (
       <EmptyState
         icon="Users"
-        title="Nobody to rank yet"
+        title={t("analytics.nobodyToRankYet")}
         description={emptyMessage}
         size="sm"
       />
@@ -160,12 +163,12 @@ export function PersonPerformanceTable({
       <table className="w-full min-w-140 border-collapse">
         <thead>
           <tr className="border-b border-line">
-            <th scope="col" className={HEAD_CLASS}>Person</th>
+            <th scope="col" className={HEAD_CLASS}>{t("analytics.person")}</th>
             <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{loadLabel}</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Resolved</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Past SLA</th>
-            <th scope="col" className={HEAD_CLASS}>SLA adherence</th>
-            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>Avg resolve</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("analytics.resolved")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("analytics.pastSla")}</th>
+            <th scope="col" className={HEAD_CLASS}>{t("kpi.slaAdherence")}</th>
+            <th scope="col" className={cn(HEAD_CLASS, "text-right")}>{t("analytics.avgResolve")}</th>
           </tr>
         </thead>
         <tbody>

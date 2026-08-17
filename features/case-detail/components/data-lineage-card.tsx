@@ -1,4 +1,7 @@
+"use client";
+
 import { Icon } from "@/components/patterns/icon";
+import { useTranslation } from "@/src/i18n/provider";
 import { SectionCard } from "@/components/patterns/section-card";
 import { DETECTION_SOURCE_META } from "@/src/config/app-config";
 import type { CaseListItem } from "@/src/domain/types";
@@ -37,51 +40,52 @@ export function DataLineageCard({
   signalRef,
   ownerName,
 }: DataLineageCardProps) {
+  const { t } = useTranslation();
   const detection = DETECTION_SOURCE_META[item.detectedBy];
 
   const steps: Step[] = [
     {
-      label: "System of record",
+      label: t("caseDetail.systemOfRecord"),
       value: item.sourceSystem,
-      detail: "Owned and operated by Perma Construction Aids. QuikOps reads it; it does not replace it.",
+      detail: t("caseDetail.systemOfRecordDetail"),
       icon: "PlugZap",
     },
     {
-      label: "Source record",
+      label: t("caseDetail.sourceRecord"),
       value: item.sourceRecord,
       detail: item.materialCode ? `Material ${item.materialCode}` : undefined,
       icon: "FileText",
     },
     {
-      label: "Operational signal",
+      label: t("caseDetail.operationalSignal"),
       value: signalRef,
       detail: detection.description,
       icon: "Activity",
     },
     {
-      label: "Business rule",
+      label: t("caseDetail.businessRule"),
       value: detectionRule,
-      detail: "The rule that judged this signal worth raising as a case.",
+      detail: t("caseDetail.theRuleThatJudgedThis"),
       icon: "ShieldCheck",
     },
     {
-      label: "QuikOps case",
+      label: t("caseDetail.quikopsCase"),
       value: item.caseNo,
       detail: `${item.plant.name} · ${item.priorityBand.toLowerCase()} priority`,
       icon: "Rows3",
     },
     {
-      label: "Owner",
+      label: t("col.owner"),
       value: ownerName,
-      detail: "Accountable for the corrective action below.",
+      detail: t("caseDetail.accountableForTheCorrectiveAction"),
       icon: "UserCog",
     },
   ];
 
   return (
     <SectionCard
-      title="How this case reached QuikOps"
-      subtitle="The signal originates in an existing business system. QuikOps converts it into an owned, tracked case."
+      title={t("caseDetail.howThisCaseReachedQuikops")}
+      subtitle={t("caseDetail.theSignalOriginatesInAn")}
       icon="Link2"
     >
       <ol className="space-y-0">

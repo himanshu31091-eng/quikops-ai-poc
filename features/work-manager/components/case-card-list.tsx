@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useFormat } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -51,6 +52,7 @@ export function CaseCardList({
   onClose,
   onNotify,
 }: CaseCardListProps) {
+  const fmt = useFormat();
   const [limit, setLimit] = React.useState(PAGE_SIZE);
 
   const signature = `${rows.length}:${rows[0]?.id ?? ""}`;
@@ -127,7 +129,7 @@ export function CaseCardList({
               <span>·</span>
               <span className="font-mono">{row.plantCode}</span>
               <span>·</span>
-              <span>{formatWhen(row.lastDetectedAt, DEMO_NOW)}</span>
+              <span>{formatWhen(row.lastDetectedAt, DEMO_NOW, fmt)}</span>
               {row.recurrenceCount > 1 ? (
                 <span className="rounded-sm border border-high-line bg-high-subtle px-1 font-medium text-high-content">
                   {row.recurrenceCount}× detected
@@ -160,7 +162,7 @@ export function CaseCardList({
                   row.isOverdue ? "font-medium text-critical" : "text-content-tertiary",
                 )}
               >
-                {formatDue(row.dueAt, DEMO_NOW)} · {row.ageDays}d old
+                {formatDue(row.dueAt, DEMO_NOW, fmt)} · {row.ageDays}d old
               </span>
             </div>
           </article>

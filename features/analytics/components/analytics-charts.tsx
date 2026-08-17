@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import {
   Area,
   AreaChart,
@@ -66,12 +67,13 @@ function ChartFrame({
   emptyMessage: string;
   children: React.ReactElement;
 }) {
+  const { t } = useTranslation();
   if (isEmpty) {
     return (
       <div className={CHART_HEIGHT}>
         <EmptyState
           icon="ChartNoAxesColumn"
-          title="Nothing to chart"
+          title={t("analytics.nothingToChart")}
           description={emptyMessage}
           size="sm"
         />
@@ -231,6 +233,7 @@ export function CategoryBreakdownChart({
   data: CategoryDatum[];
   emptyMessage: string;
 }) {
+  const { t } = useTranslation();
   const renderTooltip = (props: TooltipRenderProps<CategoryDatum>) => {
     if (!props.active || !props.payload?.length) return null;
     const datum = props.payload[0]?.payload;
@@ -239,8 +242,8 @@ export function CategoryBreakdownChart({
       <ChartTooltip
         title={datum.label}
         data={[
-          { label: "Cases", value: formatNumber(datum.count), swatch: datum.color },
-          { label: "Revenue at risk", value: formatMoney(datum.revenueAtRisk) },
+          { label: t("shell.cases"), value: formatNumber(datum.count), swatch: datum.color },
+          { label: t("case.revenueAtRisk"), value: formatMoney(datum.revenueAtRisk) },
         ]}
       />
     );
@@ -284,6 +287,7 @@ export function WeeklyThroughputChart({
   data: WeeklyDatum[];
   emptyMessage: string;
 }) {
+  const { t } = useTranslation();
   const renderTooltip = (props: TooltipRenderProps<WeeklyDatum>) => {
     if (!props.active || !props.payload?.length) return null;
     const datum = props.payload[0]?.payload;
@@ -293,8 +297,8 @@ export function WeeklyThroughputChart({
       <ChartTooltip
         title={`Week ${datum.week.split("-W")[1]}`}
         data={[
-          { label: "Opened", value: String(datum.opened), swatch: "var(--color-chart-3)" },
-          { label: "Closed", value: String(datum.closed), swatch: "var(--color-chart-6)" },
+          { label: t("case.openedAt"), value: String(datum.opened), swatch: "var(--color-chart-3)" },
+          { label: t("status.CLOSED"), value: String(datum.closed), swatch: "var(--color-chart-6)" },
         ]}
         footnote={
           net === 0
@@ -326,14 +330,14 @@ export function WeeklyThroughputChart({
         />
         <Bar
           dataKey="opened"
-          name="Opened"
+          name={t("case.openedAt")}
           fill="var(--color-chart-3)"
           radius={[3, 3, 0, 0]}
           isAnimationActive={false}
         />
         <Bar
           dataKey="closed"
-          name="Closed"
+          name={t("status.CLOSED")}
           fill="var(--color-chart-6)"
           radius={[3, 3, 0, 0]}
           isAnimationActive={false}

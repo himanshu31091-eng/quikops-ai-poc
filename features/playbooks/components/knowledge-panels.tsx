@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel, type Translate } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -13,9 +16,7 @@ import {
   type KnowledgeArticle,
   type KnowledgeCategory,
   type PreventiveAction,
-  type Sop,
-} from "@/src/data/fixtures/knowledge";
-import { ROLE_META } from "@/src/config/app-config";
+  type Sop } from "@/src/data/fixtures/knowledge";
 import { formatWhen } from "@/src/lib/format";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { cn } from "@/src/lib/cn";
@@ -35,16 +36,16 @@ import { cn } from "@/src/lib/cn";
 
 export type KnowledgeTab = "sops" | "preventive" | "articles";
 
-const TABS: { key: KnowledgeTab; label: string; icon: string; hint: string }[] = [
-  { key: "sops", label: "SOP library", icon: "ScrollText", hint: "How it is done" },
+const buildTabs = (t: Translate) => [
+  { key: "sops", label: t("playbooks.sopLibrary"), icon: "ScrollText", hint: "How it is done" },
   {
     key: "preventive",
-    label: "Preventive actions",
+    label: t("playbooks.preventiveActions"),
     icon: "ShieldCheck",
     hint: "How it is stopped",
   },
-  { key: "articles", label: "Knowledge base", icon: "BookMarked", hint: "Why it is done" },
-];
+  { key: "articles", label: t("playbooks.knowledgeBase"), icon: "BookMarked", hint: "Why it is done" },
+] as const;
 
 const EFFORT_TONE: Record<PreventiveAction["effort"], string> = {
   Low: "bg-success-subtle text-success-content border-success-line",
@@ -55,6 +56,7 @@ const EFFORT_TONE: Record<PreventiveAction["effort"], string> = {
 /* ---------------------------------------------------------------- SOP ---- */
 
 function SopCard({ sop }: { sop: Sop }) {
+  const fmt = useFormat();
   const [open, setOpen] = React.useState(false);
   const panelId = `sop-${sop.id}`;
 
@@ -87,7 +89,7 @@ function SopCard({ sop }: { sop: Sop }) {
           </span>
           <span className="mt-1 block text-2xs text-content-tertiary">
             {sop.steps.length} steps · approved by {sop.approver} ·{" "}
-            {formatWhen(sop.updatedAt, DEMO_NOW)}
+            {formatWhen(sop.updatedAt, DEMO_NOW, fmt)}
           </span>
         </span>
 
@@ -129,6 +131,7 @@ function SopCard({ sop }: { sop: Sop }) {
 /* --------------------------------------------------------- Preventive ---- */
 
 function PreventiveCard({ action }: { action: PreventiveAction }) {
+  const labels = useLabels();
   return (
     <li className="rounded-lg border border-line bg-surface px-3.5 py-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -169,7 +172,7 @@ function PreventiveCard({ action }: { action: PreventiveAction }) {
 
       <p className="mt-2 flex items-center gap-1.5 border-t border-line pt-2 text-2xs text-content-tertiary">
         <Icon name="UserCog" size="xs" />
-        Owned by {ROLE_META[action.owningRole].label}
+        Owned by {roleLabel(action.owningRole, labels)}
       </p>
     </li>
   );
@@ -235,6 +238,7 @@ function matches(haystack: string, needle: string): boolean {
 }
 
 export function KnowledgePanels() {
+  const { t } = useTranslation();
   const [tab, setTab] = React.useState<KnowledgeTab>("sops");
   const [query, setQuery] = React.useState("");
   const [category, setCategory] = React.useState<KnowledgeCategory | null>(null);
@@ -299,15 +303,15 @@ export function KnowledgePanels() {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search procedures, preventions and articles"
-            aria-label="Search the knowledge layer"
+            placeholder={t("playbooks.searchProceduresPreventionsAndArticles")}
+            aria-label={t("playbooks.searchTheKnowledgeLayer")}
             className="min-w-0 flex-1 bg-transparent text-sm text-content outline-none placeholder:text-content-tertiary"
           />
           {query !== "" ? (
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label="Clear search"
+              aria-label={t("work.clearSearch")}
               className="shrink-0 text-content-tertiary hover:text-content"
             >
               <Icon name="X" size="xs" />
@@ -322,7 +326,7 @@ export function KnowledgePanels() {
             onClick={() => setCategory(null)}
             aria-pressed={category === null}
           >
-            All
+            {t("common.all")}
           </Button>
           {KNOWLEDGE_CATEGORIES.map((entry) => (
             <Button
@@ -340,10 +344,10 @@ export function KnowledgePanels() {
 
       <div
         role="tablist"
-        aria-label="Knowledge type"
+        aria-label={t("playbooks.knowledgeType")}
         className="flex flex-wrap items-center gap-1 border-b border-line print:hidden"
       >
-        {TABS.map((entry) => (
+        {buildTabs(t).map((entry) => (
           <button
             key={entry.key}
             type="button"
@@ -363,7 +367,7 @@ export function KnowledgePanels() {
           </button>
         ))}
         <span className="ml-auto hidden pb-1.5 text-2xs text-content-tertiary sm:block">
-          {TABS.find((entry) => entry.key === tab)?.hint}
+          {buildTabs(t).find((entry) => entry.key === tab)?.hint}
         </span>
       </div>
 
@@ -371,7 +375,7 @@ export function KnowledgePanels() {
         <EmptyState
           icon="SearchX"
           size="sm"
-          title="Nothing matches"
+          title={t("playbooks.nothingMatches")}
           description={
             needle === ""
               ? "No content in this category yet."
@@ -386,7 +390,7 @@ export function KnowledgePanels() {
                 setCategory(null);
               }}
             >
-              Clear search and filters
+              {t("playbooks.clearSearchAndFilters")}
             </Button>
           }
         />

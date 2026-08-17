@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleLabel } from "@/src/domain/labels";
 import Link from "next/link";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { DataTable, type DataTableColumn } from "@/components/patterns/data-table";
@@ -8,10 +10,10 @@ import { Icon } from "@/components/patterns/icon";
 import { KpiTileRow } from "@/components/patterns/kpi-tile";
 import { ModuleToolbar } from "@/components/patterns/module-toolbar";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { AUDIT_SOURCE_LABEL, ROLE_META } from "@/src/config/app-config";
+import { AUDIT_SOURCE_LABEL } from "@/src/config/app-config";
 import type { AuditEntryRow, AuditLogData } from "@/src/data/queries/audit";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { cn } from "@/src/lib/cn";
@@ -21,8 +23,7 @@ import { exportPdf } from "@/src/lib/export";
 import {
   useAuditLog,
   type AuditFilterField,
-  type AuditSortKey,
-} from "../hooks/use-audit-log";
+  type AuditSortKey } from "../hooks/use-audit-log";
 
 /**
  * Module root. Composition only — the state lives in useAuditLog, the chrome in
@@ -38,6 +39,8 @@ const SOURCE_TONE: Record<string, string> = {
 };
 
 export function AuditLogView({ data }: { data: AuditLogData }) {
+  const labels = useLabels();
+  const fmt = useFormat();
   const { t } = useTranslation();
   const api = useAuditLog(data);
 
@@ -50,7 +53,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
         className: "w-40",
         render: (row) => (
           <span className="block">
-            <span className="block text-2xs text-content">{formatWhen(row.at, DEMO_NOW)}</span>
+            <span className="block text-2xs text-content">{formatWhen(row.at, DEMO_NOW, fmt)}</span>
             <span className="block font-mono text-2xs text-content-tertiary">
               {formatTimestamp(row.at)}
             </span>
@@ -68,7 +71,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
               {row.actorName}
             </span>
             <span className="block truncate text-2xs text-content-tertiary">
-              {row.actorRole ? ROLE_META[row.actorRole].label : t("col.system")}
+              {row.actorRole ? roleLabel(row.actorRole, labels) : t("col.system")}
             </span>
           </span>
         ),
@@ -132,9 +135,10 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
         ),
       },
     ],
-    // The column headers come from the catalogue, so they are rebuilt when the
-    // language changes rather than frozen at first render.
-    [t],
+    // The column headers and the rendered timestamps both come from the
+    // catalogue, so the columns are rebuilt when the language changes rather
+    // than frozen at first render.
+    [t, fmt, labels],
   );
 
   return (
@@ -147,7 +151,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
               <Icon name="Clock" size="xs" />
-              Data as at {formatTimestamp(DEMO_NOW)} UTC
+              {t("shell.dataAsAt", { when: formatTimestamp(DEMO_NOW, fmt) })}
             </span>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
               <Icon name="ScrollText" size="xs" />

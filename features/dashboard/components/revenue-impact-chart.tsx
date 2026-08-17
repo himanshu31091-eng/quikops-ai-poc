@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { exceptionLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import {
   Bar,
   BarChart,
@@ -8,15 +11,12 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
-} from "recharts";
+  YAxis } from "recharts";
 import {
   AXIS_DEFAULTS,
   ChartLegend,
   ChartTooltip,
-  type TooltipRenderProps,
-} from "@/components/charts/chart-primitives";
-import { EXCEPTION_META } from "@/src/config/app-config";
+  type TooltipRenderProps } from "@/components/charts/chart-primitives";
 import type { RevenueImpactBucket } from "@/src/domain/types";
 import { formatMoney, formatNumber } from "@/src/lib/format";
 
@@ -65,13 +65,15 @@ function renderTooltip(
  * two independent quantities.
  */
 export function RevenueImpactChart({ data }: { data: RevenueImpactBucket[] }) {
+  const labels = useLabels();
+  const { t } = useTranslation();
   const rows = React.useMemo<Row[]>(
     () =>
       data.map((bucket) => ({
         ...bucket,
-        label: EXCEPTION_META[bucket.exceptionType].label,
+        label: exceptionLabel(bucket.exceptionType, labels),
       })),
-    [data],
+    [data, labels],
   );
 
   const totalAtRisk = data.reduce((sum, d) => sum + d.atRisk, 0);
@@ -83,12 +85,12 @@ export function RevenueImpactChart({ data }: { data: RevenueImpactBucket[] }) {
         <ChartLegend
           items={[
             {
-              label: "Still at risk",
+              label: t("dashboard.stillAtRisk"),
               color: AT_RISK_COLOR,
               value: formatMoney(totalAtRisk, undefined, { forceCompact: true }),
             },
             {
-              label: "Recovered after execution",
+              label: t("dashboard.recoveredAfterExecution"),
               color: RECOVERED_COLOR,
               value: formatMoney(totalRecovered, undefined, { forceCompact: true }),
             },

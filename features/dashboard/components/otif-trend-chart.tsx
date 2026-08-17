@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import {
   Area,
   AreaChart,
@@ -69,6 +70,7 @@ function renderTooltip(
  * the target only shows movement, not whether the movement is enough.
  */
 export function OtifTrendChart({ data }: { data: TrendPoint[] }) {
+  const { t } = useTranslation();
   const [rangeKey, setRangeKey] = React.useState<string>("90");
   const range = RANGES.find((r) => r.key === rangeKey) ?? RANGES[2];
   const sliced = React.useMemo(() => data.slice(-range.days), [data, range.days]);
@@ -81,8 +83,8 @@ export function OtifTrendChart({ data }: { data: TrendPoint[] }) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <ChartLegend
           items={[
-            { label: "On-time in full", color: "var(--color-chart-1)" },
-            { label: "Target 95%", color: "var(--color-chart-axis)" },
+            { label: t("kpi.otif"), color: "var(--color-chart-1)" },
+            { label: t("kpi.target95"), color: "var(--color-chart-axis)" },
           ]}
         />
         <div className="flex items-center gap-0.5 rounded-md border border-line bg-surface-subtle p-0.5">

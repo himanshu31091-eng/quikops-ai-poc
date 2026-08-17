@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { exceptionLabel } from "@/src/domain/labels";
 import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
@@ -22,6 +24,7 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
 }: {
   detail: CaseDetailModel;
 }) {
+  const labels = useLabels();
   const { t } = useTranslation();
   const item = detail.case;
   const info = detail.information;
@@ -135,7 +138,7 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
                 size="xs"
                 className="text-content-tertiary"
               />
-              {EXCEPTION_META[item.exceptionType].label}
+              {exceptionLabel(item.exceptionType, labels)}
             </span>
           </FieldRow>
 

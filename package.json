@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "check:client-hooks": "node scripts/check-client-hooks.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

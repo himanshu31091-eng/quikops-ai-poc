@@ -1,168 +1,114 @@
-# SESSION_HANDOFF
+# Session handoff
 
-> The state of play at the end of the last development session.
-> **Every session must rewrite this file before ending.** Replace the content —
-> do not append. This is a snapshot of *now*, not a history; history belongs in
-> `DECISIONS.md` and `DEVELOPMENT_STATUS.md`.
->
-> Keep every section heading below, even when a section is empty. "None this
-> session" is a useful answer; a missing heading is not.
+**Session of 2026-08-17 — deep localisation of the interface layer.**
+
+Previous state: `011b585` on `origin/main`, Sika tenant live in production, sign-in
+fixed, nav translated but the page bodies still English.
 
 ---
 
-## Session Date
+## What this session did
 
-**2026-08-15** — Phase A: the persistence foundation. The seed was made
-non-destructive, the Sika evaluation corpus was expanded across five sites,
-persona identity was mapped into the database, and the `Comment` model landed.
+The complaint that started it: switching to Spanish translated the navigation and
+left the screens English. That was accurate, and the cause was structural rather
+than a matter of missing strings — the catalogue already held most of them.
 
-**Phase B has not started and must not be started without approval.**
+Three seams were missing, and each was fixed at the seam rather than per string.
 
----
+### 1. Dates and due phrasing (`src/lib/format.ts`) — D-95
 
-## Claude Version
+`formatWhen` / `formatDue` / `formatTimestamp` now take a `FormatContext`
+(`{ t, locale }`). Month names come from date-fns' own locale, so a Spanish
+screen reads "15 ago 2026", not "15 Aug 2026". `useFormat()` is the client half;
+`getTranslations()` already satisfied the same shape on the server.
 
-**Claude Opus 5** (`claude-opus-5`), Claude Code in the VS Code extension.
+`formatNumber` groups by the tenant's currency locale, so a euro tenant no longer
+mixes "512.900 €" with "1,234".
 
----
+### 2. Enum labels (`src/domain/labels.ts`, new) — D-96
 
-## Read this before anything else
+Priority, status, exception type, role, detection source, connector health and run
+status resolve through the catalogue **at the render site**, falling back to the
+authored English. The meta tables keep their English labels because the query
+layer, the exporters and the filter builders read them too.
 
-**The application still has no write path to the database.** Not one
-`prisma.*.create` or `.update` outside the seed; the only two server actions
-write cookies. Every edit a user makes in the portal — cases, actions,
-evidence, verification, comments — lives in React state and dies on refresh.
+### 3. Module-scope tables
 
-Phase A did not change that, and was not meant to. It built the floor Phase B
-stands on. **Do not tell a client their data will persist yet.**
+Column-header and menu tables evaluated at import became builders taking the
+translator — `buildHeaders(t)`, `buildMenus(t)`, `buildColumns(t)`. Work Manager's
+KPI tiles and active-filter chips (`computeKpis`, `buildFilterChips`) take the
+translator as an argument and stay pure.
 
----
+### Also fixed
 
-## How to run the demo — unchanged
-
-**Leave `USE_DATABASE` unset.** Work Manager and Case Detail read Neon when it
-is on; Dashboard, Analytics and Reports do not. Turning it on in front of a
-client shows a dashboard of eight cases above a queue of three.
-
-| Case | Shows |
-|---|---|
-| `QO-PA-2026-00421` | Problem, priority score, ownership, corrective actions, evidence, timeline, audit |
-| `QO-PA-2026-00418` | The KPI movement and the independent verification decision |
-
----
-
-## What changed this session
-
-**The seed can no longer destroy anything (D-91).** `prisma.tenant.deleteMany({})`
-cascaded to every case, action, evidence row and audit entry in the database.
-It is gone, along with every other delete. Reference data upserts; transactional
-data is created once and never written again. Three consecutive runs: run one
-created the new corpus, runs two and three created nothing and left the totals
-identical.
-
-**`seedKey` separates demo data from client data (D-92).** Every seeded row
-carries one; every row a person creates has `seedKey = null`. Rows from the old
-seed were adopted — matched once on their business key, stamped, otherwise
-untouched. Proven by planting a client case, a client comment and a client edit
-to a *seeded* case, re-running the seed, and finding all three intact.
-
-**Persona identity resolves in the database (D-93).** `User.personaKey` plus
-`findUserByPersona(tenantId, personaKey)`. All 19 personas across both tenants
-resolve 1:1, no duplicates, no key shared across tenants. `getSessionUser()` is
-database-aware and does **not** fall back to a fixture identity in database
-mode.
-
-**`Comment` model added (D-94).** Tenant- and case-scoped, author relation,
-`createdAt`, nullable `editedAt`. Schema only — the write path is Phase B.
-
-**The Sika evaluation corpus grew** from 1 site / 1 case to **5 sites / 14
-cases**, construction-chemicals throughout: admixtures, membranes, adhesives,
-resins, sealants, mortars. Five plants, four priority bands, eight exception
-types, seven statuses, both assigned and unassigned work. Sites 2 and 3 sit in
-Spanish- and Portuguese-speaking countries, so the language switch has data
-behind it. Every name is invented; every address is `example.com`.
-
-**Localization was measured, not translated.** `.claude/LOCALIZATION_PLAN.md`.
+- **Icon names were being translated.** `<Icon name={t("cd.reply")}>` renders no
+  glyph in Spanish. Four sites fixed; one of them (`comments-card.tsx`) was
+  already committed in `011b585`, so this is a live bug repaired, not one
+  introduced. Audited every identifier-shaped prop; no others.
+- **A hardcoded "Perma Construction Aids"** in `data-lineage-card.tsx`. It is a
+  client component, so it cannot read the server-only tenant env — on the client
+  it would always have named the fallback tenant. Now a tenant-neutral catalogue
+  string.
 
 ---
 
-## Database state (Neon)
+## Verification
 
-| | |
-|---|---|
-| Tenants | 2 — `perma-demo` (3 cases), `sika-evaluation` (14 cases) |
-| Users | 19, every one carrying a `personaKey` |
-| Plants | 8 — 3 Perma, 5 Sika |
-| Cases / actions / evidence | 17 / 27 / 17 |
-| Measurements / verifications / comments / audit | 17 / 4 / 5 / 18 |
-| Rows with `seedKey = null` | **0** — no client data exists yet |
-| Migrations | 2, both applied; the Phase A one is additive only |
-
----
-
-## Known gaps — state these plainly, do not paper over them
-
-- **Nothing a user does in the portal persists.** The single most important
-  fact about this build. Phase B.
-- **Evidence upload is an in-memory `objectUrl`.** Persisting it needs blob
-  storage, not just a row.
-- **Sika cannot be shown their own environment.** `DEFAULT_TENANT_ID` is
-  `perma-demo`, there is no selector and no environment override, and reaching
-  Sika data means database mode — which breaks Dashboard coherence. Blocked
-  behind the Dashboard/Analytics/Reports migration (Phase C).
-- **Translation stops at the navigation.** Exactly two files call `t()`.
-  ≈ 827 UI strings remain. See `LOCALIZATION_PLAN.md`.
-- **Administration is read-only.**
-- **Segregation of duties is enforced in the UI only.** `decideVerification`
-  has no actor check. The identity mapping now makes one possible; it is not
-  written yet.
-- **No approved Sika logo**, so `logoPath` is null and the shell falls back to
-  the QuikOps mark.
-- **Analytics 90-day trends are static series.**
-
----
-
-## Verification record — Phase A
+Everything below was run against a local production build (`next start`) with
+`USE_DATABASE=true QUIKOPS_TENANT=sika-evaluation`, i.e. production's own config.
 
 | Gate | Result |
 |---|---|
-| `prisma validate` | pass |
-| `prisma migrate deploy` | 1 migration applied, additive only — no DROP, no DELETE, no destructive ALTER |
-| Seed dry run (transaction, rolled back) | reported the plan; wrote nothing |
-| Seed run 1 | created 13 cases + supporting rows; adopted 4 cases and 29 child rows |
-| Seed runs 2 and 3 | **created nothing**, totals identical |
-| Client-data safety | planted case, comment and an edit to a seeded case → all 3 survived a reseed |
-| Tenant isolation | 0 rows visible across the boundary in either direction; 0 persona keys shared |
-| Persona resolution | 9/9 Perma, 10/10 Sika, no duplicates |
-| `tsc --noEmit` (tsbuildinfo deleted first) | pass |
+| `npx tsc --noEmit` | 0 errors (`tsconfig.tsbuildinfo` deleted first) |
 | `npx eslint .` | 0 errors, 0 warnings |
-| `next build` | 19/19 entries |
-| Runtime, `USE_DATABASE=true` | `/work` `/my-work` `/dashboard` `/login` → 200; the queue rendered exactly the 3 Neon cases; a fixture-only case correctly read "Case not found"; a cross-tenant case was invisible |
+| `npm run build` | ✓ 19/19 |
+| Client hook in a server component | 0 (see the check below) |
+| Render errors across 12 routes × 3 locales | 0 |
+| Perma leakage, **full payload**, 13 routes × 3 locales | **0** |
+| Fixture mode (`USE_DATABASE` unset) | 11/11 routes 200, Perma plants + ₹, Spanish chrome works |
+| Untranslated interface strings, es | 609 → 527 |
+| Untranslated interface strings, pt-BR | 526 — **at parity with Spanish** |
 
-**Method note, again:** a case number appearing in the HTML is not proof it was
-rendered — fixture strings ride along in the RSC payload. The valid
-discriminators are the `<title>` and the rendered `href="/work/…"` links.
+### The check worth keeping
+
+`check-client-hooks.mjs` (in the session scratchpad) flags any `.tsx` that calls a
+client hook without `"use client"`. `tsc` cannot see this class of bug and
+`next build` does not fail on it — the page throws at request time and the error
+boundary shows a fallback. **Twice this session that made a coverage number
+improve while a screen had actually stopped rendering.** Worth moving into the
+repo as a build step.
+
+### Method note
+
+A coverage figure is only meaningful when every screen is confirmed to be
+rendering. Check the server log for `⨯` and check each screen's own string count
+before believing any number. The dashboard reporting 25 visible strings instead of
+168 was a crash, not progress.
 
 ---
 
-## Not done, deliberately
+## What is deliberately still English — D-97
 
-- **Not pushed, not deployed.** `origin/main` is still `011b585`. Pushing
-  triggers a Vercel production build from `main`, and Phase A has not been
-  approved for production. The commit sits on `main` locally.
-- Phase B (server actions, rewiring the Case Detail reducer) — not started.
-- Phase C (migrating the other 13 query modules) — not started.
+Interface is translated. Content is not, and each exclusion has its own reason:
+the seeded operational corpus (case titles, root causes, playbook steps,
+connector fixtures, report definitions) is content needing a domain translator;
+`src/ai/prompts/*` is sent to Claude rather than shown, and interpolating into the
+frozen layers would kill prompt caching; Help Centre article bodies are a separate
+deliverable; route metadata is the browser tab title; CSV column values are what a
+client sorts a spreadsheet on.
+
+**The remaining ~527 counted strings are overwhelmingly those categories** —
+`src/data/fixtures/*`, `src/help/*`, `src/ai/prompts/*` — not unfinished chrome.
 
 ---
 
 ## Resume from here
 
 1. Read `CLAUDE.md`, then `.claude/` in the order it gives.
-2. **Kill stale dev servers before verifying anything.**
-3. `USE_DATABASE` stays off by default.
-4. Delete `tsconfig.tsbuildinfo` before trusting a typecheck.
-5. **Ask before pushing.** A push to `main` deploys to production.
-6. Phase B, in order: server actions for case → actions → evidence → comments →
-   verification, each writing its audit row in the same transaction; then
-   rewire `use-case-detail.ts`; then the acceptance test the client asked for
-   (create through the UI, refresh, log out and in, restart, still there).
+2. **Kill stale servers before verifying anything.** `npm run build` wipes `.next`.
+3. Delete `tsconfig.tsbuildinfo` before trusting a typecheck.
+4. Run the client-hook check after any codemod that inserts hooks.
+5. Highest-value remaining localisation, in order: Help Centre headings and
+   summaries; the derived narrative in `src/data/queries/*` and
+   `features/*/utils/*-derive.ts` (generated sentences, template-shaped, ours to
+   translate); then the corpus, if and only if a domain translator is available.

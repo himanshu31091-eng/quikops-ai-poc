@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/src/lib/cn";
@@ -51,6 +52,7 @@ function FilterMenuInner<Field extends string>({
   onClear,
   searchable = false,
 }: FilterMenuProps<Field>) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
 
@@ -107,7 +109,7 @@ function FilterMenuInner<Field extends string>({
               onClick={() => onClear(field)}
               className="text-2xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover"
             >
-              Clear
+              {t("workManager.clear")}
             </button>
           ) : null}
         </div>

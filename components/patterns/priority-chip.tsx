@@ -75,7 +75,7 @@ export function PriorityChip({
               Priority score {total.toFixed(1)}
             </p>
             <p className="text-2xs text-content-tertiary">
-              Deterministic rule set — not AI generated
+              {t("ui.deterministicRuleSetNotAi")}
             </p>
           </div>
         </div>

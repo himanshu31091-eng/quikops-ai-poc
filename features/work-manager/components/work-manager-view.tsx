@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/patterns/icon";
 import { ActionToast } from "@/components/patterns/action-toast";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import type { WorkPortfolioMetrics } from "@/src/data/queries/work";
 import type { CaseListItem, Plant, User } from "@/src/domain/types";
@@ -61,6 +61,7 @@ export function WorkManagerView({
   initialState,
   persistent,
 }: WorkManagerViewProps) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const router = useRouter();
   const [createOpen, setCreateOpen] = React.useState(false);
@@ -177,13 +178,13 @@ export function WorkManagerView({
         docKey="work"
         meta={
           <>
-            <MetaChip icon="Clock">Data as at {formatTimestamp(DEMO_NOW)} UTC</MetaChip>
+            <MetaChip icon="Clock">{t("shell.dataAsAt", { when: formatTimestamp(DEMO_NOW, fmt) })}</MetaChip>
             <MetaChip icon="Rows3">
               {formatNumber(manager.allRows.length)} cases across{" "}
               {formatNumber(plants.length)} plants
             </MetaChip>
             <MetaChip icon="ShieldCheck">
-              Priority scored by rule set · every change audit logged
+              {t("workManager.priorityScoredByRuleSet")}
             </MetaChip>
           </>
         }
@@ -245,7 +246,7 @@ export function WorkManagerView({
           />
 
           <section
-            aria-label="Operational cases"
+            aria-label={t("workManager.operationalCases")}
             aria-busy={manager.isStale}
             className="min-w-0 overflow-hidden rounded-lg border border-line bg-surface"
           >

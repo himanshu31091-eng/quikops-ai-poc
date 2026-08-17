@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { roleShortLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { signInAsPersona } from "@/src/auth/session-actions";
-import { ROLE_META } from "@/src/config/app-config";
 import type { User } from "@/src/domain/types";
 import { cn } from "@/src/lib/cn";
 import { initials } from "@/src/lib/format";
@@ -23,6 +25,8 @@ import { initials } from "@/src/lib/format";
  * presenter ends up in the wrong role.
  */
 export function PersonaSignIn({ personas }: { personas: User[] }) {
+  const labels = useLabels();
+  const { t } = useTranslation();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   // A ref, not the state, is the guard: two clicks can be dispatched before a
@@ -72,14 +76,14 @@ export function PersonaSignIn({ personas }: { personas: User[] }) {
               </span>
               <span className="block truncate text-2xs text-content-tertiary">
                 {isPending ? (
-                  <span className="anim-fade text-accent">Signing in…</span>
+                  <span className="anim-fade text-accent">{t("shell.signingIn")}</span>
                 ) : (
                   persona.jobTitle
                 )}
               </span>
             </span>
             <span className="shrink-0 rounded-sm border border-line bg-surface-subtle px-1.5 py-0.5 text-2xs font-medium text-content-secondary">
-              {ROLE_META[persona.role].short}
+              {roleShortLabel(persona.role, labels)}
             </span>
             <Icon
               name="ArrowRight"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { RouteError } from "@/components/patterns/route-error";
 
 /** Error boundary for My Work; the shared `RouteError` panel does the rest. */
@@ -11,14 +12,15 @@ export default function MyWorkError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     console.error("[my-work]", error);
   }, [error]);
 
   return (
     <RouteError
-      title="Your work could not be loaded"
-      description="The case store did not respond. No assignment or action has been changed."
+      title={t("page.yourWorkCouldNotBe")}
+      description={t("page.theCaseStoreDidNot2")}
       {...(error.digest ? { digest: error.digest } : {})}
       onRetry={reset}
       fallbackHref="/work"

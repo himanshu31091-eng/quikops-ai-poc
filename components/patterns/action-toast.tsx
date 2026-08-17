@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { cn } from "@/src/lib/cn";
 import { Icon } from "./icon";
 
@@ -41,6 +42,7 @@ export function ActionToast({
   placement = "inline",
   sessionOnly = true,
 }: ActionToastProps) {
+  const { t } = useTranslation();
   const success = tone === "success";
 
   const body = (
@@ -89,7 +91,7 @@ export function ActionToast({
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="Dismiss"
+        aria-label={t("ui.dismiss")}
         className="shrink-0 rounded-sm text-content-tertiary transition-colors duration-150 hover:text-content"
       >
         <Icon name="X" size="sm" />

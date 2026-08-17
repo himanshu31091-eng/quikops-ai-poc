@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -158,6 +159,7 @@ export function LiveSessionChip({ cases }: { cases: CaseListItem[] }) {
  * sentence here and the sentence there quote the same rate.
  */
 export function LiveFlowVerdict({ cases }: { cases: CaseListItem[] }) {
+  const { t } = useTranslation();
   const { state } = useExecutionStore();
 
   const { ledger, forecast, narrative } = React.useMemo(() => {
@@ -225,7 +227,7 @@ export function LiveFlowVerdict({ cases }: { cases: CaseListItem[] }) {
 
       <Button variant="secondary" size="sm" asChild className="shrink-0 print:hidden">
         <Link href="/analytics">
-          See the flow
+          {t("dashboard.seeTheFlow")}
           <Icon name="ArrowRight" size="sm" />
         </Link>
       </Button>
@@ -252,6 +254,7 @@ export function DashboardExportButton({
   plantHealth: PlantHealth[];
   cases: CaseListItem[];
 }) {
+  const { t } = useTranslation();
   const { state } = useExecutionStore();
 
   const onExport = React.useCallback(() => {
@@ -260,7 +263,7 @@ export function DashboardExportButton({
 
     exportSectionsCsv("executive-dashboard", "Executive Dashboard", [
       {
-        title: "Headline indicators",
+        title: t("dash.headlineIndicators"),
         csv: buildCsv(liveKpis, [
           { header: "Indicator", value: (row) => row.label },
           { header: "Value", value: (row) => String(row.value) },
@@ -270,7 +273,7 @@ export function DashboardExportButton({
         ]),
       },
       {
-        title: "Execution performance",
+        title: t("dash.executionPerformance"),
         csv: buildCsv(
           [
             { measure: "Mean time to resolve (hours)", value: liveMetrics.mttrHours },
@@ -287,7 +290,7 @@ export function DashboardExportButton({
         ),
       },
       {
-        title: "Plant health",
+        title: t("dashboard.plantHealth"),
         csv: buildCsv(plantHealth, [
           { header: "Plant", value: (row) => row.plant.code },
           { header: "Name", value: (row) => row.plant.name },
@@ -299,12 +302,12 @@ export function DashboardExportButton({
         ]),
       },
     ]);
-  }, [cases, kpis, metrics, plantHealth, state]);
+  }, [cases, kpis, metrics, plantHealth, state, t]);
 
   return (
     <Button variant="secondary" size="md" onClick={onExport}>
       <Icon name="Download" size="sm" />
-      Export
+      {t("common.export")}
     </Button>
   );
 }

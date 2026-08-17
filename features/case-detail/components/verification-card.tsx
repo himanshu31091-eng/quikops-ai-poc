@@ -1,7 +1,7 @@
 "use client";
 
 import { KPI_LABEL } from "@/src/config/app-config";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import * as React from "react";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
@@ -79,6 +79,7 @@ export const VerificationCard = React.memo(function VerificationCard({
   onRequest,
   onDecide,
 }: VerificationCardProps) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const decisions = React.useMemo(() => buildDecisions(t), [t]);
   const [decision, setDecision] = React.useState<VerificationDecision | null>(null);
@@ -220,7 +221,7 @@ export const VerificationCard = React.memo(function VerificationCard({
             className="mt-0.5 text-2xs text-content-tertiary"
             title={formatTimestamp(verification.requestedAt)}
           >
-            {formatWhen(verification.requestedAt, DEMO_NOW)}
+            {formatWhen(verification.requestedAt, DEMO_NOW, fmt)}
           </p>
         </div>
 
@@ -234,7 +235,7 @@ export const VerificationCard = React.memo(function VerificationCard({
           </p>
           <p className="mt-0.5 text-2xs text-content-tertiary">
             {decided && verification.decidedAt
-              ? `Decided ${formatWhen(verification.decidedAt, DEMO_NOW)}`
+              ? `Decided ${formatWhen(verification.decidedAt, DEMO_NOW, fmt)}`
               : "Decision pending"}
           </p>
         </div>

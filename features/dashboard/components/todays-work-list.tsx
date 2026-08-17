@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useFormat } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { StatusBadge } from "@/components/patterns/status-badge";
 import { ACTION_STATUS_META, PRIORITY_META } from "@/src/config/app-config";
@@ -21,6 +24,7 @@ const ORIGIN_LABEL = {
 } as const;
 
 export function TodaysWorkList({ actions }: { actions: ActionItem[] }) {
+  const fmt = useFormat();
   return (
     <ul className="divide-y divide-line">
       {actions.map((action) => {
@@ -67,7 +71,7 @@ export function TodaysWorkList({ actions }: { actions: ActionItem[] }) {
                     overdue ? "font-medium text-critical" : "text-content-tertiary",
                   )}
                 >
-                  {formatDue(action.dueAt, DEMO_NOW)}
+                  {formatDue(action.dueAt, DEMO_NOW, fmt)}
                 </span>
               </div>
             </div>

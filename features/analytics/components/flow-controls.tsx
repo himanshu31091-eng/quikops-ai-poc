@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/patterns/icon";
+import { useTranslation } from "@/src/i18n/provider";
 import { FLOW_HORIZONS, type FlowHorizon, type FlowUnit } from "@/src/domain/flow-balance";
 import { cn } from "@/src/lib/cn";
 
@@ -60,11 +61,12 @@ export function FlowControls({
   onHorizonChange: (horizon: FlowHorizon) => void;
   onUnitChange: (unit: FlowUnit) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-2 print:hidden">
       <div
         role="group"
-        aria-label="Time horizon"
+        aria-label={t("analytics.timeHorizon")}
         className="flex items-center gap-0.5 rounded-md border border-line bg-surface-hover p-0.5"
       >
         {FLOW_HORIZONS.map((entry) => (
@@ -81,27 +83,27 @@ export function FlowControls({
 
       <div
         role="group"
-        aria-label="Unit of measure"
+        aria-label={t("analytics.unitOfMeasure")}
         className="flex items-center gap-0.5 rounded-md border border-line bg-surface-hover p-0.5"
       >
         <Segment
           active={unit === "count"}
           onClick={() => onUnitChange("count")}
-          label="Measure in case count"
+          label={t("analytics.measureInCaseCount")}
         >
           <span className="flex items-center gap-1">
             <Icon name="Rows3" size="xs" />
-            Cases
+            {t("shell.cases")}
           </span>
         </Segment>
         <Segment
           active={unit === "value"}
           onClick={() => onUnitChange("value")}
-          label="Measure in revenue exposure"
+          label={t("analytics.measureInRevenueExposure")}
         >
           <span className="flex items-center gap-1">
             <Icon name="DollarSign" size="xs" />
-            Exposure
+            {t("analytics.exposure")}
           </span>
         </Segment>
       </div>

@@ -1,8 +1,36 @@
 import { formatDistanceStrict, differenceInCalendarDays, format } from "date-fns";
+import { de, enUS, es, fr, ja, ptBR } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
 import { CURRENCY_LOCALE, CURRENCY_LOCALES_BY_CODE, DEFAULT_CURRENCY } from "./constants";
 
 const FULL_CURRENCY_THRESHOLD = 10_000_000;
 const RELATIVE_DATE_WINDOW_DAYS = 7;
+
+/**
+ * What the date helpers need in order to speak the reader's language.
+ *
+ * Passed in rather than looked up, because this module imports no framework and
+ * must stay callable from `src/domain`, a server component and a client
+ * component alike. Both translators satisfy it structurally: `useTranslation()`
+ * on the client and `getTranslations()` on the server.
+ */
+export interface FormatContext {
+  t: (key: string, params?: Record<string, string | number>) => string;
+  locale: string;
+}
+
+const DATE_LOCALES: Record<string, DateFnsLocale> = {
+  en: enUS,
+  es,
+  "pt-BR": ptBR,
+  de,
+  fr,
+  ja,
+};
+
+function dateLocale(locale: string): DateFnsLocale {
+  return DATE_LOCALES[locale] ?? enUS;
+}
 
 /**
  * Money, in the reader's own convention.
@@ -37,9 +65,14 @@ export function formatMoney(
   }).format(amount);
 }
 
-/** Bare number, thousands-separated. Used inside table cells. */
+/**
+ * Bare number, thousands-separated. Used inside table cells.
+ *
+ * Grouped by the tenant's own currency locale rather than `en-US`, so a euro
+ * tenant does not read "512.900 €" in one column and "1,234" in the next.
+ */
 export function formatNumber(value: number, fractionDigits = 0): string {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(localeForCurrency(DEFAULT_CURRENCY), {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   }).format(value);
@@ -66,12 +99,17 @@ export function formatDelta(
  * Relative under 7 days ("2d ago"), absolute beyond ("2 Aug 2026").
  * Deterministic against a supplied `now` so server and client agree and
  * hydration never mismatches.
+ *
+ * The unit abbreviations are collapsed from date-fns' English output before the
+ * catalogue wraps them, because "2d" is read the same in every language this
+ * product ships — it is the surrounding phrasing that changes, and that is what
+ * `time.ago` carries.
  */
-export function formatWhen(value: Date | string, now: Date): string {
+export function formatWhen(value: Date | string, now: Date, fmt: FormatContext): string {
   const date = typeof value === "string" ? new Date(value) : value;
   const days = Math.abs(differenceInCalendarDays(now, date));
   if (days <= RELATIVE_DATE_WINDOW_DAYS) {
-    return `${formatDistanceStrict(date, now, { roundingMethod: "floor" })} ago`
+    const distance = formatDistanceStrict(date, now, { roundingMethod: "floor" })
       .replace(" minutes", "m")
       .replace(" minute", "m")
       .replace(" hours", "h")
@@ -80,24 +118,27 @@ export function formatWhen(value: Date | string, now: Date): string {
       .replace(" day", "d")
       .replace(" seconds", "s")
       .replace(" second", "s");
+    return fmt.t("time.ago", { value: distance });
   }
-  return format(date, "d MMM yyyy");
+  return format(date, "d MMM yyyy", { locale: dateLocale(fmt.locale) });
 }
 
 /** Due-date phrasing that reads naturally in a task list. */
-export function formatDue(value: Date | string, now: Date): string {
+export function formatDue(value: Date | string, now: Date, fmt: FormatContext): string {
   const date = typeof value === "string" ? new Date(value) : value;
   const days = differenceInCalendarDays(date, now);
-  if (days < 0) return `${Math.abs(days)}d overdue`;
-  if (days === 0) return "Due today";
-  if (days === 1) return "Due tomorrow";
-  if (days <= RELATIVE_DATE_WINDOW_DAYS) return `Due in ${days}d`;
-  return `Due ${format(date, "d MMM")}`;
+  if (days < 0) return fmt.t("due.overdue", { days: Math.abs(days) });
+  if (days === 0) return fmt.t("due.today");
+  if (days === 1) return fmt.t("due.tomorrow");
+  if (days <= RELATIVE_DATE_WINDOW_DAYS) return fmt.t("due.inDays", { days });
+  return fmt.t("due.onDate", {
+    date: format(date, "d MMM", { locale: dateLocale(fmt.locale) }),
+  });
 }
 
-export function formatTimestamp(value: Date | string): string {
+export function formatTimestamp(value: Date | string, fmt?: FormatContext): string {
   const date = typeof value === "string" ? new Date(value) : value;
-  return format(date, "d MMM yyyy, HH:mm");
+  return format(date, "d MMM yyyy, HH:mm", { locale: dateLocale(fmt?.locale ?? "en") });
 }
 
 export function formatClock(value: Date | string): string {

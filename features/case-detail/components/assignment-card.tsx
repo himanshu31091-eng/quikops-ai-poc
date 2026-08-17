@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { caseStatusLabel, priorityLabel, roleLabel } from "@/src/domain/labels";
 import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { OwnerAvatar } from "@/components/patterns/owner-avatar";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
-import { CASE_STATUS_META, PRIORITY_META, ROLE_META } from "@/src/config/app-config";
 import { CASE_STATUSES, PRIORITY_BANDS } from "@/src/domain/types";
 import type { CaseStatus, PriorityBand, User } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
@@ -64,6 +65,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
   onSetStatus,
   onAddNote,
 }: AssignmentCardProps) {
+  const labels = useLabels();
   const { t } = useTranslation();
   const [note, setNote] = React.useState("");
   const sla = computeSla(session.dueAt, session.status, session.priorityBand, DEMO_NOW);
@@ -101,7 +103,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
             <option value="">{t("cd.unassigned")}</option>
             {users.map((user) => (
               <option key={user.id} value={user.id}>
-                {user.name} — {ROLE_META[user.role].label}
+                {user.name} — {roleLabel(user.role, labels)}
               </option>
             ))}
           </select>
@@ -129,7 +131,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
               .filter((user) => user.id !== session.ownerId)
               .map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name} — {ROLE_META[user.role].label}
+                  {user.name} — {roleLabel(user.role, labels)}
                 </option>
               ))}
           </select>
@@ -161,7 +163,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
                   : "text-content-tertiary",
             )}
           >
-            {sla.label} · {sla.targetHours}h target for the {PRIORITY_META[session.priorityBand].label.toLowerCase()} band
+            {sla.label} · {sla.targetHours}h target for the {priorityLabel(session.priorityBand, labels).toLowerCase()} band
           </p>
         </div>
 
@@ -175,7 +177,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
           >
             {PRIORITY_BANDS.map((band) => (
               <option key={band} value={band}>
-                {PRIORITY_META[band].label}
+                {priorityLabel(band, labels)}
               </option>
             ))}
           </select>
@@ -184,7 +186,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
               <>{t("cd.priorityHint")}</>
             ) : (
               <span className="font-medium text-high-content">
-                Overridden — the rule set scored this {PRIORITY_META[scoredBand].label.toLowerCase()}.
+                Overridden — the rule set scored this {priorityLabel(scoredBand, labels).toLowerCase()}.
               </span>
             )}
           </p>
@@ -205,7 +207,7 @@ export const AssignmentCard = React.memo(function AssignmentCard({
                 : [...MANUAL_STATUSES, session.status]
               ).map((status) => (
                 <option key={status} value={status}>
-                  {CASE_STATUS_META[status].label}
+                  {caseStatusLabel(status, labels)}
                 </option>
               ))}
             </select>

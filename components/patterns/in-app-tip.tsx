@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ export function TermHint({
   term: string;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const tip = TERM_TIPS[term];
   if (!tip) return null;
 
@@ -63,7 +65,7 @@ export function TermHint({
             href={tip.learnMoreHref}
             className="mt-2 inline-flex items-center gap-1 text-2xs font-medium text-accent hover:underline"
           >
-            Read more
+            {t("ui.readMore")}
             <Icon name="ArrowRight" size="xs" />
           </Link>
         ) : null}
@@ -85,6 +87,7 @@ function DismissibleTip({
   icon: string;
   eyebrow: string;
 }) {
+  const { t } = useTranslation();
   const { isReady, isDismissed, dismiss } = useTipDismissal(tip.id);
   if (!isReady || isDismissed) return null;
 
@@ -124,7 +127,7 @@ function DismissibleTip({
         {tip.learnMoreHref ? (
           <Button variant="ghost" size="xs" asChild className="mt-1.5 -ml-2">
             <Link href={tip.learnMoreHref}>
-              Show me
+              {t("ui.showMe")}
               <Icon name="ArrowRight" size="xs" />
             </Link>
           </Button>

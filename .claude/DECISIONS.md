@@ -1311,3 +1311,86 @@ comments proves the model without pretending the feature is finished.
 ### D-37 — `.claude/` is the project memory
 Established 2026-08-06. `DEVELOPMENT_STATUS.md`, `NEXT_STEPS.md` and this file
 are updated after every completed module, before the session ends.
+
+### D-95 — `src/lib/format.ts` takes the translator, it does not reach for one
+Established 2026-08-17. `formatWhen`, `formatDue` and `formatTimestamp` produced
+English phrasing — "2d ago", "Due today", "3d overdue", "15 Aug 2026" — on every
+screen in the product, which meant a Spanish portal read Spanish navigation
+around English dates.
+
+The fix could not be a hook. `format.ts` is called from `src/domain`, from server
+components and from client components alike, so it takes a `FormatContext`
+(`{ t, locale }`) as an argument instead. Both translators satisfy that shape
+structurally: `useTranslation()` on the client, `getTranslations()` on the
+server. `useFormat()` is the client half of the contract.
+
+The unit abbreviations (`2d`, `14h`, `41m`) stay as date-fns produces them,
+because they read the same in every language this product ships; it is the
+phrasing around them that `time.ago` and the `due.*` keys carry. Month names come
+from date-fns' own locale, so "15 Aug" becomes "15 ago" rather than staying
+English inside a Spanish sentence.
+
+`formatNumber` now groups by the tenant's currency locale rather than `en-US`, so
+a euro tenant cannot read "512.900 €" in one column and "1,234" in the next.
+
+### D-96 — Enum labels resolve at the render site, never in the meta table
+Established 2026-08-17. `PRIORITY_META`, `EXCEPTION_META`, `CASE_STATUS_META`,
+`ROLE_META` and `DETECTION_SOURCE_META` are evaluated at import, long before a
+locale is known, and they are read by the query layer, the CSV exporters and the
+filter builders as well as by components. Their labels therefore cannot become
+catalogue lookups.
+
+`src/domain/labels.ts` holds the resolvers instead: `priorityLabel(band, labels)`
+and its siblings take a `LabelContext` (`{ t, messages }`) and fall back to the
+authored English when the catalogue does not carry the key. The fallback is
+deliberate — a band added to the domain before its translation is written renders
+a word a reader can act on, not a raw `priority.SOMETHING_NEW` key.
+
+`messages` is carried alongside `t` precisely so the resolver can tell a key the
+catalogue holds from one it would merely echo back.
+
+**CSV exports stay English.** An export's column values are what a client sorts
+and filters a spreadsheet on; localising them would change what a saved filter
+matches. That is a data decision, not a localisation one.
+
+### D-97 — The localisation boundary: interface yes, corpus no
+Established 2026-08-17, extending the scope note in `src/i18n/config.ts`.
+
+**Translated** — everything that is the product speaking: navigation, page
+headers and their descriptions, buttons, column headers, KPI tile labels and
+their footnotes, filter and facet labels, active-filter chips, empty states,
+toasts, dialogs, tooltips, status/priority/exception/role/connector labels, date
+and due phrasing, and the plant-scope selector.
+
+**Not translated, and each for its own reason:**
+
+| What | Why |
+|---|---|
+| The seeded operational corpus — case titles, root causes, impact statements, playbook steps, connector fixtures, report definitions | Content, not interface. Translating it needs a translator with domain context, not a string table. A production deployment carries it in the database with a locale column. |
+| `src/ai/prompts/*` | Sent to Claude, never shown. Interpolating into the frozen layers also kills prompt caching. |
+| Help Centre article bodies | Long-form product documentation; a separate deliverable from the portal chrome. |
+| Route metadata (`export const metadata`) | The browser tab title, a bookmark and a link preview — not on-screen copy. |
+| CSV export column values | See D-96. |
+| Lucide icon names, `dataKey`s, field identifiers | Identifiers. A translated icon name renders no glyph. |
+
+Stating the boundary is the point. A client who switches to Spanish and finds
+their own case titles still in English has seen a system behaving correctly; one
+who is told "fully multilingual" and finds half a screen English has not.
+
+### D-98 — A client hook in a server component fails at request time, not at build
+Established 2026-08-17, after making the same mistake twice in one session.
+
+`tsc` cannot see it and `next build` does not fail on it: the page compiles,
+renders, throws when requested, and the error boundary shows a fallback. From the
+outside that reads as *a screen with less on it* — which is exactly how it got
+past a coverage sweep that counted fewer untranslated strings and called it
+progress.
+
+Two consequences, both permanent:
+
+1. A leaf presentational component that needs the catalogue gets `"use client"`.
+   A client component still renders perfectly well from a server parent; the cost
+   is a few bytes of bundle, and the alternative is an English screen.
+2. **A coverage number that improves because a screen stopped rendering is not an
+   improvement.** Check the server log for `⨯` and check the screen's own string
+   count before believing any figure.

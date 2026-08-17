@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { FilterMenu, type FilterOption } from "@/components/patterns/filter-menu";
 import { Icon } from "@/components/patterns/icon";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export function AnalyticsFilterBar({
   onExportCsv,
   onExportPdf,
 }: AnalyticsFilterBarProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-wrap items-center gap-2 print:hidden">
       <div className="flex items-center gap-0.5 rounded-md border border-line bg-surface-subtle p-0.5">
@@ -71,7 +73,7 @@ export function AnalyticsFilterBar({
       <span className="h-5 w-px bg-line" aria-hidden />
 
       <FilterMenu
-        label="Plant"
+        label={t("col.plant")}
         icon="Factory"
         field="plants"
         options={facets.plants}
@@ -80,7 +82,7 @@ export function AnalyticsFilterBar({
         onClear={onClear}
       />
       <FilterMenu
-        label="Priority"
+        label={t("col.priority")}
         icon="Target"
         field="priorities"
         options={facets.priorities}
@@ -89,7 +91,7 @@ export function AnalyticsFilterBar({
         onClear={onClear}
       />
       <FilterMenu
-        label="Exception type"
+        label={t("administration.exceptionType")}
         icon="OctagonAlert"
         field="categories"
         options={facets.categories}
@@ -102,7 +104,7 @@ export function AnalyticsFilterBar({
       {isFiltered ? (
         <Button variant="ghost" size="sm" onClick={onClearAll}>
           <Icon name="X" size="xs" />
-          Clear filters
+          {t("common.clearFilters")}
         </Button>
       ) : null}
 

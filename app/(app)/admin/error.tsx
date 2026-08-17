@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { RouteError } from "@/components/patterns/route-error";
 
 /** Error boundary for Administration; the shared `RouteError` panel does the rest. */
@@ -11,14 +12,15 @@ export default function AdministrationError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     console.error("[administration]", error);
   }, [error]);
 
   return (
     <RouteError
-      title="Configuration could not be loaded"
-      description="The configuration store did not respond. No setting has been changed."
+      title={t("page.configurationCouldNotBeLoaded")}
+      description={t("page.theConfigurationStoreDidNot")}
       {...(error.digest ? { digest: error.digest } : {})}
       onRetry={reset}
       fallbackHref="/dashboard"

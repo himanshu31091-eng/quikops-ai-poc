@@ -5,7 +5,7 @@ import { ActionToast } from "@/components/patterns/action-toast";
 import { FilterMenu } from "@/components/patterns/filter-menu";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { FirstUseTip } from "@/components/patterns/in-app-tip";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,7 @@ interface ConnectorHealthViewProps {
 }
 
 export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewProps) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const api = useConnectorHealth(data, sessionUser);
   const { model, filters, selectConnector } = api;
@@ -121,7 +122,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
               <Icon name="Clock" size="xs" />
-              Data as at {formatTimestamp(DEMO_NOW)} UTC
+              {t("shell.dataAsAt", { when: formatTimestamp(DEMO_NOW, fmt) })}
             </span>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
               <Icon name="PlugZap" size="xs" />
@@ -140,7 +141,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
           <>
             <Button variant="secondary" size="md" onClick={onExport}>
               <Icon name="Download" size="sm" />
-              Export
+              {t("common.export")}
             </Button>
             <Button
               variant="secondary"
@@ -149,7 +150,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
               disabled={api.isRefreshing}
             >
               <Icon name="RefreshCw" size="sm" className={cn(api.isRefreshing && "animate-spin")} />
-              Refresh
+              {t("common.refresh")}
             </Button>
           </>
         }
@@ -164,14 +165,14 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
           <input
             value={filters.search}
             onChange={(event) => api.setSearch(event.target.value)}
-            placeholder="Search connectors, systems, owners"
-            aria-label="Search connectors"
+            placeholder={t("connectorHealth.searchConnectorsSystemsOwners")}
+            aria-label={t("connectorHealth.searchConnectors")}
             className="w-full bg-transparent text-xs text-content outline-none placeholder:text-content-tertiary"
           />
         </div>
 
         <FilterMenu
-          label="Connector"
+          label={t("connectorHealth.connector")}
           icon="PlugZap"
           field="connectorIds"
           options={api.facets.connectorIds}
@@ -181,7 +182,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
           searchable
         />
         <FilterMenu
-          label="Run status"
+          label={t("connectorHealth.runStatus")}
           icon="Activity"
           field="statuses"
           options={api.facets.statuses}
@@ -193,14 +194,14 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
         {model.isFiltered ? (
           <Button variant="ghost" size="sm" onClick={api.clearFilters}>
             <Icon name="X" size="xs" />
-            Clear filters
+            {t("common.clearFilters")}
           </Button>
         ) : null}
 
         {selected ? (
           <span className="ml-auto flex items-center gap-1.5 rounded-sm border border-accent-line bg-accent-subtle px-2 py-1 text-2xs text-accent-content">
             Scoped to {selected.name}
-            <button type="button" onClick={clearSelection} aria-label="Clear connector scope">
+            <button type="button" onClick={clearSelection} aria-label={t("connectorHealth.clearConnectorScope")}>
               <Icon name="X" size="xs" />
             </button>
           </span>
@@ -208,7 +209,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
       </div>
 
       {/* KPIs */}
-      <section aria-label="Connector indicators">
+      <section aria-label={t("connectorHealth.connectorIndicators")}>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {model.kpis.map((kpi) => (
             <KpiTile key={kpi.key} kpi={kpi} onSelect={api.setScope} />
@@ -227,8 +228,8 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
 
       {/* Connector overview */}
       <SectionCard
-        title="Connector overview"
-        subtitle="Health, last and next sync, and throughput per feed"
+        title={t("connectorHealth.connectorOverview")}
+        subtitle={t("connectorHealth.healthLastAndNextSync")}
         icon="PlugZap"
       >
         <ConnectorCards
@@ -245,8 +246,8 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
-            title="Ingestion funnel"
-            subtitle="What arrived, and what became work"
+            title={t("connectorHealth.ingestionFunnel")}
+            subtitle={t("connectorHealth.whatArrivedAndWhatBecame")}
             icon="Filter"
             className="h-full"
           >
@@ -258,8 +259,8 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
 
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
-            title="Dead-letter queue"
-            subtitle="Messages received but never delivered downstream"
+            title={t("connectorHealth.deadLetterQueue")}
+            subtitle={t("connectorHealth.messagesReceivedButNeverDelivered")}
             icon="OctagonAlert"
             flush
             className="h-full"
@@ -277,7 +278,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
 
       {/* Sync history */}
       <SectionCard
-        title="Sync history"
+        title={t("connectorHealth.syncHistory")}
         subtitle={
           selected
             ? `Recent runs for ${selected.name}`
@@ -298,7 +299,7 @@ export function ConnectorHealthView({ data, sessionUser }: ConnectorHealthViewPr
 
       {/* Field mapping */}
       <SectionCard
-        title="Field mapping"
+        title={t("connectorHealth.fieldMapping")}
         subtitle={
           selected
             ? `Source-to-target mapping for ${selected.name}`

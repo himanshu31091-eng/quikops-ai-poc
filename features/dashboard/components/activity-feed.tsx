@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useLabels } from "@/src/i18n/provider";
+import { roleShortLabel } from "@/src/domain/labels";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
-import { ROLE_META } from "@/src/config/app-config";
 import type { ActivityEvent } from "@/src/domain/types";
 import { DEMO_NOW } from "@/src/lib/constants";
 import { formatWhen } from "@/src/lib/format";
@@ -32,6 +36,9 @@ const EVENT_META: Record<
 };
 
 export function ActivityFeed({ events }: { events: ActivityEvent[] }) {
+  const labels = useLabels();
+  const fmt = useFormat();
+  const { t } = useTranslation();
   return (
     <ol className="relative space-y-0">
       {events.map((event, index) => {
@@ -66,14 +73,14 @@ export function ActivityFeed({ events }: { events: ActivityEvent[] }) {
                 </span>
                 {event.actorRole ? (
                   <span className="text-2xs text-content-tertiary">
-                    {ROLE_META[event.actorRole].short}
+                    {roleShortLabel(event.actorRole, labels)}
                   </span>
                 ) : (
-                  <span className="text-2xs text-content-tertiary">Automated</span>
+                  <span className="text-2xs text-content-tertiary">{t("dashboard.automated")}</span>
                 )}
                 <span className="size-1 rounded-full bg-line-strong" />
                 <span className="text-2xs tabular-nums text-content-tertiary">
-                  {formatWhen(event.at, DEMO_NOW)}
+                  {formatWhen(event.at, DEMO_NOW, fmt)}
                 </span>
                 {event.caseNo ? (
                   <>

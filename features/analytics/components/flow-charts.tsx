@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import {
   Area,
   Bar,
@@ -53,6 +54,10 @@ function NetFlowTooltip({
   unit: FlowUnit;
   currency: string;
 }): (props: TooltipRenderProps<FlowPoint>) => React.ReactElement | null {
+  // Read the catalogue here rather than inside the returned renderer: this
+  // factory is called unconditionally from the chart's own render, so the hook
+  // order is stable, while Recharts may invoke the renderer any number of times.
+  const { t } = useTranslation();
   const show = (value: number): string =>
     unit === "value"
       ? formatMoney(Math.abs(value), currency, { forceCompact: true })
@@ -67,10 +72,10 @@ function NetFlowTooltip({
       <ChartTooltip
         title={point.label}
         data={[
-          { label: "Detected", value: show(point.detected), swatch: "var(--color-critical)" },
-          { label: "Resolved", value: show(point.resolved), swatch: "var(--color-success)" },
+          { label: t("col.detected"), value: show(point.detected), swatch: "var(--color-critical)" },
+          { label: t("analytics.resolved"), value: show(point.resolved), swatch: "var(--color-success)" },
           {
-            label: "Net",
+            label: t("analytics.net"),
             value: `${point.net > 0 ? "+" : point.net < 0 ? "−" : ""}${show(point.net)}`,
             swatch: "var(--color-accent)",
           },
@@ -89,6 +94,7 @@ export function NetFlowRibbon({
   unit: FlowUnit;
   currency: string;
 }) {
+  const { t } = useTranslation();
   const isValue = unit === "value";
 
   // Resolution is plotted negative so the two series diverge from the axis.
@@ -143,9 +149,9 @@ export function NetFlowRibbon({
       </div>
       <ChartLegend
         items={[
-          { label: "Detected", color: "var(--color-critical)" },
-          { label: "Resolved", color: "var(--color-success)" },
-          { label: "Net movement", color: "var(--color-accent)" },
+          { label: t("col.detected"), color: "var(--color-critical)" },
+          { label: t("analytics.resolved"), color: "var(--color-success)" },
+          { label: t("analytics.netMovement"), color: "var(--color-accent)" },
         ]}
       />
     </div>

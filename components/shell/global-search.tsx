@@ -150,7 +150,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
           {navResults.length > 0 ? (
             <>
               <p className="mt-1 px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                Navigate
+                {t("shell.navigate")}
               </p>
               {navResults.map((item) => (
                 <Link
@@ -174,7 +174,7 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
 
         <div className="flex items-center justify-between border-t border-line bg-surface-subtle px-3.5 py-2">
           <p className="text-2xs text-content-tertiary">
-            Searches cases, plants, materials and customers
+            {t("shell.searchesCasesPlantsMaterialsAnd")}
           </p>
           <p className="text-2xs text-content-tertiary">
             {cases.length} cases indexed

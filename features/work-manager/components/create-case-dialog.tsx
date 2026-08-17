@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useLabels } from "@/src/i18n/provider";
+import { exceptionLabel } from "@/src/domain/labels";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { FIELD_CLASS } from "@/components/patterns/form-field";
@@ -10,9 +13,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { EXCEPTION_META } from "@/src/config/app-config";
+  DialogTitle } from "@/components/ui/dialog";
 import { computePriority } from "@/src/domain/priority";
 import { SLA_TARGET_HOURS } from "@/src/domain/sla";
 import { EXCEPTION_TYPES, type Plant, type User } from "@/src/domain/types";
@@ -78,6 +79,8 @@ export function CreateCaseDialog({
   users,
   onCreate,
 }: CreateCaseDialogProps) {
+  const labels = useLabels();
+  const { t } = useTranslation();
   const [draft, setDraft] = React.useState<NewCaseDraft>(() => ({
     ...EMPTY_DRAFT,
     plantCode: plants[0]?.code ?? "",
@@ -135,7 +138,7 @@ export function CreateCaseDialog({
             </span>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base font-semibold text-content">
-                Create case
+                {t("work.createCase")}
               </DialogTitle>
               <DialogDescription className="mt-0.5 text-xs text-content-tertiary">
                 For work that no signal raised. Priority is scored by the same rule set
@@ -143,25 +146,25 @@ export function CreateCaseDialog({
               </DialogDescription>
             </div>
             <DialogClose asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Close">
+              <Button variant="ghost" size="icon-sm" aria-label={t("common.close")}>
                 <Icon name="X" size="sm" />
               </Button>
             </DialogClose>
           </header>
 
           <div className="max-h-[60vh] space-y-3 overflow-y-auto px-5 py-4">
-            <Field label="Title" htmlFor="case-title" error={errors.title}>
+            <Field label={t("col.title")} htmlFor="case-title" error={errors.title}>
               <input
                 id="case-title"
                 value={draft.title}
                 onChange={(event) => set("title", event.target.value)}
-                placeholder="Vendor delivery delay — RM-0000 — supplier name"
+                placeholder={t("workManager.vendorDeliveryDelayRm0000")}
                 className={FIELD_CLASS}
               />
             </Field>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Plant" htmlFor="case-plant" error={errors.plantCode}>
+              <Field label={t("col.plant")} htmlFor="case-plant" error={errors.plantCode}>
                 <select
                   id="case-plant"
                   value={draft.plantCode}
@@ -176,7 +179,7 @@ export function CreateCaseDialog({
                 </select>
               </Field>
 
-              <Field label="Category" htmlFor="case-category">
+              <Field label={t("col.category")} htmlFor="case-category">
                 <select
                   id="case-category"
                   value={draft.exceptionType}
@@ -187,13 +190,13 @@ export function CreateCaseDialog({
                 >
                   {EXCEPTION_TYPES.map((type) => (
                     <option key={type} value={type}>
-                      {EXCEPTION_META[type].label}
+                      {exceptionLabel(type, labels)}
                     </option>
                   ))}
                 </select>
               </Field>
 
-              <Field label="Material code" htmlFor="case-material">
+              <Field label={t("workManager.materialCode")} htmlFor="case-material">
                 <input
                   id="case-material"
                   value={draft.materialCode}
@@ -203,40 +206,40 @@ export function CreateCaseDialog({
                 />
               </Field>
 
-              <Field label="Material description" htmlFor="case-material-desc">
+              <Field label={t("workManager.materialDescription")} htmlFor="case-material-desc">
                 <input
                   id="case-material-desc"
                   value={draft.materialDesc}
                   onChange={(event) => set("materialDesc", event.target.value)}
-                  placeholder="Aluminium extrusion profile"
+                  placeholder={t("workManager.aluminiumExtrusionProfile")}
                   className={FIELD_CLASS}
                 />
               </Field>
 
-              <Field label="Supplier" htmlFor="case-supplier">
+              <Field label={t("case.supplier")} htmlFor="case-supplier">
                 <input
                   id="case-supplier"
                   value={draft.supplierName}
                   onChange={(event) => set("supplierName", event.target.value)}
-                  placeholder="Leave empty for internal causes"
+                  placeholder={t("workManager.leaveEmptyForInternalCauses")}
                   className={FIELD_CLASS}
                 />
               </Field>
 
-              <Field label="Customer" htmlFor="case-customer">
+              <Field label={t("case.customer")} htmlFor="case-customer">
                 <input
                   id="case-customer"
                   value={draft.customerName}
                   onChange={(event) => set("customerName", event.target.value)}
-                  placeholder="Affected customer"
+                  placeholder={t("workManager.affectedCustomer")}
                   className={FIELD_CLASS}
                 />
               </Field>
 
               <Field
-                label="Customer tier"
+                label={t("administration.customerTier")}
                 htmlFor="case-tier"
-                hint="Tier one exposure carries the heaviest priority weight."
+                hint={t("workManager.tierOneExposureCarriesThe")}
               >
                 <select
                   id="case-tier"
@@ -246,15 +249,15 @@ export function CreateCaseDialog({
                   }
                   className={FIELD_CLASS}
                 >
-                  <option value="NONE">No customer impact</option>
-                  <option value="TIER_1">Tier 1</option>
-                  <option value="TIER_2">Tier 2</option>
-                  <option value="TIER_3">Tier 3</option>
+                  <option value="NONE">{t("workManager.noCustomerImpact")}</option>
+                  <option value="TIER_1">{t("workManager.tier1")}</option>
+                  <option value="TIER_2">{t("workManager.tier2")}</option>
+                  <option value="TIER_3">{t("workManager.tier3")}</option>
                 </select>
               </Field>
 
               <Field
-                label="Revenue at risk (USD)"
+                label={t("workManager.revenueAtRiskUsd")}
                 htmlFor="case-revenue"
                 error={errors.revenueAtRisk}
               >
@@ -269,7 +272,7 @@ export function CreateCaseDialog({
               </Field>
 
               <Field
-                label="Days to promised date"
+                label={t("administration.daysToPromisedDate")}
                 htmlFor="case-days"
                 error={errors.daysToPromisedDate}
               >
@@ -284,9 +287,9 @@ export function CreateCaseDialog({
               </Field>
 
               <Field
-                label="Owner"
+                label={t("col.owner")}
                 htmlFor="case-owner"
-                hint="Leave unassigned to route it through triage."
+                hint={t("workManager.leaveUnassignedToRouteIt")}
               >
                 <select
                   id="case-owner"
@@ -294,7 +297,7 @@ export function CreateCaseDialog({
                   onChange={(event) => set("ownerId", event.target.value)}
                   className={FIELD_CLASS}
                 >
-                  <option value="">Unassigned</option>
+                  <option value="">{t("cd.unassigned")}</option>
                   {users.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.name} — {user.jobTitle}
@@ -304,13 +307,13 @@ export function CreateCaseDialog({
               </Field>
             </div>
 
-            <Field label="Description" htmlFor="case-description">
+            <Field label={t("actionCenter.description")} htmlFor="case-description">
               <textarea
                 id="case-description"
                 value={draft.description}
                 onChange={(event) => set("description", event.target.value)}
                 rows={3}
-                placeholder="What was observed, what is exposed, and what has already been tried."
+                placeholder={t("workManager.whatWasObservedWhatIs")}
                 className={cn(FIELD_CLASS, "h-auto resize-y py-2 leading-relaxed")}
               />
             </Field>
@@ -319,7 +322,7 @@ export function CreateCaseDialog({
           <footer className="flex flex-wrap items-center gap-3 border-t border-line bg-surface-subtle px-5 py-3">
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <span className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-                Scored priority
+                {t("workManager.scoredPriority")}
               </span>
               {preview ? (
                 <>
@@ -336,7 +339,7 @@ export function CreateCaseDialog({
                 </>
               ) : (
                 <span className="text-2xs text-content-tertiary">
-                  Enter revenue at risk and days to the promised date to score it.
+                  {t("workManager.enterRevenueAtRiskAnd")}
                 </span>
               )}
             </div>
@@ -344,12 +347,12 @@ export function CreateCaseDialog({
             <div className="flex shrink-0 items-center gap-2">
               <DialogClose asChild>
                 <Button variant="secondary" size="md" type="button">
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </DialogClose>
               <Button variant="primary" size="md" type="submit">
                 <Icon name="Plus" size="sm" />
-                Create case
+                {t("work.createCase")}
               </Button>
             </div>
           </footer>

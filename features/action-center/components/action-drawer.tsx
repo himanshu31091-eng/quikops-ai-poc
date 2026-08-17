@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { AssignMenu } from "@/components/patterns/assign-menu";
 import { Icon } from "@/components/patterns/icon";
@@ -85,6 +86,8 @@ export function ActionDrawer({
   onApplyRecommendation,
   recommendationApplied,
 }: ActionDrawerProps) {
+  const fmt = useFormat();
+  const { t } = useTranslation();
   const trapRef = useFocusTrap(open);
   const [tab, setTab] = React.useState<Tab>("timeline");
 
@@ -112,7 +115,7 @@ export function ActionDrawer({
       {open ? (
         <button
           type="button"
-          aria-label="Close action detail"
+          aria-label={t("actionCenter.closeActionDetail")}
           onClick={onClose}
           className="anim-fade fixed inset-0 z-40 bg-surface-inverse/25 backdrop-blur-[1px]"
         />
@@ -120,7 +123,7 @@ export function ActionDrawer({
 
       <aside
         ref={trapRef as React.RefObject<HTMLElement>}
-        aria-label="Action detail"
+        aria-label={t("actionCenter.actionDetail")}
         inert={!open}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-line bg-surface shadow-overlay",
@@ -130,7 +133,7 @@ export function ActionDrawer({
       >
         {row === null || context === null ? (
           <div className="flex flex-1 items-center justify-center p-6">
-            <p className="text-xs text-content-tertiary">No action selected.</p>
+            <p className="text-xs text-content-tertiary">{t("actionCenter.noActionSelected")}</p>
           </div>
         ) : (
           <>
@@ -161,10 +164,10 @@ export function ActionDrawer({
                       ? "From a playbook"
                       : "Raised manually"}
                   {" · due "}
-                  {formatDue(row.dueAt, DEMO_NOW)}
+                  {formatDue(row.dueAt, DEMO_NOW, fmt)}
                 </p>
               </div>
-              <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close">
+              <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("common.close")}>
                 <Icon name="X" size="sm" />
               </Button>
             </header>
@@ -177,7 +180,7 @@ export function ActionDrawer({
               {row.completionPct > 0 && row.isOpen ? (
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-2xs">
-                    <span className="text-content-tertiary">Progress</span>
+                    <span className="text-content-tertiary">{t("actionCenter.progress")}</span>
                     <span className="font-semibold tabular-nums text-content">
                       {row.completionPct}%
                     </span>
@@ -208,19 +211,19 @@ export function ActionDrawer({
                 </p>
 
                 <div className="mt-3 grid grid-cols-2 gap-2.5">
-                  <Field label="Plant">{row.context.plantName}</Field>
-                  <Field label="Category">{row.context.exceptionLabel}</Field>
-                  <Field label="Revenue at risk">
+                  <Field label={t("col.plant")}>{row.context.plantName}</Field>
+                  <Field label={t("col.category")}>{row.context.exceptionLabel}</Field>
+                  <Field label={t("case.revenueAtRisk")}>
                     {formatMoney(row.context.revenueAtRisk, row.context.currency)}
                   </Field>
-                  <Field label="Case priority">
+                  <Field label={t("actionCenter.casePriority")}>
                     {row.context.priorityScore.toFixed(1)} / 100
                   </Field>
                   {row.context.supplierName ? (
-                    <Field label="Supplier">{row.context.supplierName}</Field>
+                    <Field label={t("case.supplier")}>{row.context.supplierName}</Field>
                   ) : null}
                   {row.context.customerName ? (
-                    <Field label="Customer">{row.context.customerName}</Field>
+                    <Field label={t("case.customer")}>{row.context.customerName}</Field>
                   ) : null}
                 </div>
               </div>
@@ -247,7 +250,7 @@ export function ActionDrawer({
                 >
                   <Button variant="secondary" size="sm">
                     <Icon name="UserCog" size="sm" />
-                    Reassign
+                    {t("actionCenter.reassign")}
                   </Button>
                 </AssignMenu>
               </div>
@@ -310,7 +313,7 @@ export function ActionDrawer({
                             {event.detail}
                           </p>
                           <p className="mt-0.5 text-2xs text-content-tertiary">
-                            {event.actorName} · {formatWhen(event.at, DEMO_NOW)}
+                            {event.actorName} · {formatWhen(event.at, DEMO_NOW, fmt)}
                           </p>
                         </div>
                       </li>
@@ -321,7 +324,7 @@ export function ActionDrawer({
                 {tab === "comments" ? (
                   context.comments.length === 0 ? (
                     <p className="py-4 text-center text-2xs text-content-tertiary">
-                      No discussion on this case yet.
+                      {t("actionCenter.noDiscussionOnThisCase")}
                     </p>
                   ) : (
                     <ol className="space-y-2.5">
@@ -334,7 +337,7 @@ export function ActionDrawer({
                             <span className="font-medium text-content">
                               {comment.authorName}
                             </span>
-                            · {formatWhen(comment.at, DEMO_NOW)}
+                            · {formatWhen(comment.at, DEMO_NOW, fmt)}
                           </p>
                           <p className="mt-1 text-xs leading-relaxed text-content-secondary">
                             {comment.body}
@@ -348,7 +351,7 @@ export function ActionDrawer({
                 {tab === "attachments" ? (
                   context.evidence.length === 0 ? (
                     <p className="py-4 text-center text-2xs text-content-tertiary">
-                      No evidence attached to this case yet.
+                      {t("actionCenter.noEvidenceAttachedToThis")}
                     </p>
                   ) : (
                     <ul className="space-y-1.5">
@@ -370,7 +373,7 @@ export function ActionDrawer({
                               {file.description}
                             </p>
                             <p className="mt-0.5 text-2xs text-content-tertiary">
-                              {file.uploadedByName} · {formatWhen(file.uploadedAt, DEMO_NOW)}
+                              {file.uploadedByName} · {formatWhen(file.uploadedAt, DEMO_NOW, fmt)}
                             </p>
                           </div>
                         </li>
@@ -399,7 +402,7 @@ export function ActionDrawer({
                             ) : null}
                           </p>
                           <p className="mt-0.5 text-2xs text-content-tertiary">
-                            {formatWhen(entry.at, DEMO_NOW)} ·{" "}
+                            {formatWhen(entry.at, DEMO_NOW, fmt)} ·{" "}
                             {AUDIT_SOURCE_LABEL[entry.source].toLowerCase()}
                           </p>
                         </div>

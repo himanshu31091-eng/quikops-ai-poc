@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/patterns/empty-state";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
 import { PageHeader } from "@/components/patterns/page-header";
-import { useTranslation } from "@/src/i18n/provider";
+import { useFormat, useTranslation } from "@/src/i18n/provider";
 import { PriorityChip } from "@/components/patterns/priority-chip";
 import { ProgressBar } from "@/components/patterns/progress-bar";
 import { SectionCard } from "@/components/patterns/section-card";
@@ -39,6 +39,7 @@ const HOUR_MS = 3_600_000;
  * derived; nothing is stored twice.
  */
 export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
+  const fmt = useFormat();
   const { t } = useTranslation();
   const { state } = useExecutionStore();
 
@@ -102,7 +103,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
           <>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
               <Icon name="Clock" size="xs" />
-              Data as at {formatTimestamp(DEMO_NOW)} UTC
+              {t("shell.dataAsAt", { when: formatTimestamp(DEMO_NOW, fmt) })}
             </span>
             <span className="flex items-center gap-1.5 text-2xs text-content-tertiary">
               <Icon name="UserCog" size="xs" />
@@ -254,7 +255,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
                           )}
                         >
                           <Icon name="CalendarClock" size="xs" />
-                          {formatDue(action.dueAt, DEMO_NOW)}
+                          {formatDue(action.dueAt, DEMO_NOW, fmt)}
                         </span>
                         <span
                           className={cn(
@@ -345,6 +346,7 @@ const CaseList = React.memo(function CaseList({
   emptyTitle: string;
   emptyDescription: string;
 }) {
+  const fmt = useFormat();
   return (
     <SectionCard title={title} subtitle={subtitle} icon={icon} flush>
       {cases.length === 0 ? (
@@ -394,7 +396,7 @@ const CaseList = React.memo(function CaseList({
                       <span
                         className={cn(breached ? "font-medium text-critical" : "")}
                       >
-                        {formatDue(item.dueAt, DEMO_NOW)}
+                        {formatDue(item.dueAt, DEMO_NOW, fmt)}
                       </span>
                     </span>
                   </span>
