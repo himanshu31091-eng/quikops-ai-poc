@@ -1,5 +1,3 @@
-import { PLANT_BY_CODE } from "@/src/data/fixtures/organisation";
-
 /**
  * Plant-scope vocabulary that both the server and the browser need.
  *
@@ -7,13 +5,13 @@ import { PLANT_BY_CODE } from "@/src/data/fixtures/organisation";
  * import of a module touching next/headers pulls server-only code into the
  * browser bundle and fails the build. Same split as src/auth/session.ts.
  *
- *  is a real state, not the absence of one. Portfolio figures and
+ * `ALL_PLANTS` is a real state, not the absence of one. Portfolio figures and
  * plant figures answer different questions and must never be mixed.
  */
 export const PLANT_SCOPE_COOKIE = "qo_plant";
 export const ALL_PLANTS = "ALL";
 
-/** , or a plant code that exists. An unknown code is not trusted. */
+/** `ALL_PLANTS`, or a plant code that exists. An unknown code is not trusted. */
 export type PlantScope = string;
 
 /** True when the scope names one plant rather than the whole network. */
@@ -32,9 +30,4 @@ export function scopeCases<T extends { plantCode: string }>(
   scope: PlantScope,
 ): T[] {
   return isPlantScoped(scope) ? items.filter((item) => item.plantCode === scope) : items;
-}
-
-/** How the scope is named in a heading — "All plants" or the plant's own name. */
-export function plantScopeLabel(scope: PlantScope): string {
-  return isPlantScoped(scope) ? (PLANT_BY_CODE[scope]?.name ?? scope) : "All plants";
 }

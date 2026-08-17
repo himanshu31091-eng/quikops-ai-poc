@@ -153,3 +153,43 @@ Verified against `https://quikops-ai-poc.vercel.app` after deploying: 13/13
 routes 200, zero Perma references in the full payload across 13 routes × 3
 locales, and Spanish and Portuguese both rendering (529 / 528 untranslated
 interface strings, i.e. at parity).
+
+---
+
+## Follow-up — the plant selector did nothing (reported from the screen)
+
+The dropdown listed Sika's five sites correctly and clicking one changed nothing.
+Four faults behind one screenshot, recorded as D-99 to D-102.
+
+| Fault | Cause |
+|---|---|
+| Plant switching inert | `setPlantScope` **and** `getPlantScope` both validated the code against the demo tenant's fixture map. `SK-DE1` is not in it, so the write returned early and the read discarded the cookie. |
+| Badge said "Demo Scenario · Illustrative Data" | Hardcoded to the demo tenant; its tooltip named Perma Construction Aids. Now from the tenant profile, passed down from the layout. |
+| Copilot briefed on the wrong company | Prompt layer 2 named Perma, four Indian plants and rupees. Now `TenantConfig.copilotOperator`. |
+| "0 plants in scope" | Counting `user.plantScope.length`; an executive's scope is `[]`, which means the whole network. |
+
+### Verified
+
+| Check | Result |
+|---|---|
+| `tsc` · ESLint · client-hook gate · `next build` | 0 · 0 · 0 · ✓ 19/19 |
+| Every plant scopes the corpus | ALL 11 · DE1 2 · ES1 2 · FR1 3 · IT1 2 · PT1 2 — **and 2+2+3+2+2 = 11** |
+| Unknown code (`VP01`) | refused, no cookie written |
+| Header coherence | unscoped "across 5 plants" / "All 5 plants in scope"; scoped "at Leimen" / "Scoped to SK-DE1" |
+| Badge | renders "Sika Evaluation Environment · Representative evaluation data…" |
+| Perma sweep, full payload, 13 routes × 3 locales, plus scoped views | 0 |
+
+### What this cost me, and the lesson
+
+**My "zero Perma references" claim was narrower than it sounded.** It was true of
+what is in the payload — and Radix renders tooltip and popover content only when
+opened, so the badge tooltip naming Perma was never in it. Prompt text is not in
+any payload either. A payload sweep cannot see either one.
+
+So the sweep now has a companion: **grep the source** for tenant-specific strings
+outside `src/data/fixtures/` and `src/config/tenant.ts`. That is what found the
+Copilot prompt and the tooltip. Run both.
+
+The deeper pattern, now three for three (sign-in D-93, case owner, plant scope):
+**a fixture import inside a validation path is the bug.** Anything validating a
+tenant-owned identifier goes through the corpus seam.

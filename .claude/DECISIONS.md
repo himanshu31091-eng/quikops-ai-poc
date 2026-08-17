@@ -1394,3 +1394,78 @@ Two consequences, both permanent:
 2. **A coverage number that improves because a screen stopped rendering is not an
    improvement.** Check the server log for `⨯` and check the screen's own string
    count before believing any figure.
+
+### D-99 — Tenant-owned facts are validated against the tenant, never the fixtures
+Established 2026-08-17, after the plant selector was reported as doing nothing.
+
+The dropdown listed Sika's five sites correctly, and clicking one had no effect
+whatsoever. Both halves of the scope round-trip validated the code against
+`PLANT_BY_CODE` — the *demo* organisation's fixture map:
+
+- `setPlantScope` returned before writing the cookie, because `SK-DE1` is not a
+  fixture plant;
+- `getPlantScope` discarded a cookie that had somehow been written, for the same
+  reason, so every screen fell through to the whole network.
+
+Both now check against `getPlants()`, the same seam the selector was populated
+from. Refusing an unknown code is still the point; the tenant's own plant list is
+simply the right thing to refuse it against.
+
+This is the third instance of one pattern — sign-in (D-93) and the case owner
+lookup were the first two. **Anything that validates a tenant-owned identifier
+goes through the corpus seam.** A fixture import inside a validation path is the
+bug, whatever it is validating.
+
+`plantScopeLabel` was deleted rather than fixed: it was the only other caller of
+that fixture map, it had no consumers, and it was the reason a
+browser-bundled module imported the fixtures at all.
+
+### D-100 — The environment badge reads the tenant, because that is its whole job
+Established 2026-08-17.
+
+`DemoModeBadge` names the environment and states that the modelled company is a
+scenario rather than a customer — the one claim its own comment calls "the
+serious one". Both strings were hardcoded to the demo tenant, so the Sika
+evaluation environment displayed "Demo Scenario · Illustrative Data" and a
+tooltip naming Perma Construction Aids: precisely the misstatement the badge
+exists to prevent, made by the badge itself.
+
+`environmentLabel` and `dataDisclosure` now come from the tenant profile, passed
+down from the layout. The badge is a client component and **cannot** resolve
+`QUIKOPS_TENANT` itself — that variable is server-only, and a client component
+reading it gets the fallback tenant. Same root cause as the lineage card.
+
+### D-101 — The Copilot is told which company it works for by the tenant profile
+Established 2026-08-17.
+
+Prompt layer 2 opened by naming Perma Construction Aids, its four Indian plants
+and rupees. On the Sika tenant the Copilot was therefore briefed on the wrong
+company, in the wrong currency, and would answer accordingly — invisible to every
+payload sweep, and visible to the client the moment they asked it anything.
+
+The operator paragraph is now `TenantConfig.copilotOperator`.
+
+**This does not break prompt caching, and the rule it appears to violate is
+narrower than it looks.** The cache prefix requires the layer to be byte-identical
+*across requests in a deployment*. `QUIKOPS_TENANT` resolves once at module load
+and never varies at runtime, so the layer is exactly as constant as a literal. The
+prohibition is on *per-request* interpolation — case data, user names, a
+question — which is what would actually move the prefix.
+
+Also: the portfolio prompt catalogue offered "Why does Vapi need attention?" as a
+suggested question. Which plant is worst is what the answer establishes, so the
+label now names no site at all.
+
+### D-102 — An empty `plantScope` means the whole network, not nothing
+Established 2026-08-17.
+
+The dashboard rendered "0 plants in scope" for every executive, directly above
+"Operational health across 5 plants". It was counting `user.plantScope.length`,
+and an executive's scope is `[]` — which `case-detail-db-mapper` already treats as
+"can take any plant". The count was reporting a permission as though it were a
+selection, and getting the sense of it backwards.
+
+The chip now states the **active scope**, which is what a reader assumes those
+words mean: "All 5 plants in scope", or "Scoped to SK-DE1". The page description
+follows the same scope, because every KPI beneath it does — a subtitle still
+claiming the whole network described a page that was no longer on screen.

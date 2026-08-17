@@ -1,5 +1,5 @@
 import { getTranslations } from "@/src/i18n/server";
-import { getPlantScope } from "@/src/scope/plant-scope";
+import { ALL_PLANTS, getPlantScope } from "@/src/scope/plant-scope";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { PageHeader } from "@/components/patterns/page-header";
@@ -98,6 +98,9 @@ export default async function ExecutiveDashboardPage() {
   ]);
 
   const { t } = await getTranslations();
+  const scopedPlant =
+    scope === ALL_PLANTS ? null : (plantHealth.find((row) => row.plant.code === scope) ?? null);
+
   const firstName = user.name.split(" ")[0] ?? user.name;
 
   return (
@@ -115,10 +118,20 @@ export default async function ExecutiveDashboardPage() {
     <div className="space-y-5">
       <PageHeader
         title={t("dash.greeting", { name: firstName })}
-        // Counted from the plants actually on screen. The figure was written by
-        // hand and said four while the network had three, which the plant filter
-        // beside it contradicted on sight.
-        description={t("dash.subtitle", { count: plantHealth.length })}
+        /*
+         * Counted from the plants actually on screen. The figure was written by
+         * hand and said four while the network had three, which the plant filter
+         * beside it contradicted on sight.
+         *
+         * Scope-aware for the same reason: every KPI below narrows to the scoped
+         * plant, so a subtitle still claiming the whole network described a page
+         * that was no longer on screen.
+         */
+        description={
+          scopedPlant
+            ? t("dash.subtitleScoped", { plant: scopedPlant.plant.name })
+            : t("dash.subtitle", { count: plantHealth.length })
+        }
         docKey="dashboard"
         meta={
           <>
@@ -129,7 +142,16 @@ export default async function ExecutiveDashboardPage() {
               {t("dash.lastSync")}
             </MetaChip>
             <MetaChip icon="Building2">
-              {t("dash.plantsInScope", { count: user.plantScope.length })}
+              {/*
+                The active scope, not the user's permission. It read
+                `user.plantScope.length`, and an empty scope means the whole
+                network rather than nothing — what `case-detail-db-mapper` treats
+                as "can take any plant" — so every executive saw "0 plants in
+                scope" directly above a line saying "across 5 plants".
+              */}
+              {scopedPlant
+                ? t("dash.onePlantInScope", { plant: scopedPlant.plant.code })
+                : t("dash.allPlantsInScope", { count: plantHealth.length })}
             </MetaChip>
             <LiveSessionChip cases={caseBaseline} />
           </>

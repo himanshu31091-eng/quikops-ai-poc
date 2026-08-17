@@ -32,6 +32,9 @@ interface AppShellProps {
   plantScope: string;
   notifications: NotificationModel[];
   searchableCases: SearchableCase[];
+  /** Tenant identity, resolved on the server: the badge cannot read the env. */
+  environmentLabel: string;
+  dataDisclosure: string;
   children: React.ReactNode;
 }
 
@@ -43,6 +46,8 @@ export function AppShell({
   plantScope,
   notifications,
   searchableCases,
+  environmentLabel,
+  dataDisclosure,
   children,
 }: AppShellProps) {
   const { t } = useTranslation();
@@ -127,7 +132,10 @@ export function AppShell({
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <DemoModeBadge />
+            <DemoModeBadge
+              environmentLabel={environmentLabel}
+              dataDisclosure={dataDisclosure}
+            />
             <div className="hidden xl:block">
               <PlantScopeSelector plants={plants} scope={plantScope} />
             </div>

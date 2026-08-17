@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { getTenantConfig } from "@/src/config/tenant";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/shell/app-shell";
 import { TourInvitation, TourOverlay } from "@/components/tour/tour-overlay";
@@ -79,6 +80,8 @@ export default async function AppLayout({
       priorityBand: c.priorityBand,
     }));
 
+  const tenant = getTenantConfig();
+
   return (
     // Providers are ordered outermost-first by lifetime: locale outlives a
     // session's work, the execution store outlives a single screen, and the
@@ -94,6 +97,8 @@ export default async function AppLayout({
             plantScope={plantScope}
             notifications={notifications}
             searchableCases={searchableCases}
+            environmentLabel={tenant.environmentLabel}
+            dataDisclosure={tenant.dataDisclosure}
           >
             {children}
           </AppShell>

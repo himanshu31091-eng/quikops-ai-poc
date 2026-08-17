@@ -14,16 +14,26 @@ import { useTranslation } from "@/src/i18n/provider";
  * walkthrough. A client who has stopped wondering whether the figures are real
  * is the first failure mode.
  *
- * The second: **Perma Construction Aids is a representative scenario, not a
- * QuikOps customer.** Nothing in this repository evidences an engagement with
- * them. A viewer who leaves the room believing the vendor has implemented this
- * for a named company has been misled about the one fact that cannot be walked
- * back afterwards, so the badge names the scenario rather than only the mode.
+ * The second: **the modelled company is a representative scenario, not a
+ * QuikOps customer.** Nothing in this repository evidences an engagement. A
+ * viewer who leaves the room believing the vendor has implemented this for a
+ * named company has been misled about the one fact that cannot be walked back
+ * afterwards, so the badge names the scenario rather than only the mode.
  *
- * Rendered from `APP.environment`, so a build that is not the demo shows
- * nothing rather than a badge that has to be remembered about.
+ * Both strings come from the tenant profile, passed down from the layout. They
+ * used to be hardcoded to the demo tenant, which meant the evaluation
+ * environment displayed the *other* tenant's name — the precise failure the
+ * paragraph above exists to prevent. The badge is a client component and cannot
+ * read `QUIKOPS_TENANT` itself; that variable is server-only.
  */
-export function DemoModeBadge() {
+interface DemoModeBadgeProps {
+  /** e.g. "Sika Evaluation Environment" — resolved on the server. */
+  environmentLabel: string;
+  /** What the data actually is, in the tenant's own words. */
+  dataDisclosure: string;
+}
+
+export function DemoModeBadge({ environmentLabel, dataDisclosure }: DemoModeBadgeProps) {
   const { t } = useTranslation();
   if (APP.environment !== "Demo") return null;
 
@@ -37,19 +47,13 @@ export function DemoModeBadge() {
           role="note"
         >
           <span className="size-1.5 shrink-0 rounded-full bg-accent" />
-          {t("shell.demoStrip")}
+          {environmentLabel} · {dataDisclosure}
         </span>
       </TooltipTrigger>
       <TooltipContent>
         <p className="max-w-[260px] text-2xs leading-relaxed">
-          <span className="font-medium">
-            Perma Construction Aids is a representative scenario, not a QuikOps
-            customer.
-          </span>{" "}
-          It models an Indian construction-chemicals manufacturer so the platform
-          can be shown against a real operational problem. Every case, plant,
-          person and figure here is illustrative, and no production system is
-          connected. {APP.name} {APP.version}.
+          <span className="font-medium">{t("shell.scenarioNotCustomer")}</span>{" "}
+          {t("shell.scenarioDetail")} {APP.name} {APP.version}.
         </p>
       </TooltipContent>
     </Tooltip>

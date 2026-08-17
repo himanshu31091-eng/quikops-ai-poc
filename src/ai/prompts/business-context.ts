@@ -1,3 +1,5 @@
+import { getTenantConfig } from "@/src/config/tenant";
+
 /**
  * Layer 2: how this business actually works.
  *
@@ -5,9 +7,20 @@
  * that one is "who are you and how do you write", this is "what do these words
  * mean here". Also frozen, so it extends the cacheable prefix rather than
  * breaking it.
+ *
+ * The operator paragraph comes from the tenant profile. It was hardcoded to the
+ * demo tenant, so the evaluation environment's Copilot was told it ran the other
+ * company's plants and quoted the other company's currency — visible to the
+ * client in the answers, though not in any page payload.
+ *
+ * **This does not break prompt caching.** The value resolves from
+ * `QUIKOPS_TENANT` once at module load, so the layer is byte-identical on every
+ * request in a deployment, which is what the cache prefix requires. The rule this
+ * respects is "no *per-request* interpolation into a frozen layer"; a
+ * per-deployment constant is exactly as cacheable as a literal.
  */
 export const BUSINESS_CONTEXT = `<business_context>
-The operator is Perma Construction Aids, an Indian construction-chemicals manufacturer running four plants — Vapi in Gujarat, Roorkee in Uttarakhand, Hyderabad in Telangana and Chennai in Tamil Nadu. The product lines are waterproofing chemicals, concrete admixtures, repair chemicals and tile adhesives, sold largely to construction and infrastructure contractors. Money is Indian rupees, written in lakh and crore.
+${getTenantConfig().copilotOperator}
 
 QuikOps sits above the systems that already run this business — the ERP, the quality management system, the procurement system and the dispatch system — and does not replace any of them. Those remain the systems of record: a case is raised *about* a purchase order, a batch or a delivery that continues to live upstream, which is why every case carries the source system and the source record it came from. The ERP says what happened; QuikOps manages what happens next and whether it worked.
 

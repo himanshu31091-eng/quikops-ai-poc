@@ -91,7 +91,10 @@ export const COPILOT_PROMPTS: CopilotPromptSpec[] = [
 export const PORTFOLIO_PROMPTS: CopilotPromptSpec[] = [
   {
     id: "worst-plant",
-    label: "Why does Vapi need attention?",
+    // Names no site: which plant is worst is what the answer establishes, and a
+    // label naming the demo tenant's plant was wrong in the evaluation tenant and
+    // would go stale here the moment the corpus moved.
+    label: "Which plant needs attention first?",
     prompt:
       "Which plant needs attention first, and what is actually driving it? Be specific about the cases behind your answer and name the source records where you have them.",
     icon: "Factory",

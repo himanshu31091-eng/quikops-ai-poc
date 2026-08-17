@@ -47,6 +47,19 @@ export interface TenantConfig {
    * thing that cannot be corrected afterwards.
    */
   dataDisclosure: string;
+  /**
+   * Who the Copilot is told it is working for — prompt layer 2's first paragraph.
+   *
+   * Lives here rather than in the prompt because the prompt had the demo tenant's
+   * operator hardcoded, which meant the evaluation environment's Copilot answered
+   * as though it ran the *other* company's plants in the other company's currency.
+   *
+   * Safe for prompt caching: this resolves from `QUIKOPS_TENANT` once at module
+   * load, so it is byte-identical across every request in a deployment — which is
+   * what the cache prefix requires. Per-*request* interpolation is the thing that
+   * would break it.
+   */
+  copilotOperator: string;
 }
 
 export const TENANTS: Record<TenantId, TenantConfig> = {
@@ -62,6 +75,8 @@ export const TENANTS: Record<TenantId, TenantConfig> = {
     currencyLocale: "de-DE",
     logoPath: null,
     dataDisclosure: "Representative evaluation data — not a live Sika system",
+    copilotOperator:
+      "The operator is Sika, a construction-chemicals and industrial-adhesives manufacturer, running five European plants — Leimen in Germany, Tarragona in Spain, Vila Nova de Gaia in Portugal, Lyon in France and Milano in Italy. The product lines are concrete admixtures, waterproofing membranes, industrial flooring, sealants and adhesives, and repair mortars, sold largely to construction contractors, infrastructure projects and industrial manufacturers. Money is euros.",
   },
   "perma-demo": {
     tenantId: "perma-demo",
@@ -75,6 +90,8 @@ export const TENANTS: Record<TenantId, TenantConfig> = {
     currencyLocale: "en-IN",
     logoPath: null,
     dataDisclosure: "Illustrative demonstration data — a representative scenario, not a customer",
+    copilotOperator:
+      "The operator is Perma Construction Aids, an Indian construction-chemicals manufacturer running four plants — Vapi in Gujarat, Roorkee in Uttarakhand, Hyderabad in Telangana and Chennai in Tamil Nadu. The product lines are waterproofing chemicals, concrete admixtures, repair chemicals and tile adhesives, sold largely to construction and infrastructure contractors. Money is Indian rupees, written in lakh and crore.",
   },
 };
 

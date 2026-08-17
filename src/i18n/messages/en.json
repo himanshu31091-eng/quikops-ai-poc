@@ -201,7 +201,6 @@
   "shell.tagline": "Operational Execution Platform",
   "shell.lastSync": "Last sync 2h ago · 34 signals",
   "shell.searchCollapsed": "Search cases, plants, materials…",
-  "shell.demoStrip": "Demo Scenario · Illustrative Data",
   "navSection.execute": "Execute",
   "navSection.improve": "Improve",
   "navSection.system": "System",
@@ -866,5 +865,10 @@
   "wm.chip.completedToday": "Completed today",
   "shell.plantScopeHint": "Scoping to a plant recomputes every figure from that plant’s cases. Portfolio and plant numbers answer different questions and are never mixed.",
   "common.refreshing": "Refreshing",
-  "caseDetail.systemOfRecordDetail": "Owned and operated by your own IT organisation. QuikOps reads it; it does not replace it."
+  "caseDetail.systemOfRecordDetail": "Owned and operated by your own IT organisation. QuikOps reads it; it does not replace it.",
+  "shell.scenarioNotCustomer": "The company modelled here is a representative scenario, not a QuikOps customer.",
+  "shell.scenarioDetail": "It models a real manufacturer’s operating problem so the platform can be shown against something concrete. Every case, plant, person and figure here is illustrative, and no production system is connected.",
+  "dash.allPlantsInScope": "All {count} plants in scope",
+  "dash.subtitleScoped": "Operational health at {plant}, with every number traceable to the cases behind it.",
+  "dash.onePlantInScope": "Scoped to {plant}"
 }

@@ -201,7 +201,6 @@
   "shell.tagline": "Plataforma de ejecución operativa",
   "shell.lastSync": "Última sincronización hace 2 h · 34 señales",
   "shell.searchCollapsed": "Buscar casos, plantas, materiales…",
-  "shell.demoStrip": "Escenario de demostración · Datos ilustrativos",
   "navSection.execute": "Ejecutar",
   "navSection.improve": "Mejorar",
   "navSection.system": "Sistema",
@@ -866,5 +865,10 @@
   "wm.chip.completedToday": "Completados hoy",
   "shell.plantScopeHint": "Al limitar el alcance a una planta se recalculan todas las cifras a partir de los casos de esa planta. Las cifras de cartera y de planta responden a preguntas distintas y nunca se mezclan.",
   "common.refreshing": "Actualizando",
-  "caseDetail.systemOfRecordDetail": "Propiedad y gestión de su propia organización de TI. QuikOps lo consulta; no lo sustituye."
+  "caseDetail.systemOfRecordDetail": "Propiedad y gestión de su propia organización de TI. QuikOps lo consulta; no lo sustituye.",
+  "shell.scenarioNotCustomer": "La empresa representada aquí es un escenario ilustrativo, no un cliente de QuikOps.",
+  "shell.scenarioDetail": "Modela el problema operativo de un fabricante real para poder mostrar la plataforma frente a algo concreto. Todos los casos, plantas, personas y cifras son ilustrativos, y no hay ningún sistema de producción conectado.",
+  "dash.allPlantsInScope": "Las {count} plantas en alcance",
+  "dash.subtitleScoped": "Salud operativa en {plant}, con cada cifra trazable hasta los casos que la sustentan.",
+  "dash.onePlantInScope": "Alcance: {plant}"
 }
