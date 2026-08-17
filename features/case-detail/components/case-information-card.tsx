@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -21,26 +22,27 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
 }: {
   detail: CaseDetailModel;
 }) {
+  const { t } = useTranslation();
   const item = detail.case;
   const info = detail.information;
   const detection = DETECTION_SOURCE_META[item.detectedBy];
 
   return (
     <SectionCard
-      title="Case information"
-      subtitle="Linked records from the operational systems"
+      title={t("section.information")}
+      subtitle={t("cd.infoSub")}
       icon="Layers"
       flush
       footer={
         <p className="flex items-center gap-1.5 text-2xs text-content-tertiary">
           <Icon name="Lock" size="xs" />
-          Read-only. These values are owned by the source systems and change there, not here.
+          {t("cd.readOnlyNotice")}
         </p>
       }
     >
       <div className="grid gap-x-6 px-4 py-2 md:grid-cols-2">
         <div className="min-w-0 divide-y divide-line">
-          <FieldRow label="Material" icon="Boxes">
+          <FieldRow label={t("case.material")} icon="Boxes">
             {item.materialCode ? (
               <>
                 <span className="font-mono">{item.materialCode}</span>
@@ -49,11 +51,11 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
                 ) : null}
               </>
             ) : (
-              <span className="text-content-tertiary">Not material-specific</span>
+              <span className="text-content-tertiary">{t("cd.notMaterialSpecific")}</span>
             )}
           </FieldRow>
 
-          <FieldRow label="Supplier" icon="TruckElectric">
+          <FieldRow label={t("case.supplier")} icon="TruckElectric">
             {item.supplierName ? (
               <>
                 {item.supplierName}
@@ -64,11 +66,11 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
                 ) : null}
               </>
             ) : (
-              <span className="text-content-tertiary">Internal cause — no supplier</span>
+              <span className="text-content-tertiary">{t("cd.internalCause")}</span>
             )}
           </FieldRow>
 
-          <FieldRow label="Customer" icon="Users">
+          <FieldRow label={t("case.customer")} icon="Users">
             {item.customerName ? (
               <>
                 {item.customerName}
@@ -79,20 +81,20 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
                 ) : null}
               </>
             ) : (
-              <span className="text-content-tertiary">No customer order exposed</span>
+              <span className="text-content-tertiary">{t("cd.noCustomerExposed")}</span>
             )}
           </FieldRow>
 
-          <FieldRow label="Production line" icon="Factory">
+          <FieldRow label={t("cd.productionLine")} icon="Factory">
             {info.productionLine}
           </FieldRow>
 
-          <FieldRow label="Plant" icon="Building2">
+          <FieldRow label={t("case.plant")} icon="Building2">
             <span className="font-mono">{item.plantCode}</span> · {item.plant.name},{" "}
             {item.plant.country}
           </FieldRow>
 
-          <FieldRow label="Order number" icon="FileText">
+          <FieldRow label={t("cd.orderNumber")} icon="FileText">
             <span className="font-mono">{info.orderRef}</span>
             <span className="ml-1.5 text-2xs text-content-tertiary">
               {info.orderType.replace("_", " ").toLowerCase()}
@@ -101,7 +103,7 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
         </div>
 
         <div className="min-w-0 divide-y divide-line">
-          <FieldRow label="Revenue exposure" icon="DollarSign">
+          <FieldRow label={t("cd.revenueExposure")} icon="DollarSign">
             <MoneyCell
               amount={item.revenueAtRisk}
               currency={item.currency}
@@ -114,7 +116,7 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
             </span>
           </FieldRow>
 
-          <FieldRow label="Priority score" icon="Target">
+          <FieldRow label={t("cd.priorityScore")} icon="Target">
             <span className="font-semibold tabular-nums">{item.priorityScore.toFixed(1)}</span>
             <span className="text-content-tertiary"> / 100</span>
             <span className="mt-1 block text-2xs text-content-tertiary">
@@ -122,11 +124,11 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
             </span>
           </FieldRow>
 
-          <FieldRow label="Risk category" icon="TriangleAlert">
+          <FieldRow label={t("cd.riskCategory")} icon="TriangleAlert">
             {info.riskCategory}
           </FieldRow>
 
-          <FieldRow label="Category" icon="Tag">
+          <FieldRow label={t("col.category")} icon="Tag">
             <span className="flex items-center gap-1.5">
               <Icon
                 name={EXCEPTION_META[item.exceptionType].icon}
@@ -137,15 +139,15 @@ export const CaseInformationCard = React.memo(function CaseInformationCard({
             </span>
           </FieldRow>
 
-          <FieldRow label="Detection rule" icon="Zap">
+          <FieldRow label={t("cd.detectionRule")} icon="Zap">
             <span className="font-mono text-2xs">{info.detectionRuleId}</span> ·{" "}
             {info.detectionRuleName}
             <span className="mt-1 block text-2xs text-content-tertiary">
-              Signal <span className="font-mono">{info.signalRef}</span>
+              {t("cd.signal")} <span className="font-mono">{info.signalRef}</span>
             </span>
           </FieldRow>
 
-          <FieldRow label="Detection source" icon={detection.icon}>
+          <FieldRow label={t("cd.detectionSource")} icon={detection.icon}>
             {detection.label}
             <span className="mt-1 block text-2xs text-content-tertiary">
               {detection.description}

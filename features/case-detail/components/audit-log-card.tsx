@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
   entries: CaseAuditEntry[];
   recentIds: Set<string>;
 }) {
+  const { t } = useTranslation();
   const [limit, setLimit] = React.useState(PAGE_SIZE);
   const [source, setSource] = React.useState<CaseAuditEntry["source"] | "ALL">("ALL");
 
@@ -53,7 +55,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
 
   return (
     <SectionCard
-      title="Audit log"
+      title={t("section.audit")}
       subtitle={`${entries.length} entries · append-only`}
       icon="ScrollText"
       flush
@@ -72,7 +74,7 @@ export const AuditLogCard = React.memo(function AuditLogCard({
                 : "text-content-tertiary hover:text-content",
             )}
           >
-            All
+            {t("common.all")}
           </button>
           {sources.map((key) => (
             <button
@@ -98,8 +100,8 @@ export const AuditLogCard = React.memo(function AuditLogCard({
       {filtered.length === 0 ? (
         <SectionEmpty
           icon="ScrollText"
-          title="No entries for this source"
-          description="Change the filter to see the rest of the audit trail."
+          title={t("cd.noAuditForSource")}
+          description={t("cd.noAuditHint")}
         />
       ) : (
         <>
@@ -111,25 +113,25 @@ export const AuditLogCard = React.memo(function AuditLogCard({
                     scope="col"
                     className="w-[164px] px-3 py-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
                   >
-                    Timestamp
+                    {t("col.timestamp")}
                   </th>
                   <th
                     scope="col"
                     className="w-[160px] px-3 py-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
                   >
-                    User
+                    {t("col.user")}
                   </th>
                   <th
                     scope="col"
                     className="px-3 py-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
                   >
-                    Action
+                    {t("col.action")}
                   </th>
                   <th
                     scope="col"
                     className="w-[124px] px-3 py-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary"
                   >
-                    Source
+                    {t("col.source")}
                   </th>
                 </tr>
               </thead>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import Link from "next/link";
 import { Icon } from "@/components/patterns/icon";
 import { MoneyCell } from "@/components/patterns/money-cell";
@@ -30,21 +31,26 @@ interface CaseSidePanelProps {
   className?: string;
 }
 
+/** The tone classes are constant; only the label follows the language, so the
+ *  label is looked up at render and the rest stays a module constant. */
+const HEALTH_LABEL_KEY = {
+  ON_TRACK: "health.onTrack",
+  AT_RISK: "health.atRisk",
+  OFF_TRACK: "health.offTrack",
+} as const;
+
 const HEALTH_TONE = {
   ON_TRACK: {
-    label: "On track",
     text: "text-success-content",
     ring: "text-success",
     tone: "success" as const,
   },
   AT_RISK: {
-    label: "At risk",
     text: "text-high-content",
     ring: "text-high",
     tone: "high" as const,
   },
   OFF_TRACK: {
-    label: "Off track",
     text: "text-critical-content",
     ring: "text-critical",
     tone: "critical" as const,
@@ -125,14 +131,16 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
   onExport,
   className,
 }: CaseSidePanelProps) {
+  const { t } = useTranslation();
   const item = detail.case;
   const tone = HEALTH_TONE[health.band];
+  const healthLabel = t(HEALTH_LABEL_KEY[health.band]);
   const sla = computeSla(session.dueAt, session.status, session.priorityBand, DEMO_NOW);
   const openActions = session.actions.filter((action) => action.status !== "DONE").length;
 
   return (
     <div className={cn("grid gap-4", className)}>
-      <SectionCard title="Case health" subtitle="Execution, not priority" icon="Gauge" flush>
+      <SectionCard title={t("cd.caseHealth")} subtitle={t("cd.executionNotPriority")} icon="Gauge" flush>
         <div className="flex items-center gap-4 px-4 py-3.5">
           <div className="relative flex size-16 shrink-0 items-center justify-center">
             <svg viewBox="0 0 36 36" className="size-16 -rotate-90" aria-hidden="true">
@@ -163,9 +171,9 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
             </span>
           </div>
           <div className="min-w-0">
-            <p className={cn("anim-status text-sm font-semibold", tone.text)}>{tone.label}</p>
+            <p className={cn("anim-status text-sm font-semibold", tone.text)}>{healthLabel}</p>
             <p className="mt-0.5 text-2xs leading-relaxed text-content-tertiary">
-              Scored from SLA position, ownership, plan progress and recurrence.
+              {t("cd.healthHint")}
             </p>
           </div>
         </div>
@@ -192,11 +200,11 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
         </ul>
       </SectionCard>
 
-      <SectionCard title="Exposure and clock" icon="Target" flush>
+      <SectionCard title={t("cd.exposureAndClock")} icon="Target" flush>
         <div className="divide-y divide-line">
           <div className="px-4 py-3">
             <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-              Priority score
+              {t("cd.priorityScore")}
             </p>
             <p className="mt-1 flex items-baseline gap-1.5">
               <span className="text-2xl font-semibold leading-none tabular-nums text-content">
@@ -227,7 +235,7 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
 
           <div className="px-4 py-3">
             <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-              Revenue at risk
+              {t("case.revenueAtRisk")}
             </p>
             <p className="mt-1">
               <MoneyCell
@@ -239,13 +247,13 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
               />
             </p>
             <p className="mt-1.5 text-2xs text-content-tertiary">
-              Confirmed demand that cannot be served if this is not cleared in time.
+              {t("cd.confirmedDemand")}
             </p>
           </div>
 
           <div className="px-4 py-3">
             <p className="text-2xs font-medium uppercase tracking-wide text-content-tertiary">
-              SLA countdown
+              {t("cd.slaCountdown")}
             </p>
             <p
               className={cn(
@@ -275,8 +283,8 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
       </SectionCard>
 
       <SectionCard
-        title="Recent AI insights"
-        subtitle="Generated from this case record"
+        title={t("cd.recentInsights")}
+        subtitle={t("cd.insightsSub")}
         icon="Sparkles"
         flush
         footer={
@@ -285,7 +293,7 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
             onClick={onOpenCopilot}
             className="flex items-center gap-1.5 text-2xs font-medium text-accent transition-colors duration-150 hover:text-accent-hover"
           >
-            Ask the Copilot about this case
+            {t("cd.askAboutCase")}
             <Icon name="ArrowRight" size="xs" />
           </button>
         }
@@ -313,14 +321,14 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
       </SectionCard>
 
       <RelatedList
-        title="Related cases"
+        title={t("cd.relatedCases")}
         icon="Link2"
         entries={detail.related}
         emptyText="Nothing else in the network shares this material, customer or exception type."
       />
 
       <RelatedList
-        title="Supplier issues"
+        title={t("cd.supplierIssues")}
         icon="TruckElectric"
         entries={detail.supplierIssues}
         emptyText={
@@ -330,11 +338,11 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
         }
       />
 
-      <SectionCard title="Quick actions" icon="Zap" flush>
+      <SectionCard title={t("cd.quickActions")} icon="Zap" flush>
         <div className="grid gap-2 px-4 py-3.5">
           <Button variant="primary" size="md" onClick={onOpenCopilot} className="justify-start">
             <Icon name="Sparkles" size="sm" />
-            Ask Copilot
+            {t("cd.askCopilot")}
           </Button>
           <Button
             variant="secondary"
@@ -343,7 +351,7 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
             className="justify-start"
           >
             <Icon name="Upload" size="sm" />
-            Upload evidence
+            {t("action.uploadEvidence")}
           </Button>
           <Button
             variant="secondary"
@@ -353,16 +361,16 @@ export const CaseSidePanel = React.memo(function CaseSidePanel({
             className="justify-start"
           >
             <Icon name="ShieldCheck" size="sm" />
-            Request verification
+            {t("verification.request")}
           </Button>
           <Button variant="secondary" size="md" onClick={onExport} className="justify-start">
             <Icon name="Download" size="sm" />
-            Export case record
+            {t("cd.exportRecord")}
           </Button>
           <Button variant="secondary" size="md" asChild className="justify-start">
             <Link href="/work">
               <Icon name="ArrowLeft" size="sm" />
-              Back to Work Manager
+              {t("cd.backToWork")}
             </Link>
           </Button>
         </div>

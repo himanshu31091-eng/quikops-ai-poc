@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "@/src/i18n/provider";
 import { Icon } from "@/components/patterns/icon";
 import { SectionCard } from "@/components/patterns/section-card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ const TimelineRow = React.memo(function TimelineRow({
   isLast: boolean;
   isRecent: boolean;
 }) {
+  const { t } = useTranslation();
   const tone = TIMELINE_TONE[event.kind];
 
   return (
@@ -69,7 +71,7 @@ const TimelineRow = React.memo(function TimelineRow({
           </span>
           {isRecent ? (
             <span className="rounded-sm bg-accent px-1.5 py-px text-2xs font-semibold text-white">
-              Just now
+              {t("common.justNow")}
             </span>
           ) : null}
         </div>
@@ -107,6 +109,7 @@ export const ExecutionTimeline = React.memo(function ExecutionTimeline({
   events: CaseTimelineEvent[];
   recentIds: Set<string>;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = React.useState(false);
 
   // Newest first is what a manager wants on an active case; the rail still
@@ -121,7 +124,7 @@ export const ExecutionTimeline = React.memo(function ExecutionTimeline({
 
   return (
     <SectionCard
-      title="Execution timeline"
+      title={t("section.timeline")}
       subtitle={`${events.length} events, newest first`}
       icon="Activity"
       flush
@@ -129,8 +132,8 @@ export const ExecutionTimeline = React.memo(function ExecutionTimeline({
       {ordered.length === 0 ? (
         <SectionEmpty
           icon="Activity"
-          title="Nothing has happened yet"
-          description="Events appear here as the case is assigned, worked, evidenced and verified."
+          title={t("cd.nothingYet")}
+          description={t("cd.nothingYetHint")}
         />
       ) : (
         <div className="px-4 py-3.5">

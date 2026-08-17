@@ -45,7 +45,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
     () => [
       {
         key: "at",
-        label: "When",
+        label: t("col.when"),
         sortKey: "at",
         className: "w-40",
         render: (row) => (
@@ -59,7 +59,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
       },
       {
         key: "actor",
-        label: "Actor",
+        label: t("col.actor"),
         sortKey: "actor",
         className: "w-44",
         render: (row) => (
@@ -68,14 +68,14 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
               {row.actorName}
             </span>
             <span className="block truncate text-2xs text-content-tertiary">
-              {row.actorRole ? ROLE_META[row.actorRole].label : "System"}
+              {row.actorRole ? ROLE_META[row.actorRole].label : t("col.system")}
             </span>
           </span>
         ),
       },
       {
         key: "action",
-        label: "Action",
+        label: t("col.action"),
         sortKey: "action",
         render: (row) => (
           <span className="block min-w-0">
@@ -99,7 +99,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
       },
       {
         key: "case",
-        label: "Case",
+        label: t("col.case"),
         sortKey: "case",
         className: "w-36",
         render: (row) =>
@@ -117,7 +117,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
       },
       {
         key: "source",
-        label: "Source",
+        label: t("col.source"),
         sortKey: "source",
         className: "w-32",
         render: (row) => (
@@ -132,7 +132,9 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
         ),
       },
     ],
-    [],
+    // The column headers come from the catalogue, so they are rebuilt when the
+    // language changes rather than frozen at first render.
+    [t],
   );
 
   return (
@@ -171,7 +173,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
         facets={[
           {
             field: "actors",
-            label: "Actor",
+            label: t("col.actor"),
             icon: "Users",
             options: api.facets.actors,
             selected: api.filters.actors,
@@ -179,7 +181,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
           },
           {
             field: "actions",
-            label: "Action",
+            label: t("col.action"),
             icon: "Activity",
             options: api.facets.actions,
             selected: api.filters.actions,
@@ -187,14 +189,14 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
           },
           {
             field: "sources",
-            label: "Source",
+            label: t("col.source"),
             icon: "PlugZap",
             options: api.facets.sources,
             selected: api.filters.sources,
           },
           {
             field: "plants",
-            label: "Plant",
+            label: t("col.plant"),
             icon: "Factory",
             options: api.facets.plants,
             selected: api.filters.plants,
@@ -234,7 +236,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
 
       <SectionCard
         title={t("audit.trail")}
-        subtitle="Newest first. Session changes interleave with the stored record."
+        subtitle={t("au.newestFirst")}
         icon="ScrollText"
         flush
       >
@@ -261,7 +263,7 @@ export function AuditLogView({ data }: { data: AuditLogData }) {
                   action: (
                     <Button variant="secondary" size="md" onClick={api.clearFilters}>
                       <Icon name="X" size="sm" />
-                      Clear filters
+                      {t("common.clearFilters")}
                     </Button>
                   ),
                 }

@@ -114,7 +114,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
-          label="Open cases"
+          label={t("mw.openCases")}
           icon="Rows3"
           value={formatNumber(open.length)}
           footnote={
@@ -127,14 +127,14 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
           tone={overdue > 0 ? "critical" : "neutral"}
         />
         <StatTile
-          label="Revenue at risk"
+          label={t("case.revenueAtRisk")}
           icon="DollarSign"
           value={<MoneyCell amount={exposure} compact={false} className="text-2xl font-semibold" />}
           footnote="Across the cases you own"
           tone="neutral"
         />
         <StatTile
-          label="Awaiting my review"
+          label={t("mw.awaitingReview")}
           icon="ShieldCheck"
           value={formatNumber(toReview.length)}
           footnote={
@@ -143,7 +143,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
           tone={toReview.length > 0 ? "verify" : "neutral"}
         />
         <StatTile
-          label="Portfolio resolution"
+          label={t("mw.portfolioResolution")}
           icon="Gauge"
           value={formatHours(data.portfolioMttrHours)}
           footnote="Mean time to resolve this quarter"
@@ -276,7 +276,7 @@ export function MyWorkView({ data, sessionUser }: MyWorkViewProps) {
                 <Button variant="secondary" size="md" asChild className="w-full justify-start">
                   <Link href="/work?mine=true">
                     <Icon name="Filter" size="sm" />
-                    Open my cases in the Work Manager
+                    {t("mw.openInWorkManager")}
                   </Link>
                 </Button>
               </div>

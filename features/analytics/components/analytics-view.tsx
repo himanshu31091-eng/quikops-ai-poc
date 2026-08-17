@@ -92,7 +92,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       ) : null}
 
       {/* 1 — Headline trend cards */}
-      <section aria-label="Headline metrics">
+      <section aria-label={t("an.headlineMetrics")}>
         <AnalyticsKpiCards kpis={model.kpis} />
       </section>
 
@@ -104,7 +104,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8">
           <SectionCard
-            title="On-time in full"
+            title={t("kpi.otif")}
             subtitle={t("analytics.groupTarget")}
             icon="ChartNoAxesColumn"
             className="h-full"
@@ -118,16 +118,16 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
             <TrendChart
               data={model.otifSeries}
               unit="percent"
-              label="On-time in full"
-              target={{ value: OTIF_TARGET_PCT, label: "Target 95%" }}
-              emptyMessage="No OTIF readings in the selected window."
+              label={t("kpi.otif")}
+              target={{ value: OTIF_TARGET_PCT, label: t("kpi.target95") }}
+              emptyMessage={t("an.noOtif")}
               footnote="Source: Connected Enterprise Data · daily refresh"
             />
           </SectionCard>
         </div>
         <div className="min-w-0 xl:col-span-4">
           <SectionCard
-            title="Revenue at risk"
+            title={t("kpi.revenueAtRisk")}
             subtitle={t("analytics.exposure")}
             icon="DollarSign"
             className="h-full"
@@ -135,9 +135,9 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
             <TrendChart
               data={model.revenueSeries}
               unit="currency"
-              label="Revenue at risk"
+              label={t("kpi.revenueAtRisk")}
               colorVar="var(--color-chart-4)"
-              emptyMessage="No exposure readings in the selected window."
+              emptyMessage={t("an.noExposure")}
             />
           </SectionCard>
         </div>
@@ -146,7 +146,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       <div className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-6">
           <SectionCard
-            title="Resolution time"
+            title={t("an.resolutionTime")}
             subtitle={t("analytics.mttrWeekly")}
             icon="Clock"
             className="h-full"
@@ -160,22 +160,22 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
             <TrendChart
               data={model.resolutionSeries}
               unit="hours"
-              label="Mean time to resolve"
+              label={t("metric.mttr")}
               colorVar="var(--color-chart-5)"
-              emptyMessage="No cases were resolved in the selected window."
+              emptyMessage={t("an.noResolved")}
             />
           </SectionCard>
         </div>
         <div className="min-w-0 xl:col-span-6">
           <SectionCard
-            title="Cases opened and closed"
+            title={t("an.openedClosed")}
             subtitle={t("analytics.throughput")}
             icon="Activity"
             className="h-full"
           >
             <WeeklyThroughputChart
               data={model.weekly}
-              emptyMessage="No case activity in the selected window."
+              emptyMessage={t("an.noActivity")}
             />
           </SectionCard>
         </div>
@@ -183,26 +183,26 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
 
       {/* 3 — Distribution */}
       <div className="grid gap-4 xl:grid-cols-3">
-        <SectionCard title="Cases by priority" subtitle={t("analytics.scored")} icon="Target">
+        <SectionCard title={t("an.byPriority")} subtitle={t("analytics.scored")} icon="Target">
           <CategoryBreakdownChart
             data={model.byPriority}
-            emptyMessage="No cases match the current filters."
+            emptyMessage={t("an.noMatch")}
           />
         </SectionCard>
-        <SectionCard title="Cases by plant" subtitle={t("analytics.whereWorkSits")} icon="Factory">
+        <SectionCard title={t("an.byPlant")} subtitle={t("analytics.whereWorkSits")} icon="Factory">
           <CategoryBreakdownChart
             data={model.byPlant}
-            emptyMessage="No cases match the current filters."
+            emptyMessage={t("an.noMatch")}
           />
         </SectionCard>
         <SectionCard
-          title="Cases by exception type"
+          title={t("an.byException")}
           subtitle={t("analytics.recurring")}
           icon="OctagonAlert"
         >
           <CategoryBreakdownChart
             data={model.byException}
-            emptyMessage="No cases match the current filters."
+            emptyMessage={t("an.noMatch")}
           />
         </SectionCard>
       </div>
@@ -210,7 +210,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       {/* 4 — Plant performance */}
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
-          title="Top performing plants"
+          title={t("an.topPlants")}
           subtitle={t("analytics.plantRanking")}
           icon="TrendingUp"
           flush
@@ -219,8 +219,8 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
           <PlantPerformanceTable rows={model.topPlants} emptyMessage={scopeNote} />
         </SectionCard>
         <SectionCard
-          title="Lowest performing plants"
-          subtitle="Worst first — these are the ones to act on"
+          title={t("an.lowestPlants")}
+          subtitle={t("an.worstFirst")}
           icon="TrendingDown"
           flush
           className="h-full"
@@ -232,7 +232,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       {/* 5 — People */}
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
-          title="Owner performance"
+          title={t("an.ownerPerformance")}
           subtitle={t("analytics.byOwner")}
           icon="UserCog"
           flush
@@ -242,11 +242,11 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
             rows={model.owners}
             people={data.people}
             loadLabel="Owned"
-            emptyMessage="No cases in this selection carry an owner."
+            emptyMessage={t("an.noOwner")}
           />
         </SectionCard>
         <SectionCard
-          title="Reviewer performance"
+          title={t("an.reviewerPerformance")}
           subtitle={t("analytics.verificationLoad")}
           icon="ShieldCheck"
           flush
@@ -262,7 +262,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
             rows={model.reviewers}
             people={data.people}
             loadLabel="Reviewed"
-            emptyMessage="Nothing in this selection has reached verification yet."
+            emptyMessage={t("an.noVerification")}
           />
         </SectionCard>
       </div>
@@ -270,7 +270,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
       {/* 6 — Heatmaps */}
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
-          title="SLA heatmap"
+          title={t("an.slaHeatmap")}
           subtitle={t("analytics.breaches")}
           icon="Grid3x3"
           className="h-full"
@@ -278,7 +278,7 @@ export function AnalyticsView({ data }: { data: AnalyticsData }) {
           <AnalyticsHeatmap grid={model.slaHeatmap} tone="critical" />
         </SectionCard>
         <SectionCard
-          title="Aging heatmap"
+          title={t("an.agingHeatmap")}
           subtitle={t("analytics.ageing")}
           icon="Hourglass"
           className="h-full"
