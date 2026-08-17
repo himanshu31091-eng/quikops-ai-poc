@@ -439,6 +439,9 @@ export interface RelatedCaseRef {
   priorityBand: PriorityBand;
   plantCode: string;
   revenueAtRisk: number;
+  /** Carried from the case, so a chip never falls back to a global default
+   *  currency that belongs to a different tenant. */
+  currency: string;
   openedAt: string;
   /** Why this case is related to the one being viewed. */
   relation: string;
@@ -464,6 +467,9 @@ export interface KpiCardModel {
   label: string;
   value: number;
   unit: "PERCENT" | "CURRENCY" | "COUNT";
+  /** ISO 4217 for a CURRENCY tile. Carried so the tile never falls back to a
+   *  global default belonging to a different tenant. */
+  currency?: string;
   target: number | null;
   deltaValue: number;
   deltaUnit: "pts" | "%" | "abs";

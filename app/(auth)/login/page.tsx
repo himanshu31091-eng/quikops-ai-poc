@@ -5,11 +5,8 @@ import {
   SkipToDefaultPersona,
 } from "@/components/shell/persona-sign-in";
 import { APP } from "@/src/config/app-config";
-import {
-  DEFAULT_SESSION_USER_ID,
-  DEMO_PERSONAS,
-  USER_BY_ID,
-} from "@/src/data/fixtures/organisation";
+import { getTenantConfig } from "@/src/config/tenant";
+import { getSignInPersonas } from "@/src/data/queries/personas";
 
 /**
  * The sign-in screen.
@@ -39,8 +36,16 @@ const VALUE_POINTS = [
   },
 ] as const;
 
-export default function LoginPage() {
-  const personas = DEMO_PERSONAS.map((id) => USER_BY_ID[id]!).filter(Boolean);
+/**
+ * Rendered per request: the personas come from the tenant directory, so a
+ * build-time snapshot would offer the demo cast to an evaluation tenant that
+ * does not have them — and none of those sign-ins would resolve.
+ */
+export const dynamic = "force-dynamic";
+
+export default async function LoginPage() {
+  const personas = await getSignInPersonas();
+  const tenant = getTenantConfig();
 
   return (
     <div className="flex min-h-dvh">
@@ -135,15 +140,20 @@ export default function LoginPage() {
           <PersonaSignIn personas={personas} />
 
           <p className="mt-7 text-2xs leading-relaxed text-content-tertiary">
+            {/* The organisation named here is the active tenant's, not a
+                hard-coded one: an evaluator reading "this environment models
+                <someone else>" on the sign-in screen has been told, before
+                they even reach the portal, that they are looking at another
+                company's demo. The disclosure sentence comes from the same
+                tenant config the shell renders. */}
             Persona selection exists for demonstration only and is removed from
             production builds. This environment models{" "}
             <span className="font-medium text-content-secondary">
-              Perma Construction Aids
+              {tenant.tenantName}
             </span>
-            , a representative Indian construction-chemicals manufacturer — an
-            illustrative scenario rather than a QuikOps customer. All data is
-            synthetic.{" "}
-            <SkipToDefaultPersona userId={DEFAULT_SESSION_USER_ID}>
+            {tenant.industry ? `, ${tenant.industry.toLowerCase()}` : ""} —{" "}
+            {tenant.dataDisclosure.toLowerCase()}.{" "}
+            <SkipToDefaultPersona userId={personas[0]?.id ?? ""}>
               Skip to dashboard
             </SkipToDefaultPersona>
           </p>

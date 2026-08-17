@@ -13,9 +13,10 @@ import type {
   TrendPoint,
 } from "@/src/domain/types";
 import { isOpenStatus } from "@/src/domain/case-status";
+import { computePlantRollup } from "@/src/domain/portfolio-metrics";
 import { PRIORITY_BANDS } from "@/src/domain/types";
-import { OTIF_TARGET_PCT, SPARKLINE_POINTS } from "@/src/lib/constants";
-import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
+import { DEMO_NOW, OTIF_TARGET_PCT, SPARKLINE_POINTS } from "@/src/lib/constants";
+import { DEFAULT_TENANT_ID, getTenantConfig } from "@/src/config/tenant";
 import { USE_DATABASE } from "../db";
 import { getCaseCorpus, getPlants } from "./corpus";
 import { findAuditForTenant, findOpenActionsForTenant } from "./portfolio-db-mapper";
@@ -116,6 +117,7 @@ export async function getHeadlineKpis(scope: PlantScope = ALL_PLANTS): Promise<K
       label: "Revenue at risk",
       value: revenueAtRisk,
       unit: "CURRENCY",
+      currency: getTenantConfig().currency,
       target: null,
       deltaValue: 18.4,
       deltaUnit: "%",
@@ -174,6 +176,28 @@ export async function getCriticalCases(limit = 5, scope: PlantScope = ALL_PLANTS
 }
 
 export async function getPlantHealth(): Promise<PlantHealth[]> {
+  // The seeded series belongs to the demo organisation and names its sites.
+  // In database mode the rollup is computed from the tenant's own cases, so
+  // the panel shows the evaluator their plants rather than somebody else's.
+  if (USE_DATABASE) {
+    const [corpus, sites] = await Promise.all([getCaseCorpus(), getPlants()]);
+    return sites
+      .map((plant) => {
+        const rollup = computePlantRollup(corpus, plant.code, DEMO_NOW);
+        return {
+          plant,
+          // OTIF is measured by the enterprise data platform, not recomputed
+          // here; the group series stands in until a per-plant feed exists.
+          otifPct: OTIF_SERIES_90D[OTIF_SERIES_90D.length - 1]?.value ?? 0,
+          otifDeltaPts: 0,
+          openCases: rollup.openCases,
+          criticalCases: rollup.criticalCases,
+          revenueAtRisk: rollup.revenueAtRisk,
+          slaAdherencePct: rollup.slaAdherencePct,
+        };
+      })
+      .sort((a, b) => a.slaAdherencePct - b.slaAdherencePct);
+  }
   return PLANT_HEALTH;
 }
 
@@ -231,6 +255,48 @@ export async function getRevenueImpact(): Promise<RevenueImpactBucket[]> {
 }
 
 export async function getInventoryHealth(): Promise<InventoryHealthRow[]> {
+  /* The seeded table belongs to the demo organisation and names its sites. In
+   * database mode every figure here is read off the tenant's own inventory
+   * cases instead — days of cover and the policy target from the measurement
+   * the case is judged against, stockout risk and excess value counted from
+   * the cases themselves. A plant with no inventory case is omitted rather
+   * than shown at zero, because "no case" is not "no stock". */
+  if (USE_DATABASE) {
+    const [corpus, sites] = await Promise.all([getCaseCorpus(), getPlants()]);
+    return sites.flatMap((plant) => {
+      const atPlant = corpus.filter(
+        (item) => item.plantCode === plant.code && item.kpiKey === "INVENTORY_DAYS",
+      );
+      if (atPlant.length === 0) return [];
+
+      const latest = atPlant.reduce((newest, item) =>
+        item.lastDetectedAt > newest.lastDetectedAt ? item : newest,
+      );
+      const inventoryDays = latest.baselineValue;
+      const targetDays = latest.targetValue;
+
+      return [
+        {
+          plantCode: plant.code,
+          plantName: plant.name,
+          inventoryDays,
+          targetDays,
+          stockoutRiskSkus: atPlant.filter(
+            (item) => item.exceptionType === "INVENTORY_STOCKOUT" && isOpenStatus(item.status),
+          ).length,
+          excessValue: atPlant
+            .filter((item) => item.exceptionType === "INVENTORY_EXCESS")
+            .reduce((sum, item) => sum + item.revenueAtRisk, 0),
+          status:
+            inventoryDays < targetDays * 0.5
+              ? ("AT_RISK" as const)
+              : inventoryDays > targetDays * 1.5
+                ? ("WATCH" as const)
+                : ("HEALTHY" as const),
+        },
+      ];
+    });
+  }
   return INVENTORY_HEALTH;
 }
 

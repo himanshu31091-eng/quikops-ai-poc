@@ -78,14 +78,28 @@ export const TENANTS: Record<TenantId, TenantConfig> = {
   },
 };
 
-/** The tenant this deployment presents. Overridable per environment. */
-export const DEFAULT_TENANT_ID: TenantId = "perma-demo";
-
-export function getTenantConfig(tenantId: TenantId = DEFAULT_TENANT_ID): TenantConfig {
-  return TENANTS[tenantId];
-}
-
 /** True when the id names a tenant that exists — used to reject a stale cookie. */
 export function isTenantId(value: string | undefined): value is TenantId {
   return value !== undefined && value in TENANTS;
+}
+
+/**
+ * The tenant this deployment presents.
+ *
+ * Read from the server environment so one build serves either audience: the
+ * Sika evaluation environment sets `QUIKOPS_TENANT=sika-evaluation`, and
+ * anything else falls back to the demo scenario.
+ *
+ * **Never read from the browser** — not a header, not a query string, not a
+ * cookie. The tenant decides which rows a session may see, so a value the
+ * client could choose would be the isolation model handed to whoever opened
+ * dev tools. An unrecognised value falls back rather than throwing: a typo in
+ * an environment variable should show the demo, not take the portal down.
+ */
+export const DEFAULT_TENANT_ID: TenantId = isTenantId(process.env.QUIKOPS_TENANT)
+  ? process.env.QUIKOPS_TENANT
+  : "perma-demo";
+
+export function getTenantConfig(tenantId: TenantId = DEFAULT_TENANT_ID): TenantConfig {
+  return TENANTS[tenantId];
 }

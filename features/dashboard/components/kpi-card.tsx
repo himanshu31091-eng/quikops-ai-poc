@@ -69,6 +69,7 @@ export function KpiCard({ model, index }: { model: KpiCardModel; index: number }
           <AnimatedNumber
             value={model.value}
             format={UNIT_FORMAT[model.unit]}
+            currency={model.currency}
             delayMs={index * 60}
             className={cn(
               "block text-2xl font-semibold leading-7 tracking-[-0.02em]",

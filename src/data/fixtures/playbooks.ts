@@ -83,7 +83,7 @@ export const PLAYBOOK_LIBRARY: PlaybookDefinition[] = [
     name: "Critical raw material shortage response",
     exceptionType: "MATERIAL_SHORTAGE",
     description:
-      "Written from the polymer-resin case at Vapi. The first time this was worked it was an improvement action; this is the standard way of responding to it, so the second time is not improvised.",
+      "Written from a polymer-resin shortage case. The first time this was worked it was an improvement action; this is the standard way of responding to it, so the second time is not improvised.",
     version: "v3",
     updatedAt: ago(2),
     steps: [

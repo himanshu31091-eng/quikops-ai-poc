@@ -3,6 +3,7 @@ import { DEFAULT_TENANT_ID } from "@/src/config/tenant";
 import { USE_DATABASE } from "@/src/data/db";
 import { DEFAULT_SESSION_USER_ID, USER_BY_ID } from "@/src/data/fixtures/organisation";
 import { findUserByPersona } from "@/src/data/queries/identity";
+import { getSignInPersonas } from "@/src/data/queries/personas";
 import type { User } from "@/src/domain/types";
 
 const SESSION_COOKIE = "qo_persona";
@@ -49,12 +50,18 @@ export async function getSessionUser(): Promise<User> {
   if (USE_DATABASE) {
     const fallback = await findUserByPersona(DEFAULT_TENANT_ID, DEFAULT_SESSION_USER_ID);
     if (fallback) return fallback;
-    // Reached only if the tenant carries no personas at all, which is a
-    // configuration fault rather than a data condition. Saying so beats
-    // rendering the whole portal as a fixture person who does not exist in the
-    // database everything else on screen was read from.
+
+    // A tenant that does not carry the demo's default persona is normal — the
+    // evaluation tenant has its own people — so fall back to whoever that
+    // tenant offers on its sign-in screen rather than to a fixture identity
+    // the database has never heard of.
+    const [first] = await getSignInPersonas(DEFAULT_TENANT_ID);
+    if (first) return first;
+
+    // No personas at all is a configuration fault rather than a data
+    // condition, and saying so beats rendering the portal as nobody.
     throw new Error(
-      `Database mode is on, but tenant "${DEFAULT_TENANT_ID}" has no user for persona "${DEFAULT_SESSION_USER_ID}". Run the seed, or unset USE_DATABASE.`,
+      `Database mode is on, but tenant "${DEFAULT_TENANT_ID}" has no sign-in personas. Run the seed, or unset USE_DATABASE.`,
     );
   }
 

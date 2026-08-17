@@ -50,6 +50,8 @@ const HOUR = 3_600_000;
 const at = (days, hours = 0) => new Date(DEMO_NOW.getTime() + days * DAY + hours * HOUR);
 
 const DRY_RUN = process.argv.includes("--dry-run");
+/** Rewrites seed-owned rows in place. Never touches a row with no seedKey. */
+const REFRESH_SEEDED = process.argv.includes("--refresh-seeded");
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -58,7 +60,7 @@ const prisma = new PrismaClient({
 /* ------------------------------------------------------------------ Tally */
 
 /** What the run did, per model, so the console report is auditable. */
-const tally = { created: {}, adopted: {}, updated: {}, unchanged: {} };
+const tally = { created: {}, adopted: {}, refreshed: {}, updated: {}, unchanged: {} };
 const note = (bucket, label) => {
   tally[bucket][label] = (tally[bucket][label] ?? 0) + 1;
 };
@@ -100,6 +102,21 @@ async function ensureRef(delegate, label, where, data) {
 async function ensureRow(delegate, label, { tenantId, seedKey, adoptWhere, data }) {
   const own = await delegate.findFirst({ where: { tenantId, seedKey } });
   if (own) {
+    /* `--refresh-seeded` rewrites the demo corpus in place, and is the one
+     * mode that touches a row it did not just create. It exists because the
+     * seeded scenario itself sometimes has to change — a tenant being
+     * re-pointed at a different client, a case portfolio being rewritten —
+     * and creating a second copy beside the first would leave the queue
+     * showing both.
+     *
+     * It is still incapable of touching client work: the `where` carries the
+     * `seedKey`, and a row a person created has none. Run it before handing an
+     * environment over, never after. */
+    if (REFRESH_SEEDED) {
+      const refreshed = await delegate.update({ where: { id: own.id }, data });
+      note("refreshed", label);
+      return refreshed;
+    }
     note("unchanged", label);
     return own;
   }
@@ -159,232 +176,249 @@ const PERMA_PEOPLE = [
   ["usr_agupta", "ananya.gupta@example.com", "Ananya Gupta", "Supply Chain Analyst", "ANALYST", []],
   ["usr_pnair", "prakash.nair@example.com", "Prakash Nair", "Platform Administrator", "ADMINISTRATOR", []],
 ];
-
 /**
- * Sika evaluation personas. Synthetic roles, not people: an evaluator signs in
- * as "Evaluation Reviewer" and is never asked to impersonate a named employee.
+ * The Sika evaluation team.
+ *
+ * Named people with the job titles this work actually sits with, because an
+ * evaluator judging a segregation-of-duties rule needs to see a plant manager
+ * hand a case to a regional quality manager — not "Reviewer" handing it to
+ * "Approver". The names are invented and every address is `example.com`, which
+ * RFC 2606 reserves for exactly this; no real Sika employee appears anywhere.
  */
 const SIKA_PEOPLE = [
-  ["usr_eval_exec", "executive@example.com", "Evaluation Executive", "Executive", "EXECUTIVE", []],
-  ["usr_eval_ops", "ops.manager@example.com", "Evaluation Operations Manager", "Operations Manager", "OPS_MANAGER", []],
-  ["usr_eval_reviewer", "reviewer@example.com", "Evaluation Reviewer", "Reviewer", "OPS_MANAGER", ["EVAL1"]],
-  ["usr_eval_owner", "action.owner@example.com", "Evaluation Action Owner", "Action Owner", "TASK_OWNER", ["EVAL1"]],
-  ["usr_eval_owner_es", "owner.catalonia@example.com", "Evaluation Owner — Site 2", "Action Owner", "TASK_OWNER", ["EVAL2"]],
-  ["usr_eval_owner_pt", "owner.setubal@example.com", "Evaluation Owner — Site 3", "Action Owner", "TASK_OWNER", ["EVAL3"]],
-  ["usr_eval_owner_fr", "owner.lyon@example.com", "Evaluation Owner — Site 4", "Action Owner", "TASK_OWNER", ["EVAL4"]],
-  ["usr_eval_owner_it", "owner.lombardy@example.com", "Evaluation Owner — Site 5", "Action Owner", "TASK_OWNER", ["EVAL5"]],
-  ["usr_eval_analyst", "analyst@example.com", "Evaluation Analyst", "Supply Chain Analyst", "ANALYST", []],
-  ["usr_eval_admin", "administrator@example.com", "Evaluation Administrator", "Platform Administrator", "ADMINISTRATOR", []],
+  ["usr_sk_exec", "martina.keller@example.com", "Martina Keller", "Regional Supply Chain Director", "EXECUTIVE", []],
+  ["usr_sk_ops", "andreas.brandt@example.com", "Andreas Brandt", "Head of Operations — EMEA", "OPS_MANAGER", []],
+  ["usr_sk_quality", "beatriz.almeida@example.com", "Beatriz Almeida", "Regional Quality Manager", "OPS_MANAGER", []],
+  ["usr_sk_owner_de", "jonas.richter@example.com", "Jonas Richter", "Plant Operations Manager — Leimen", "TASK_OWNER", ["SK-DE1"]],
+  ["usr_sk_owner_es", "carla.ferrer@example.com", "Carla Ferrer", "Production Manager — Tarragona", "TASK_OWNER", ["SK-ES1"]],
+  ["usr_sk_owner_pt", "rui.marques@example.com", "Rui Marques", "Plant Operations Manager — Gaia", "TASK_OWNER", ["SK-PT1"]],
+  ["usr_sk_owner_fr", "elodie.bernard@example.com", "Élodie Bernard", "Procurement Manager — Lyon", "TASK_OWNER", ["SK-FR1"]],
+  ["usr_sk_owner_it", "marco.ferretti@example.com", "Marco Ferretti", "Production Manager — Milano", "TASK_OWNER", ["SK-IT1"]],
+  ["usr_sk_analyst", "sofia.lindqvist@example.com", "Sofia Lindqvist", "Supply Chain Analyst", "ANALYST", []],
+  ["usr_sk_admin", "daniel.vogt@example.com", "Daniel Vogt", "Platform Administrator", "ADMINISTRATOR", []],
 ];
 
-/* --------------------------------------------------- Sika evaluation sites */
-
 /**
- * Five sites across the markets the evaluation covers. Site 2 and Site 3 are
- * in Spanish- and Portuguese-speaking countries, which is what makes the
- * language switch demonstrable against data rather than against navigation
- * alone.
+ * Five European sites, in the countries the evaluation covers.
+ *
+ * Tarragona and Gaia are in Spanish- and Portuguese-speaking countries, which
+ * is what makes the language switch demonstrable against data rather than
+ * against navigation alone. These are evaluation sites carrying a plausible
+ * location, not a claim about any particular factory.
  */
 const SIKA_PLANTS = [
-  ["EVAL1", "Evaluation Site 1", "Germany", "DE", "Europe/Berlin"],
-  ["EVAL2", "Evaluation Site 2 — Catalonia", "Spain", "ES", "Europe/Madrid"],
-  ["EVAL3", "Evaluation Site 3 — Setúbal", "Portugal", "PT", "Europe/Lisbon"],
-  ["EVAL4", "Evaluation Site 4 — Lyon", "France", "FR", "Europe/Paris"],
-  ["EVAL5", "Evaluation Site 5 — Lombardy", "Italy", "IT", "Europe/Rome"],
+  ["SK-DE1", "Leimen", "Germany", "DE", "Europe/Berlin"],
+  ["SK-ES1", "Tarragona", "Spain", "ES", "Europe/Madrid"],
+  ["SK-PT1", "Vila Nova de Gaia", "Portugal", "PT", "Europe/Lisbon"],
+  ["SK-FR1", "Lyon", "France", "FR", "Europe/Paris"],
+  ["SK-IT1", "Milano", "Italy", "IT", "Europe/Rome"],
 ];
 
 const SIKA_KPIS = [
   ["OTIF_PCT", "On-time in full", "Share of confirmed orders delivered on time and complete.", "%"],
-  ["INVENTORY_DAYS", "Inventory days of cover", "Days of forward demand covered by on-hand stock.", "days"],
+  ["INVENTORY_DAYS", "Inventory days of cover", "Days of forward demand covered by on-hand stock against the coverage policy.", "days"],
   ["SUPPLIER_OTD_PCT", "Supplier on-time delivery", "Share of supplier consignments received on the confirmed date.", "%"],
   ["SCHEDULE_ADHERENCE_PCT", "Schedule adherence", "Share of production orders completed in the planned sequence and window.", "%"],
+  ["FORECAST_ACCURACY_PCT", "Forecast accuracy", "Agreement between forecast and actual demand over the planning horizon.", "%"],
 ];
 
 /**
- * The evaluation corpus: construction-chemicals exceptions across five sites.
+ * The Sika evaluation portfolio.
  *
- * Every field is invented. Customers and suppliers are trade names that exist
- * nowhere, materials are the product families the industry actually runs on
- * (admixtures, membranes, adhesives, resins, sealants, mortars), and each
- * description ends by saying what the record is. No real identity, no real
- * order, no real price appears anywhere in this file.
+ * Fourteen cases across five sites, written in the vocabulary of construction
+ * chemicals: admixtures, sealants, epoxies, membranes, tile adhesives, repair
+ * mortars and the raw materials behind them. Product families are Sika's own
+ * published ranges; customers and suppliers are invented, and every case says
+ * in its description what the record is.
  *
- * Spread is deliberate rather than decorative — five plants, four priority
- * bands, eight exception types, seven statuses, three detection sources, and
- * both assigned and unassigned work. An evaluator filtering the queue needs
- * every facet to return something, and to return something different.
+ * The spread is deliberate. Five plants, four priority bands, eight exception
+ * types, seven statuses, three detection sources, assigned and unassigned work,
+ * breached and healthy SLAs — so an evaluator filtering the queue finds every
+ * facet populated, and finds something different behind each one.
  */
 const SIKA_CASES = [
   {
     key: "sika-case-00001",
-    caseNo: "QO-EV-2026-00001",
-    title: "Raw material delivery delayed against confirmed date",
+    caseNo: "QO-SK-2026-00101",
+    title: "ViscoCrete polymer delayed against confirmed ready-mix schedule",
     description:
-      "Representative evaluation case. A confirmed supplier date moved out, placing customer orders at risk. Illustrative data — not a live Sika record.",
+      "A confirmed consignment of PCE polymer for Sika ViscoCrete admixture moved out by four days, against a ready-mix schedule carrying three infrastructure contracts. Representative evaluation data — not a live Sika record.",
     exceptionType: "VENDOR_DELAY",
     detectedBy: "EVERY_ANGLE",
     status: "PENDING_VERIFY",
     priorityBand: "CRITICAL",
-    priorityScore: 78.4,
+    priorityScore: 84.6,
     escalationLevel: 1,
-    plant: "EVAL1",
-    materialCode: "RM-EV-1001",
+    plant: "SK-DE1",
+    materialCode: "RM-PCE-4210",
+    materialDesc: "PCE superplasticiser polymer, 40% solids, 1000L IBC",
+    customerCode: "C-NBI-0210",
+    customerName: "Nordbau Infrastruktur",
     customerTier: "TIER_1",
-    revenueAtRisk: "48000",
-    owner: "usr_eval_owner",
-    reviewer: "usr_eval_reviewer",
+    supplierCode: "V-RPC-402",
+    supplierName: "Rheinpolymer Chemie",
+    revenueAtRisk: "96500",
+    owner: "usr_sk_owner_de",
+    reviewer: "usr_sk_quality",
     openedDays: -4,
     dueDays: -1,
     breached: true,
-    recurrenceCount: 1,
-    source: ["Representative ERP", "PO-EVAL-1001", "SIG-EVAL-0001", "RULE-VD-002", "Vendor confirmed date slip"],
-    kpi: ["OTIF_PCT", 87, 95, 92, -1],
-    verification: { requestedDays: -1, notes: "Awaiting review." },
+    recurrenceCount: 2,
+    source: ["SAP ECC", "PO-SK-4471023", "SIG-2026-08-11-DE-00101", "RULE-VD-002", "Vendor confirmed date slip"],
+    kpi: ["SUPPLIER_OTD_PCT", 82, 94, 88, -3],
+    verification: { requestedDays: -1, notes: "Awaiting review. 3 of 3 actions complete and evidenced." },
     actions: [
-      ["Confirm the revised date with the supplier", "Representative corrective action.", "DONE", 100, -3, -3],
+      ["Confirm the revised dispatch date in writing", "Obtain written confirmation of the revised date and quantity from the supplier.", "DONE", 100, -3, -3],
+      ["Release buffer stock against the ready-mix schedule", "Cover the first two pours from the Leimen buffer while the consignment is in transit.", "DONE", 100, -3, -2],
+      ["Re-sequence the batching plan around the confirmed arrival", "Protect the two Tier 1 infrastructure contracts first.", "DONE", 100, -2, -1],
     ],
     evidence: [
-      ["supplier-confirmation.pdf", "DOCUMENT", 122880, "Supplier confirmed the revised date in writing.", -3, true],
+      ["supplier-revised-dispatch-confirmation.pdf", "DOCUMENT", 184320, "Rheinpolymer confirmed the revised dispatch date and quantity in writing.", -3, false],
+      ["leimen-buffer-release-note.pdf", "DOCUMENT", 96256, "Buffer stock released against the first two scheduled pours.", -2, false],
+      ["revised-batching-plan-wk33.xlsx", "SPREADSHEET", 88104, "Batching plan re-sequenced to protect the Tier 1 contracts.", -1, false],
     ],
-    audit: [["verification.requested", "usr_eval_owner", "Case detail", -1]],
+    comments: [
+      ["usr_sk_owner_de", "Buffer covers us to Thursday. If the consignment slips again we lose the Nordbau pour, so I have asked for daily transit confirmation.", -2],
+      ["usr_sk_ops", "Agreed. Protect Nordbau first — everything else can move.", -2, 5],
+    ],
+    audit: [
+      ["case.assigned", "usr_sk_ops", "Work Manager", -4, "ownerId", "Unassigned", "Jonas Richter"],
+      ["action.completed", "usr_sk_owner_de", "Case detail", -3],
+      ["case.escalated", null, "Rule engine", -3, "escalationLevel", "0", "1"],
+      ["verification.requested", "usr_sk_owner_de", "Case detail", -1],
+    ],
   },
   {
     key: "sika-case-00002",
-    caseNo: "QO-EV-2026-00002",
-    title: "Superplasticiser polymer short against confirmed batch plan",
+    caseNo: "QO-SK-2026-00102",
+    title: "Sikaflex sealant batch held on skin-over time",
     description:
-      "Coverage of PCE superplasticiser polymer fell to three days after Vallis Polymer Supply deferred a confirmed consignment, against a batch plan that has four ready-mix contracts on it. Representative evaluation data — not a live Sika record.",
-    exceptionType: "MATERIAL_SHORTAGE",
-    detectedBy: "EVERY_ANGLE",
-    status: "IN_PROGRESS",
-    priorityBand: "CRITICAL",
-    priorityScore: 84.2,
-    escalationLevel: 1,
-    plant: "EVAL2",
-    materialCode: "RM-PCE-2200",
-    materialDesc: "PCE superplasticiser polymer, 40% solids, 1000L IBC",
-    customerCode: "C-NB-0210",
-    customerName: "Nordbau Infrastruktur",
-    customerTier: "TIER_1",
-    supplierCode: "V-VPS-402",
-    supplierName: "Vallis Polymer Supply",
-    revenueAtRisk: "96500",
-    owner: "usr_eval_owner_es",
-    reviewer: "usr_eval_ops",
-    openedDays: -3,
-    dueDays: 1,
-    recurrenceCount: 2,
-    source: ["Representative ERP", "PO-EVAL-2204", "SIG-EVAL-0002", "RULE-MS-001", "Coverage below policy minimum"],
-    kpi: ["OTIF_PCT", 84, 95, 88, -3],
-    actions: [
-      ["Confirm the deferred consignment's revised arrival", "Obtain a written revised date and quantity from the supplier.", "DONE", 100, -3, -2],
-      ["Qualify the alternate polymer source for this grade", "Confirm the alternate source can meet the grade specification and lead time.", "IN_PROGRESS", 60, -1, null],
-      ["Re-sequence the batch plan around the confirmed arrival", "Protect the two highest-tier ready-mix contracts first.", "TODO", 0, 1, null],
-    ],
-    evidence: [
-      ["revised-consignment-confirmation.pdf", "DOCUMENT", 168400, "Supplier confirmed the revised arrival date and quantity in writing.", -2, true],
-      ["alternate-source-specification.pdf", "DOCUMENT", 214016, "Alternate source specification sheet for the same polymer grade.", -1, false],
-    ],
-    comments: [
-      ["usr_eval_owner_es", "Alternate source can cover 60% of the shortfall at the same grade. Confirming the balance against the deferred consignment before I re-sequence.", -1],
-      ["usr_eval_ops", "Protect the two Tier 1 contracts first. Anything else moves.", -1, 4],
-    ],
-    audit: [
-      ["case.assigned", "usr_eval_ops", "Work Manager", -3, "ownerId", "Unassigned", "Evaluation Owner — Site 2"],
-      ["action.completed", "usr_eval_owner_es", "Case detail", -2],
-      ["case.escalated", null, "Rule engine", -2, "escalationLevel", "0", "1"],
-    ],
-  },
-  {
-    key: "sika-case-00003",
-    caseNo: "QO-EV-2026-00003",
-    title: "Epoxy hardener batch held on amine value out of specification",
-    description:
-      "Incoming inspection placed a hardener lot on quality hold after the amine value read outside the release window. Two industrial-flooring orders draw on the same lot. Representative evaluation data — not a live Sika record.",
+      "Incoming quality control held a polyurethane sealant batch after skin-over time fell outside the release window. Two façade contracts draw on the same batch. Representative evaluation data — not a live Sika record.",
     exceptionType: "QUALITY_HOLD",
     detectedBy: "EVERY_ANGLE",
     status: "IN_PROGRESS",
     priorityBand: "HIGH",
-    priorityScore: 71.5,
-    plant: "EVAL3",
+    priorityScore: 74.2,
+    plant: "SK-ES1",
+    materialCode: "FG-SFX-1180",
+    materialDesc: "Sikaflex polyurethane sealant, 600ml sausage",
+    customerCode: "C-IOC-0619",
+    customerName: "Iberia Obras Civiles",
+    customerTier: "TIER_1",
+    supplierCode: "V-CTL-118",
+    supplierName: "Catalonia Polymers",
+    revenueAtRisk: "62400",
+    owner: "usr_sk_owner_es",
+    reviewer: "usr_sk_quality",
+    openedDays: -6,
+    dueDays: 0,
+    recurrenceCount: 1,
+    source: ["Quality Management System", "LOT-SK-ES-88412", "SIG-2026-08-09-ES-00102", "RULE-QH-004", "Release specification breach"],
+    kpi: ["OTIF_PCT", 86, 95, 89, -5],
+    actions: [
+      ["Re-test the retained sample against the release window", "Repeat the skin-over determination on the retained sample.", "DONE", 100, -5, -5],
+      ["Agree a concession or a replacement batch with the supplier", "Either a written concession with justification, or replacement on the original date.", "IN_PROGRESS", 45, 0, null],
+      ["Confirm the façade contract dates can still be met", "Written confirmation to both contract managers once the batch position is known.", "TODO", 0, 1, null],
+    ],
+    evidence: [
+      ["retest-certificate-ES-88412.pdf", "DOCUMENT", 143360, "Re-test confirmed skin-over time outside the release window on the retained sample.", -5, false],
+    ],
+    comments: [
+      ["usr_sk_owner_es", "Re-test matches the original reading, so this is the batch rather than the measurement. Replacement requested from Catalonia Polymers.", -5],
+      ["usr_sk_quality", "Do not release under concession without my sign-off — this batch is going onto a Tier 1 façade.", -4],
+    ],
+    audit: [
+      ["case.assigned", "usr_sk_ops", "Work Manager", -6, "ownerId", "Unassigned", "Carla Ferrer"],
+      ["action.completed", "usr_sk_owner_es", "Case detail", -5],
+    ],
+  },
+  {
+    key: "sika-case-00003",
+    caseNo: "QO-SK-2026-00103",
+    title: "Sikadur epoxy hardener short against industrial flooring orders",
+    description:
+      "Coverage of amine hardener for the Sikadur epoxy range fell below policy after a confirmed quantity was cut on receipt. Two industrial flooring orders are exposed. Representative evaluation data — not a live Sika record.",
+    exceptionType: "MATERIAL_SHORTAGE",
+    detectedBy: "EVERY_ANGLE",
+    status: "IN_PROGRESS",
+    priorityBand: "HIGH",
+    priorityScore: 71.8,
+    plant: "SK-PT1",
     materialCode: "RM-EPX-1140",
     materialDesc: "Epoxy hardener, amine-based, 200kg drum",
-    customerCode: "C-AC-0338",
+    customerCode: "C-ATC-0338",
     customerName: "Atlântico Construções",
     customerTier: "TIER_2",
     supplierCode: "V-AUR-116",
     supplierName: "Aurelia Resins",
-    revenueAtRisk: "62400",
-    owner: "usr_eval_owner_pt",
-    reviewer: "usr_eval_reviewer",
-    openedDays: -6,
-    dueDays: 0,
-    recurrenceCount: 1,
-    source: ["Quality Management System", "LOT-EVAL-88412", "SIG-EVAL-0003", "RULE-QH-004", "Release specification breach"],
-    kpi: ["OTIF_PCT", 86, 94, 89, -5],
+    revenueAtRisk: "54800",
+    owner: "usr_sk_owner_pt",
+    reviewer: "usr_sk_ops",
+    openedDays: -3,
+    dueDays: 1,
+    recurrenceCount: 2,
+    source: ["SAP ECC", "PO-SK-4470884", "SIG-2026-08-12-PT-00103", "RULE-MS-001", "Coverage below policy minimum"],
+    kpi: ["INVENTORY_DAYS", 7, 21, 11, -3],
     actions: [
-      ["Re-test the retained sample against the release window", "Repeat the amine value determination on the retained sample.", "DONE", 100, -5, -5],
-      ["Obtain a supplier deviation statement or replacement lot", "Either a written deviation with justification, or a replacement lot on the original date.", "IN_PROGRESS", 45, -1, null],
+      ["Confirm the short-shipped quantity with the supplier", "Establish what was actually dispatched against the confirmed order.", "DONE", 100, -3, -2],
+      ["Qualify the alternate hardener grade for this formulation", "Confirm the alternate grade meets the specification and the lead time.", "IN_PROGRESS", 60, 1, null],
     ],
     evidence: [
-      ["retest-certificate-88412.pdf", "DOCUMENT", 143360, "Re-test confirmed the amine value outside the release window on the retained sample.", -5, true],
+      ["goods-receipt-discrepancy-PT-4470884.pdf", "DOCUMENT", 106496, "Goods receipt shows the delivered quantity against the confirmed order.", -2, false],
     ],
     comments: [
-      ["usr_eval_owner_pt", "Re-test confirms the original reading, so this is the lot rather than the measurement. Replacement requested.", -5],
+      ["usr_sk_analyst", "Second short shipment from Aurelia this quarter. Worth raising at the supplier review rather than absorbing it again.", -2],
     ],
-    audit: [
-      ["case.assigned", "usr_eval_reviewer", "Work Manager", -6, "ownerId", "Unassigned", "Evaluation Owner — Site 3"],
-      ["action.completed", "usr_eval_owner_pt", "Case detail", -5],
-    ],
+    audit: [["case.assigned", "usr_sk_ops", "Work Manager", -3, "ownerId", "Unassigned", "Rui Marques"]],
   },
   {
     key: "sika-case-00004",
-    caseNo: "QO-EV-2026-00004",
-    title: "Waterproofing membrane consignment at risk of missing site date",
+    caseNo: "QO-SK-2026-00104",
+    title: "Sikalastic membrane consignment at risk against tunnel contract",
     description:
-      "A membrane consignment for a tunnel contract is tracking two days behind the site's required date. Representative evaluation data — not a live Sika record.",
+      "A liquid-applied membrane consignment for a tunnel waterproofing contract is tracking two days behind the site's required date. Representative evaluation data — not a live Sika record.",
     exceptionType: "DELIVERY_AT_RISK",
     detectedBy: "EVERY_ANGLE",
     status: "ASSIGNED",
     priorityBand: "HIGH",
     priorityScore: 68.9,
-    plant: "EVAL4",
-    materialCode: "FG-WPM-4410",
-    materialDesc: "Waterproofing membrane, 2mm, 20m roll",
-    customerCode: "C-RB-0451",
+    plant: "SK-FR1",
+    materialCode: "FG-SLC-4410",
+    materialDesc: "Sikalastic liquid-applied membrane, 20kg pail",
+    customerCode: "C-RBT-0451",
     customerName: "Rhône Bâtiment",
     customerTier: "TIER_1",
-    revenueAtRisk: "54800",
-    owner: "usr_eval_owner_fr",
-    reviewer: "usr_eval_ops",
+    revenueAtRisk: "58200",
+    owner: "usr_sk_owner_fr",
+    reviewer: "usr_sk_ops",
     openedDays: -2,
     dueDays: 2,
     recurrenceCount: 1,
     kpi: ["OTIF_PCT", 88, 95, null, -2],
     actions: [
-      ["Confirm the freight mode against the site's required date", "Establish whether the booked mode can still meet the date, and price the expedite if it cannot.", "TODO", 0, 1, null],
+      ["Price the expedite against the site's required date", "Establish whether the booked mode can still meet the date, and what an expedite costs.", "TODO", 0, 1, null],
     ],
-    audit: [["case.assigned", "usr_eval_ops", "Work Manager", -2, "ownerId", "Unassigned", "Evaluation Owner — Site 4"]],
+    audit: [["case.assigned", "usr_sk_ops", "Work Manager", -2, "ownerId", "Unassigned", "Élodie Bernard"]],
   },
   {
     key: "sika-case-00005",
-    caseNo: "QO-EV-2026-00005",
-    title: "Cellulose ether stockout against tile adhesive demand",
+    caseNo: "QO-SK-2026-00105",
+    title: "Cellulose ether stockout against SikaCeram demand",
     description:
-      "On-hand cellulose ether fell below the coverage policy while tile adhesive demand ran ahead of forecast. Representative evaluation data — not a live Sika record.",
+      "On-hand cellulose ether fell below the coverage policy while tile adhesive demand ran ahead of forecast at Tarragona. Representative evaluation data — not a live Sika record.",
     exceptionType: "INVENTORY_STOCKOUT",
     detectedBy: "PLAYBOOK_MONITOR",
     status: "ASSIGNED",
     priorityBand: "HIGH",
     priorityScore: 66.3,
-    plant: "EVAL2",
+    plant: "SK-ES1",
     materialCode: "RM-CEL-3050",
     materialDesc: "Cellulose ether, methyl hydroxyethyl, 25kg bag",
     supplierCode: "V-PON-233",
     supplierName: "Ponte Additives",
     customerTier: "TIER_2",
     revenueAtRisk: "41200",
-    owner: "usr_eval_owner_es",
+    owner: "usr_sk_owner_es",
     openedDays: -4,
     dueDays: 1,
     recurrenceCount: 3,
@@ -394,29 +428,29 @@ const SIKA_CASES = [
       ["Reset the reorder point for the corrected demand", "Recalculate the trigger so the coverage gap does not reopen inside the lead time.", "TODO", 0, 3, null],
     ],
     comments: [
-      ["usr_eval_analyst", "Third occurrence on this material in a quarter. The reorder point is the fix; the replenishment is only the patch.", -3],
+      ["usr_sk_analyst", "Third occurrence on this material in a quarter. The reorder point is the fix; the replenishment is only the patch.", -3],
     ],
-    audit: [["case.assigned", "usr_eval_ops", "Work Manager", -4, "ownerId", "Unassigned", "Evaluation Owner — Site 2"]],
+    audit: [["case.assigned", "usr_sk_ops", "Work Manager", -4, "ownerId", "Unassigned", "Carla Ferrer"]],
   },
   {
     key: "sika-case-00006",
-    caseNo: "QO-EV-2026-00006",
+    caseNo: "QO-SK-2026-00106",
     title: "Tile adhesive line capacity short of the confirmed order book",
     description:
-      "Available line hours for the tile adhesive plant fall short of confirmed orders in the current window. Representative evaluation data — not a live Sika record.",
+      "Available line hours at Milano fall short of confirmed SikaCeram orders in the current window. Representative evaluation data — not a live Sika record.",
     exceptionType: "CAPACITY_CONSTRAINT",
     detectedBy: "PLAYBOOK_MONITOR",
     status: "TRIAGED",
     priorityBand: "MEDIUM",
     priorityScore: 52.7,
-    plant: "EVAL5",
-    materialCode: "FG-TAD-5120",
-    materialDesc: "Cementitious tile adhesive, C2TE, 25kg bag",
-    customerCode: "C-LC-0512",
+    plant: "SK-IT1",
+    materialCode: "FG-SCR-5120",
+    materialDesc: "SikaCeram cementitious tile adhesive, C2TE, 25kg bag",
+    customerCode: "C-LCT-0512",
     customerName: "Lombardia Costruzioni",
     customerTier: "TIER_2",
     revenueAtRisk: "38600",
-    reviewer: "usr_eval_ops",
+    reviewer: "usr_sk_ops",
     openedDays: -2,
     dueDays: 3,
     recurrenceCount: 1,
@@ -424,23 +458,23 @@ const SIKA_CASES = [
   },
   {
     key: "sika-case-00007",
-    caseNo: "QO-EV-2026-00007",
-    title: "Silicone sealant delivered quantities varying from confirmed",
+    caseNo: "QO-SK-2026-00107",
+    title: "Silicone base polymer quantities varying from confirmed",
     description:
-      "Delivered quantities varied from confirmed quantities on four of the last eleven sealant consignments. Representative evaluation data — not a live Sika record.",
+      "Delivered quantities varied from confirmed quantities on four of the last eleven silicone base consignments into Leimen. Representative evaluation data — not a live Sika record.",
     exceptionType: "PLANNING_DEVIATION",
     detectedBy: "PLAYBOOK_MONITOR",
     status: "ASSIGNED",
     priorityBand: "MEDIUM",
     priorityScore: 47.1,
-    plant: "EVAL1",
+    plant: "SK-DE1",
     materialCode: "RM-SIL-2710",
     materialDesc: "Silicone sealant base polymer, 190kg drum",
     supplierCode: "V-NOR-508",
     supplierName: "Norska Minerals",
     customerTier: "TIER_3",
     revenueAtRisk: "27900",
-    owner: "usr_eval_owner",
+    owner: "usr_sk_owner_de",
     openedDays: -8,
     dueDays: 2,
     recurrenceCount: 2,
@@ -448,43 +482,43 @@ const SIKA_CASES = [
     actions: [
       ["Reconcile the last eleven consignments against confirmations", "Establish whether the variance is systematic or a measurement difference.", "IN_PROGRESS", 40, 1, null],
     ],
-    audit: [["case.assigned", "usr_eval_ops", "Work Manager", -8, "ownerId", "Unassigned", "Evaluation Action Owner"]],
+    audit: [["case.assigned", "usr_sk_ops", "Work Manager", -8, "ownerId", "Unassigned", "Jonas Richter"]],
   },
   {
     key: "sika-case-00008",
-    caseNo: "QO-EV-2026-00008",
-    title: "Quartz aggregate delayed against the repair mortar plan",
+    caseNo: "QO-SK-2026-00108",
+    title: "Graded quartz delayed against SikaGrout production plan",
     description:
-      "Graded quartz aggregate confirmed four days late against the repair mortar production plan. Representative evaluation data — not a live Sika record.",
+      "Graded quartz aggregate confirmed four days late against the SikaGrout production plan at Gaia. Representative evaluation data — not a live Sika record.",
     exceptionType: "VENDOR_DELAY",
     detectedBy: "EVERY_ANGLE",
     status: "IN_PROGRESS",
     priorityBand: "MEDIUM",
     priorityScore: 44.8,
-    plant: "EVAL3",
+    plant: "SK-PT1",
     materialCode: "RM-QTZ-1820",
     materialDesc: "Graded quartz aggregate, 0.1–0.3mm, 1000kg bulk bag",
     supplierCode: "V-NOR-508",
     supplierName: "Norska Minerals",
     customerTier: "TIER_3",
     revenueAtRisk: "23400",
-    owner: "usr_eval_owner_pt",
+    owner: "usr_sk_owner_pt",
     openedDays: -5,
     dueDays: 1,
     recurrenceCount: 1,
     kpi: ["SUPPLIER_OTD_PCT", 81, 92, 85, -5],
     actions: [
       ["Confirm the revised dispatch date in writing", "Written confirmation of the revised date and quantity.", "DONE", 100, -4, -4],
-      ["Move the mortar batch to the confirmed arrival", "Re-plan the batch rather than hold the line idle.", "IN_PROGRESS", 50, 0, null],
+      ["Move the grout batch to the confirmed arrival", "Re-plan the batch rather than hold the line idle.", "IN_PROGRESS", 50, 0, null],
     ],
     evidence: [
-      ["aggregate-dispatch-confirmation.pdf", "DOCUMENT", 98304, "Supplier confirmed the revised dispatch date in writing.", -4, true],
+      ["quartz-dispatch-confirmation-PT.pdf", "DOCUMENT", 98304, "Norska Minerals confirmed the revised dispatch date in writing.", -4, false],
     ],
   },
   {
     key: "sika-case-00009",
-    caseNo: "QO-EV-2026-00009",
-    title: "Curing compound cover well above policy at Site 4",
+    caseNo: "QO-SK-2026-00109",
+    title: "Curing compound cover well above policy at Lyon",
     description:
       "Days of cover for curing compound stand at more than three times the coverage policy, tying up working capital and shelf life. Representative evaluation data — not a live Sika record.",
     exceptionType: "INVENTORY_EXCESS",
@@ -492,7 +526,7 @@ const SIKA_CASES = [
     status: "TRIAGED",
     priorityBand: "LOW",
     priorityScore: 22.4,
-    plant: "EVAL4",
+    plant: "SK-FR1",
     materialCode: "FG-CUR-6300",
     materialDesc: "Concrete curing compound, wax emulsion, 200L drum",
     customerTier: "TIER_3",
@@ -504,8 +538,8 @@ const SIKA_CASES = [
   },
   {
     key: "sika-case-00010",
-    caseNo: "QO-EV-2026-00010",
-    title: "Titanium dioxide pigment short against the coatings schedule",
+    caseNo: "QO-SK-2026-00110",
+    title: "Titanium dioxide short against Sikagard coating schedule",
     description:
       "Pigment coverage fell below the coatings schedule requirement after a confirmed quantity was cut on receipt. Unassigned pending triage. Representative evaluation data — not a live Sika record.",
     exceptionType: "MATERIAL_SHORTAGE",
@@ -513,7 +547,7 @@ const SIKA_CASES = [
     status: "NEW",
     priorityBand: "MEDIUM",
     priorityScore: 49.6,
-    plant: "EVAL5",
+    plant: "SK-IT1",
     materialCode: "RM-TIO-4200",
     materialDesc: "Titanium dioxide pigment, rutile grade, 25kg bag",
     supplierCode: "V-KAS-711",
@@ -527,24 +561,24 @@ const SIKA_CASES = [
   },
   {
     key: "sika-case-00011",
-    caseNo: "QO-EV-2026-00011",
-    title: "Grout mix held on flow value, released after re-work",
+    caseNo: "QO-SK-2026-00111",
+    title: "SikaGrout batch re-worked on flow value and released",
     description:
-      "A structural grout batch was held on flow value, re-worked against the release specification and verified independently before dispatch. Representative evaluation data — not a live Sika record.",
+      "A structural grout batch was held on flow value, re-worked against the release specification and independently verified before dispatch. Representative evaluation data — not a live Sika record.",
     exceptionType: "QUALITY_HOLD",
     detectedBy: "EVERY_ANGLE",
     status: "VERIFIED",
     priorityBand: "HIGH",
     priorityScore: 69.2,
-    plant: "EVAL1",
+    plant: "SK-DE1",
     materialCode: "FG-GRT-7710",
-    materialDesc: "Structural grout, non-shrink, 25kg bag",
-    customerCode: "C-NB-0210",
+    materialDesc: "SikaGrout non-shrink structural grout, 25kg bag",
+    customerCode: "C-NBI-0210",
     customerName: "Nordbau Infrastruktur",
     customerTier: "TIER_1",
     revenueAtRisk: "44000",
-    owner: "usr_eval_owner",
-    reviewer: "usr_eval_reviewer",
+    owner: "usr_sk_owner_de",
+    reviewer: "usr_sk_quality",
     openedDays: -14,
     dueDays: -9,
     verifiedDays: -8,
@@ -565,19 +599,22 @@ const SIKA_CASES = [
       ["Record the root cause against the mix design", "Close the loop so the same deviation is caught at batching.", "DONE", 100, -10, -9],
     ],
     evidence: [
-      ["grout-release-certificate.pdf", "DOCUMENT", 176128, "Re-worked batch passed full release testing.", -11, true],
-      ["customer-date-confirmation.pdf", "DOCUMENT", 81920, "Customer confirmed the delivery date was held.", -10, true],
+      ["sikagrout-release-certificate-DE.pdf", "DOCUMENT", 176128, "Re-worked batch passed full release testing.", -11, true],
+      ["nordbau-date-confirmation.pdf", "DOCUMENT", 81920, "Nordbau confirmed the delivery date was held.", -10, true],
+    ],
+    comments: [
+      ["usr_sk_quality", "Root cause sits with the mix design tolerance, not the batching. I have logged it against the specification review.", -9],
     ],
     audit: [
-      ["case.assigned", "usr_eval_ops", "Work Manager", -14, "ownerId", "Unassigned", "Evaluation Action Owner"],
-      ["verification.requested", "usr_eval_owner", "Case detail", -9],
-      ["verification.decided", "usr_eval_reviewer", "Case detail", -8, "decision", "Pending", "Approved"],
+      ["case.assigned", "usr_sk_ops", "Work Manager", -14, "ownerId", "Unassigned", "Jonas Richter"],
+      ["verification.requested", "usr_sk_owner_de", "Case detail", -9],
+      ["verification.decided", "usr_sk_quality", "Case detail", -8, "decision", "Pending", "Approved"],
     ],
   },
   {
     key: "sika-case-00012",
-    caseNo: "QO-EV-2026-00012",
-    title: "Repair mortar consignment at risk against a motorway contract",
+    caseNo: "QO-SK-2026-00112",
+    title: "MonoTop repair mortar at risk against motorway contract",
     description:
       "A repair mortar consignment for a motorway maintenance contract is tracking behind the confirmed date. All corrective actions are complete and evidenced; submitted for independent verification. Representative evaluation data — not a live Sika record.",
     exceptionType: "DELIVERY_AT_RISK",
@@ -585,15 +622,15 @@ const SIKA_CASES = [
     status: "PENDING_VERIFY",
     priorityBand: "HIGH",
     priorityScore: 65.8,
-    plant: "EVAL2",
-    materialCode: "FG-RMT-5540",
-    materialDesc: "Concrete repair mortar, R4 class, 25kg bag",
-    customerCode: "C-IO-0619",
+    plant: "SK-ES1",
+    materialCode: "FG-MTP-5540",
+    materialDesc: "Sika MonoTop concrete repair mortar, R4 class, 25kg bag",
+    customerCode: "C-IOC-0619",
     customerName: "Iberia Obras Civiles",
     customerTier: "TIER_1",
     revenueAtRisk: "39700",
-    owner: "usr_eval_owner_es",
-    reviewer: "usr_eval_reviewer",
+    owner: "usr_sk_owner_es",
+    reviewer: "usr_sk_quality",
     openedDays: -7,
     dueDays: -3,
     breached: true,
@@ -603,39 +640,39 @@ const SIKA_CASES = [
     actions: [
       ["Expedite the consignment to the contract date", "Book the faster mode and confirm the revised arrival.", "DONE", 100, -6, -5],
       ["Confirm the revised arrival with the contract manager", "Written confirmation that the revised date is acceptable on site.", "DONE", 100, -5, -4],
-      ["Protect the remaining schedule against the same route", "Re-check the other consignments moving on that route this week.", "DONE", 100, -4, -3],
+      ["Re-check the remaining consignments on that route", "Protect the rest of the week's schedule against the same cause.", "DONE", 100, -4, -3],
     ],
     evidence: [
-      ["expedite-booking-confirmation.pdf", "DOCUMENT", 106496, "Expedited freight booked against the contract date.", -5, false],
-      ["site-acceptance-of-revised-date.pdf", "DOCUMENT", 73728, "Contract manager accepted the revised arrival in writing.", -4, false],
+      ["expedite-booking-ES-4471190.pdf", "DOCUMENT", 106496, "Expedited freight booked against the contract date.", -5, false],
+      ["site-acceptance-revised-date.pdf", "DOCUMENT", 73728, "Contract manager accepted the revised arrival in writing.", -4, false],
     ],
     comments: [
-      ["usr_eval_owner_es", "Site accepted the revised arrival, so the contract date holds. Submitting for verification.", -3],
+      ["usr_sk_owner_es", "Site accepted the revised arrival, so the contract date holds. Submitting for verification.", -3],
     ],
     audit: [
-      ["case.assigned", "usr_eval_ops", "Work Manager", -7, "ownerId", "Unassigned", "Evaluation Owner — Site 2"],
-      ["verification.requested", "usr_eval_owner_es", "Case detail", -3],
+      ["case.assigned", "usr_sk_ops", "Work Manager", -7, "ownerId", "Unassigned", "Carla Ferrer"],
+      ["verification.requested", "usr_sk_owner_es", "Case detail", -3],
     ],
   },
   {
     key: "sika-case-00013",
-    caseNo: "QO-EV-2026-00013",
+    caseNo: "QO-SK-2026-00113",
     title: "Pail supply variance closed without customer impact",
     description:
-      "Packaging pail deliveries varied from confirmed quantities across three consignments. Resolved with the supplier and closed without customer impact. Representative evaluation data — not a live Sika record.",
+      "Packaging pail deliveries varied from confirmed quantities across three consignments at Gaia. Resolved with the supplier and closed without customer impact. Representative evaluation data — not a live Sika record.",
     exceptionType: "PLANNING_DEVIATION",
     detectedBy: "PLAYBOOK_MONITOR",
     status: "CLOSED",
     priorityBand: "LOW",
     priorityScore: 19.7,
-    plant: "EVAL3",
+    plant: "SK-PT1",
     materialCode: "PK-PAI-2010",
     materialDesc: "Packaging pail, 20 litre, HDPE",
     supplierCode: "V-KAS-711",
     supplierName: "Kastell Speciality Chemicals",
     customerTier: "TIER_3",
     revenueAtRisk: "9900",
-    owner: "usr_eval_owner_pt",
+    owner: "usr_sk_owner_pt",
     openedDays: -21,
     dueDays: -16,
     closedDays: -15,
@@ -645,24 +682,24 @@ const SIKA_CASES = [
       ["Agree the tolerance and the count method with the supplier", "Written agreement on the tolerance and how quantities are counted on receipt.", "DONE", 100, -18, -16],
     ],
     evidence: [
-      ["supplier-tolerance-agreement.pdf", "DOCUMENT", 65536, "Tolerance and count method agreed in writing.", -16, true],
+      ["pail-tolerance-agreement-PT.pdf", "DOCUMENT", 65536, "Tolerance and count method agreed in writing with Kastell.", -16, true],
     ],
   },
   {
     key: "sika-case-00014",
-    caseNo: "QO-EV-2026-00014",
-    title: "Polyurethane sealant line down, unassigned",
+    caseNo: "QO-SK-2026-00114",
+    title: "Sikaflex filling line down on mixer fault, unassigned",
     description:
-      "The polyurethane sealant line stopped on a mixer fault with confirmed orders in the window. Detected and unassigned — this is what the queue looks like before anybody has picked the work up. Representative evaluation data — not a live Sika record.",
+      "The Sikaflex filling line stopped on a mixer fault with confirmed orders in the window. Detected and unassigned — this is what the queue looks like before anybody has picked the work up. Representative evaluation data — not a live Sika record.",
     exceptionType: "CAPACITY_CONSTRAINT",
     detectedBy: "MANUAL",
     status: "NEW",
     priorityBand: "CRITICAL",
     priorityScore: 79.9,
-    plant: "EVAL4",
-    materialCode: "FG-PUS-8820",
-    materialDesc: "Polyurethane sealant, 600ml sausage",
-    customerCode: "C-RB-0451",
+    plant: "SK-FR1",
+    materialCode: "FG-SFX-8820",
+    materialDesc: "Sikaflex polyurethane sealant, 600ml sausage",
+    customerCode: "C-RBT-0451",
     customerName: "Rhône Bâtiment",
     customerTier: "TIER_1",
     revenueAtRisk: "88300",
@@ -837,7 +874,7 @@ async function seedSikaCases(db, tenantId, ctx) {
             description,
             // An action needs an owner even where the case does not have one
             // yet; the site owner is who would carry it.
-            ownerId: (owner ?? ctx.people.usr_eval_ops).id,
+            ownerId: (owner ?? ctx.people.usr_sk_ops).id,
             status,
             completionPct: pct,
             sequence: index,
@@ -863,7 +900,7 @@ async function seedSikaCases(db, tenantId, ctx) {
           fileType,
           fileSizeBytes,
           proves,
-          uploadedById: (owner ?? ctx.people.usr_eval_ops).id,
+          uploadedById: (owner ?? ctx.people.usr_sk_ops).id,
           uploadedAt: at(uploadedDays, 7),
           accepted,
         },
@@ -899,9 +936,9 @@ async function seedSikaCases(db, tenantId, ctx) {
         adoptWhere: { caseId: record.id },
         data: {
           caseId: record.id,
-          requestedById: (owner ?? ctx.people.usr_eval_owner).id,
+          requestedById: (owner ?? ctx.people.usr_sk_owner_de).id,
           requestedAt: at(v.requestedDays),
-          reviewerId: (reviewer ?? ctx.people.usr_eval_reviewer).id,
+          reviewerId: (reviewer ?? ctx.people.usr_sk_quality).id,
           decision: v.decision ?? null,
           decidedAt: v.decidedDays === undefined ? null : at(v.decidedDays),
           comment: v.comment ?? null,
@@ -1113,6 +1150,7 @@ function report(counts) {
   // A seed is a CLI script, not app code: its result belongs on the console.
   console.warn(DRY_RUN ? "\nDRY RUN — nothing was written\n" : "\nApplied\n");
   console.warn(line("created"));
+  console.warn(line("refreshed"));
   console.warn(line("adopted"));
   console.warn(line("updated"));
   console.warn(line("unchanged"));

@@ -1,5 +1,5 @@
 import { formatDistanceStrict, differenceInCalendarDays, format } from "date-fns";
-import { CURRENCY_LOCALE, DEFAULT_CURRENCY } from "./constants";
+import { CURRENCY_LOCALE, CURRENCY_LOCALES_BY_CODE, DEFAULT_CURRENCY } from "./constants";
 
 const FULL_CURRENCY_THRESHOLD = 10_000_000;
 const RELATIVE_DATE_WINDOW_DAYS = 7;
@@ -14,6 +14,12 @@ const RELATIVE_DATE_WINDOW_DAYS = 7;
  *
  * Never renders a fractional unit — executives read magnitude, not precision.
  */
+/** Grouping follows the currency being rendered — lakh for rupees, thousands
+ *  for euros — so a mixed-currency screen never groups one like the other. */
+function localeForCurrency(currency: string): string {
+  return CURRENCY_LOCALES_BY_CODE[currency] ?? CURRENCY_LOCALE;
+}
+
 export function formatMoney(
   amount: number,
   currency = DEFAULT_CURRENCY,
@@ -23,7 +29,7 @@ export function formatMoney(
     options?.forceCompact ??
     (options?.forceFull ? false : Math.abs(amount) >= FULL_CURRENCY_THRESHOLD);
 
-  return new Intl.NumberFormat(CURRENCY_LOCALE, {
+  return new Intl.NumberFormat(localeForCurrency(currency), {
     style: "currency",
     currency,
     notation: compact ? "compact" : "standard",

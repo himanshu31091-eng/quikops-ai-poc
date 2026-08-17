@@ -5,7 +5,8 @@ import { TourInvitation, TourOverlay } from "@/components/tour/tour-overlay";
 import { getActiveSessionUser } from "@/src/auth/session";
 import { getPlantScope } from "@/src/scope/plant-scope";
 import { CASES } from "@/src/data/fixtures/cases";
-import { DEMO_PERSONAS, PLANTS, USER_BY_ID } from "@/src/data/fixtures/organisation";
+import { PLANTS } from "@/src/data/fixtures/organisation";
+import { getSignInPersonas } from "@/src/data/queries/personas";
 import { NOTIFICATIONS } from "@/src/data/fixtures/intelligence";
 import { getNavBadgeCounts } from "@/src/data/queries/dashboard";
 import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/src/i18n/config";
@@ -29,7 +30,7 @@ export default async function AppLayout({
     getPlantScope(),
   ]);
 
-  const personas = DEMO_PERSONAS.map((id) => USER_BY_ID[id]!).filter(Boolean);
+  const personas = await getSignInPersonas();
 
   const localeCookie = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale = isLocale(localeCookie) ? localeCookie : DEFAULT_LOCALE;

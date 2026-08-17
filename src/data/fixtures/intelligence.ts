@@ -86,7 +86,8 @@ export function buildPortfolioSummary(
     .filter((item) => item.ownerId === null)
     .reduce((sum, item) => sum + item.revenueAtRisk, 0);
 
-  const money = (value: number) => formatMoney(value);
+  // The tenant's currency, so the narrative agrees with the tiles beside it.
+  const money = (value: number) => formatMoney(value, corpus[0]?.currency);
 
   // What is actually driving the worst site, rather than an assumed cause: the
   // most common exception type among its open cases, and whether that work is

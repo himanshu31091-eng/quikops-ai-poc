@@ -13,10 +13,10 @@ const DURATION_MS = 700;
  */
 export type NumberFormat = "percent" | "currency-compact" | "currency" | "count";
 
-const FORMATTERS: Record<NumberFormat, (value: number) => string> = {
+const FORMATTERS: Record<NumberFormat, (value: number, currency?: string) => string> = {
   percent: (value) => formatPercent(value),
-  "currency-compact": (value) => formatMoney(value, undefined, { forceCompact: true }),
-  currency: (value) => formatMoney(value, undefined, { forceFull: true }),
+  "currency-compact": (value, currency) => formatMoney(value, currency, { forceCompact: true }),
+  currency: (value, currency) => formatMoney(value, currency, { forceFull: true }),
   count: (value) => formatNumber(Math.round(value)),
 };
 
@@ -27,6 +27,8 @@ function easeOutCubic(t: number): number {
 interface AnimatedNumberProps {
   value: number;
   format: NumberFormat;
+  /** ISO 4217 for the currency formats. Omitted for percent and count. */
+  currency?: string;
   className?: string;
   delayMs?: number;
 }
@@ -39,6 +41,7 @@ interface AnimatedNumberProps {
 export function AnimatedNumber({
   value,
   format,
+  currency,
   className,
   delayMs = 0,
 }: AnimatedNumberProps) {
@@ -94,7 +97,7 @@ export function AnimatedNumber({
 
   return (
     <span className={cn("tabular-nums", className)} suppressHydrationWarning>
-      {formatter(display)}
+      {formatter(display, currency)}
     </span>
   );
 }

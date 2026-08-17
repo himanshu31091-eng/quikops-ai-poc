@@ -61,6 +61,7 @@ function toRelatedRef(source: CaseListItem, relation: string): RelatedCaseRef {
     priorityBand: source.priorityBand,
     plantCode: source.plantCode,
     revenueAtRisk: source.revenueAtRisk,
+    currency: source.currency,
     openedAt: source.openedAt,
     relation,
   };
