@@ -112,3 +112,44 @@ client sorts a spreadsheet on.
    summaries; the derived narrative in `src/data/queries/*` and
    `features/*/utils/*-derive.ts` (generated sentences, template-shaped, ours to
    translate); then the corpus, if and only if a domain translator is available.
+
+---
+
+## Addendum — sign-in verified through the action, not the cookie
+
+Earlier sessions marked sign-in as passing while only ever setting `qo_persona`
+by hand. That is not the same test, and it is why the broken click reached the
+client. This session exercised the server action itself, by POSTing to `/login`
+with the `Next-Action` header against a local production build under production's
+config.
+
+| Persona | Cookie written | Redirect |
+|---|---|---|
+| `usr_sk_exec` | ✅ HttpOnly, SameSite=lax | `/dashboard` |
+| `usr_sk_ops` | ✅ | `/work` |
+| `usr_sk_owner_de` | ✅ | `/my-work` |
+| `usr_sk_analyst` | ✅ | `/work` |
+| `usr_sk_admin` | ✅ | `/admin` |
+| `usr_rmenon` (the *other* tenant's user) | ❌ none | `/login` — correctly refused |
+
+`signOut` clears the cookie and returns to `/login`; `switchPersona` writes the
+cookie without navigating. All three behave as D-90 describes.
+
+Note for next time: **Vercel's build assigns different server-action IDs than a
+local build**, so the same POST returns 404 against production. Exercise actions
+against a local production build; the deployed build runs the same source.
+
+## Deployment
+
+`89a0989` is on `origin/main` and live in production.
+
+**The Git integration did not trigger a build** — the push completed and no new
+deployment appeared, so production was still serving the previous build. It was
+deployed with `npx vercel --prod`. Worth knowing: on this project, **pushing to
+`main` is not sufficient to deploy.** Verify the deployment rather than assuming
+the push did it.
+
+Verified against `https://quikops-ai-poc.vercel.app` after deploying: 13/13
+routes 200, zero Perma references in the full payload across 13 routes × 3
+locales, and Spanish and Portuguese both rendering (529 / 528 untranslated
+interface strings, i.e. at parity).
