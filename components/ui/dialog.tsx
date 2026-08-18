@@ -31,7 +31,21 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-[12%] z-50 w-full max-w-2xl -translate-x-1/2 overflow-hidden rounded-xl border border-line bg-surface shadow-overlay outline-none",
+        /*
+         * The gutter is applied to `width`, not to `max-width`.
+         *
+         * `w-full` made a dialog exactly as wide as the viewport on a phone —
+         * edge to edge, corners cut off by the screen. Capping `max-width` here
+         * instead would fight every caller that passes its own `max-w-*`, since
+         * both are the same property and the winner is decided by stylesheet
+         * order rather than by the class list. Constraining the width leaves the
+         * caller's `max-w-*` working exactly as before, as a ceiling.
+         *
+         * The height cap replaces `overflow-hidden`: a tall dialog at 720px
+         * clipped its own footer, which is where the confirm button lives.
+         */
+        "fixed left-1/2 top-[12%] z-50 w-[calc(100%-1.5rem)] max-w-2xl -translate-x-1/2 rounded-xl border border-line bg-surface shadow-overlay outline-none sm:w-[calc(100%-3rem)]",
+        "max-h-[80dvh] overflow-y-auto overscroll-contain",
         "data-[state=open]:anim-settle",
         className,
       )}

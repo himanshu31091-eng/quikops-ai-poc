@@ -523,7 +523,7 @@
   "analytics.howLongOpenWorkHas": "How long open work has been open — distinct from late",
   "analytics.escalationDepth": "Escalation depth",
   "analytics.workThatHasBeenPushed": "Work that has been pushed above its owner, and for how long",
-  "analytics.flowAmpForecast": "Flow &amp; forecast",
+  "analytics.flowAmpForecast": "Flow & forecast",
   "analytics.noPlantsInThisSelection": "No plants in this selection",
   "analytics.nobodyToRankYet": "Nobody to rank yet",
   "analytics.avgResolve": "Avg resolve",
@@ -870,5 +870,7 @@
   "shell.scenarioDetail": "It models a real manufacturer’s operating problem so the platform can be shown against something concrete. Every case, plant, person and figure here is illustrative, and no production system is connected.",
   "dash.allPlantsInScope": "All {count} plants in scope",
   "dash.subtitleScoped": "Operational health at {plant}, with every number traceable to the cases behind it.",
-  "dash.onePlantInScope": "Scoped to {plant}"
+  "dash.onePlantInScope": "Scoped to {plant}",
+  "shell.environmentShort": "Evaluation",
+  "shell.allPlantsShort": "All"
 }

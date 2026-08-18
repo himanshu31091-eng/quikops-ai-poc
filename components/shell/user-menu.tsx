@@ -52,7 +52,7 @@ export function UserMenu({ user, personas }: UserMenuProps) {
             Reinhardt" over "Operations Manager" and pushed the chevron out of
             the header instead. Same shape as OwnerAvatar, which had it right.
           */}
-          <span className="hidden min-w-0 text-left lg:block">
+          <span className="hidden min-w-0 text-left xl:block">
             <span className="block truncate text-xs font-medium leading-3.5 text-content">
               {user.name}
             </span>

@@ -870,5 +870,7 @@
   "shell.scenarioDetail": "Modela el problema operativo de un fabricante real para poder mostrar la plataforma frente a algo concreto. Todos los casos, plantas, personas y cifras son ilustrativos, y no hay ningún sistema de producción conectado.",
   "dash.allPlantsInScope": "Las {count} plantas en alcance",
   "dash.subtitleScoped": "Salud operativa en {plant}, con cada cifra trazable hasta los casos que la sustentan.",
-  "dash.onePlantInScope": "Alcance: {plant}"
+  "dash.onePlantInScope": "Alcance: {plant}",
+  "shell.environmentShort": "Evaluación",
+  "shell.allPlantsShort": "Todas"
 }

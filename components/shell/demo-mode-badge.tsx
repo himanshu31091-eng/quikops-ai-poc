@@ -41,17 +41,38 @@ export function DemoModeBadge({ environmentLabel, dataDisclosure }: DemoModeBadg
     <Tooltip>
       <TooltipTrigger asChild>
         <span
-          className="hidden items-center gap-1.5 rounded-sm border border-line bg-surface-subtle px-2 py-1 text-2xs font-medium text-content-secondary lg:flex"
+          className="flex max-w-52 shrink items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-sm border border-line bg-surface-subtle px-1.5 py-1 text-2xs font-medium text-content-secondary sm:px-2 2xl:max-w-96"
           // Not a control, but it is worth reading aloud in the tab order's
           // place rather than being skipped as decoration.
           role="note"
+          // The visible text is progressively abbreviated, so the whole claim
+          // stays available to a screen reader at every width.
+          aria-label={`${environmentLabel} · ${dataDisclosure}`}
+          title={`${environmentLabel} · ${dataDisclosure}`}
         >
           <span className="size-1.5 shrink-0 rounded-full bg-accent" />
-          {environmentLabel} · {dataDisclosure}
+          {/*
+            Three tiers, because this string is long in English and longer in
+            Spanish and Portuguese. Rendering it in full at every width is what
+            wrapped the badge into a five-line block that burst out of a
+            fixed-height header and overlapped the page beneath it.
+
+            The dot alone still says "this is not production" at a glance, and
+            the full sentence is one hover or one screen reader away at every
+            width.
+          */}
+          <span className="hidden truncate 2xl:inline">
+            {environmentLabel} · {dataDisclosure}
+          </span>
+          <span className="hidden truncate xl:inline 2xl:hidden">{environmentLabel}</span>
+          <span className="hidden truncate sm:inline xl:hidden">{t("shell.environmentShort")}</span>
         </span>
       </TooltipTrigger>
       <TooltipContent>
-        <p className="max-w-[260px] text-2xs leading-relaxed">
+        <p className="max-w-65 text-2xs leading-relaxed">
+          <span className="font-medium">{environmentLabel}</span> — {dataDisclosure}.
+        </p>
+        <p className="mt-1.5 max-w-65 text-2xs leading-relaxed">
           <span className="font-medium">{t("shell.scenarioNotCustomer")}</span>{" "}
           {t("shell.scenarioDetail")} {APP.name} {APP.version}.
         </p>

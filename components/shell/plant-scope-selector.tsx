@@ -46,22 +46,38 @@ export function PlantScopeSelector({ plants, scope }: PlantScopeSelectorProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/*
+          Plant scope is tenant context, not decoration: it changes every figure
+          on the screen. It used to disappear below `xl`, which left tablet users
+          unable to see or change the scope their numbers were computed under.
+
+          It now narrows instead of vanishing — full name, then code only, then
+          the icon alone — so the control is reachable at every width and the
+          scoped state stays visible.
+        */}
         <button
           type="button"
           aria-label={`Plant scope — ${current ? current.name : "all plants"}`}
           className={cn(
-            "flex h-8 items-center gap-2 rounded-md border bg-surface px-2.5 text-sm text-content transition-colors duration-150 hover:border-line-strong hover:bg-surface-hover",
+            "flex h-8 shrink-0 items-center gap-1.5 rounded-md border bg-surface px-1.5 text-sm text-content transition-colors duration-150 hover:border-line-strong hover:bg-surface-hover sm:gap-2 sm:px-2.5",
             // A scoped view is a modal state: the control says so rather than
             // leaving the reader to notice the numbers are smaller.
             current ? "border-accent-line bg-accent-subtle" : "border-line",
             isPending && "opacity-60",
           )}
         >
-          <Icon name="Factory" size="sm" className="text-content-tertiary" />
-          <span className="whitespace-nowrap font-medium">
+          <Icon name="Factory" size="sm" className="shrink-0 text-content-tertiary" />
+          <span className="hidden whitespace-nowrap font-medium xl:inline">
             {current ? `${current.code} · ${current.name}` : t("shell.allPlants")}
           </span>
-          <Icon name="ChevronsUpDown" size="xs" className="text-content-tertiary" />
+          <span className="hidden whitespace-nowrap font-medium md:inline xl:hidden">
+            {current ? current.code : t("shell.allPlantsShort")}
+          </span>
+          <Icon
+            name="ChevronsUpDown"
+            size="xs"
+            className="hidden shrink-0 text-content-tertiary md:inline"
+          />
         </button>
       </DropdownMenuTrigger>
 

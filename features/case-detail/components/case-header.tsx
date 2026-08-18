@@ -164,7 +164,13 @@ export const CaseHeader = React.memo(function CaseHeader({
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
+        {/*
+          `shrink-0` forbade this group from compressing, so at the width where
+          the header first becomes a row the six commands pushed it wider than
+          the container instead of wrapping inside it. It already wraps; it
+          simply was not allowed to.
+        */}
+        <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" disabled={pending !== null || terminal}>

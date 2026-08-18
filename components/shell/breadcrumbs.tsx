@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { cn } from "@/src/lib/cn";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/patterns/icon";
 import { NAVIGATION } from "@/src/config/app-config";
@@ -59,27 +60,59 @@ export function Breadcrumbs() {
     });
   });
 
+  const last = crumbs.length - 1;
+
   return (
-    <nav aria-label={t("shell.breadcrumb")} className="flex min-w-0 items-center gap-1">
-      {crumbs.map((crumb, index) => (
-        <span key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1">
-          {index > 0 ? (
-            <Icon name="ChevronRight" size="xs" className="text-content-tertiary" />
-          ) : null}
-          {crumb.href ? (
-            <Link
-              href={crumb.href}
-              className="truncate text-xs text-content-tertiary transition-colors duration-150 hover:text-content"
-            >
-              {crumb.label}
-            </Link>
-          ) : (
-            <span className="truncate text-xs font-medium text-content-secondary">
-              {crumb.label}
-            </span>
-          )}
-        </span>
-      ))}
+    /*
+     * Every crumb used to shrink equally, so a squeezed trail read "H. > Exe…" —
+     * both ends useless. The current page is the one crumb that must stay
+     * legible, so it never shrinks below a readable width while its ancestors
+     * give way first, and the middle of a deep trail collapses to an ellipsis
+     * rather than compressing every segment into initials.
+     */
+    <nav
+      aria-label={t("shell.breadcrumb")}
+      className="flex min-w-0 items-center gap-1 whitespace-nowrap"
+    >
+      {crumbs.map((crumb, index) => {
+        const isLast = index === last;
+        // On a deep trail the intermediate crumbs are the least valuable: the
+        // root gives orientation and the leaf says where you are.
+        const collapses = crumbs.length > 2 && index > 0 && index < last;
+
+        return (
+          <span
+            key={`${crumb.label}-${index}`}
+            className={cn(
+              "flex items-center gap-1",
+              isLast ? "min-w-0 shrink" : "min-w-0 shrink-3",
+              collapses && "hidden xl:flex",
+            )}
+          >
+            {index > 0 ? (
+              <Icon name="ChevronRight" size="xs" className="shrink-0 text-content-tertiary" />
+            ) : null}
+            {crumb.href ? (
+              <Link
+                href={crumb.href}
+                className="truncate text-xs text-content-tertiary transition-colors duration-150 hover:text-content"
+              >
+                {crumb.label}
+              </Link>
+            ) : (
+              <span
+                className={cn(
+                  "truncate text-xs font-medium text-content-secondary",
+                  // A leaf narrower than this is not a label, it is noise.
+                  isLast && "min-w-16",
+                )}
+              >
+                {crumb.label}
+              </span>
+            )}
+          </span>
+        );
+      })}
     </nav>
   );
 }

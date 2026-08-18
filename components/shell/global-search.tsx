@@ -27,11 +27,19 @@ export interface SearchableCase {
 
 interface GlobalSearchProps {
   cases: SearchableCase[];
+  /**
+   * Icon-only trigger for widths where the full field does not fit.
+   *
+   * The same dialog, the same results — only the trigger changes. Search is a
+   * primary control, and the alternative at narrow widths was not a smaller
+   * search box but no search at all.
+   */
+  compact?: boolean;
 }
 
 const MAX_RESULTS_PER_GROUP = 5;
 
-export function GlobalSearch({ cases }: GlobalSearchProps) {
+export function GlobalSearch({ cases, compact = false }: GlobalSearchProps) {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -77,20 +85,38 @@ export function GlobalSearch({ cases }: GlobalSearchProps) {
   return (
     <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
       <DialogTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "flex h-8 w-full max-w-md items-center gap-2 rounded-md border border-line bg-surface-subtle px-2.5",
-            "text-sm text-content-tertiary transition-colors duration-150",
-            "hover:border-line-strong hover:bg-surface",
-          )}
-        >
-          <Icon name="Search" size="sm" />
-          <span className="flex-1 text-left">{t("shell.searchCollapsed")}</span>
-          <kbd className="hidden items-center gap-0.5 rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-2xs text-content-tertiary sm:inline-flex">
-            ⌘K
-          </kbd>
-        </button>
+        {compact ? (
+          <button
+            type="button"
+            aria-label={t("shell.globalSearch")}
+            className={cn(
+              "flex size-8 items-center justify-center rounded-md text-content-secondary",
+              "transition-colors duration-150 hover:bg-surface-hover hover:text-content",
+            )}
+          >
+            <Icon name="Search" size="sm" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={cn(
+              // `w-full` with no floor let this collapse toward zero while still
+              // claiming the row; the width now comes from the header's own
+              // sizing, and the label truncates rather than forcing a wrap.
+              "flex h-8 w-full min-w-0 items-center gap-2 rounded-md border border-line bg-surface-subtle px-2.5",
+              "text-sm text-content-tertiary transition-colors duration-150",
+              "hover:border-line-strong hover:bg-surface",
+            )}
+          >
+            <Icon name="Search" size="sm" className="shrink-0" />
+            <span className="min-w-0 flex-1 truncate text-left">
+              {t("shell.searchCollapsed")}
+            </span>
+            <kbd className="hidden shrink-0 items-center gap-0.5 rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-2xs text-content-tertiary lg:inline-flex">
+              ⌘K
+            </kbd>
+          </button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="max-w-xl p-0">

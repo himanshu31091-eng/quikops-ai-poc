@@ -109,39 +109,71 @@ export function AppShell({
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {/*
+          Three zones with explicit shrink priorities, because a single flex row
+          of greedy children is what crushed the breadcrumb to "H. > Exe…" while
+          the search kept its full 448px.
+
+          - left  : shrinks first and truncates. It is context, not the task.
+          - centre: shrinks second, with a floor — a search box narrower than
+                    its own placeholder is not a search box.
+          - right : never shrinks. Identity, notifications and tenant scope are
+                    the controls a user reaches for, and a control that has been
+                    squeezed to nothing is worse than one that was never shown.
+
+          `flex-nowrap` is deliberate: the header is a fixed height, so a wrap is
+          not a graceful degradation here, it is a burst box overlapping the page.
+        */}
         <header
           className={cn(
-            "sticky top-0 z-40 flex h-topbar shrink-0 items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur-sm",
+            "sticky top-0 z-40 flex h-topbar shrink-0 flex-nowrap items-center gap-2 border-b border-line bg-surface/95 px-3 backdrop-blur-sm sm:gap-3 sm:px-4",
           )}
         >
-          <button
-            type="button"
-            aria-label={t("shell.openNavigation")}
-            onClick={() => setMobileNavOpen(true)}
-            className="-ml-1 flex size-8 items-center justify-center rounded-md text-content-secondary transition-colors duration-150 hover:bg-surface-hover lg:hidden"
-          >
-            <Icon name="PanelLeft" size="md" />
-          </button>
+          <div className="flex min-w-0 flex-1 items-center gap-2 md:min-w-24">
+            <button
+              type="button"
+              aria-label={t("shell.openNavigation")}
+              onClick={() => setMobileNavOpen(true)}
+              className="-ml-1 flex size-8 shrink-0 items-center justify-center rounded-md text-content-secondary transition-colors duration-150 hover:bg-surface-hover lg:hidden"
+            >
+              <Icon name="PanelLeft" size="md" />
+            </button>
 
-          <div className="hidden min-w-0 md:block">
-            <Breadcrumbs />
+            {/*
+              A floor as well as a ceiling. `min-w-0` alone let this zone be
+              driven to a width of exactly 0 once the right cluster and the
+              search had taken their share — the trail was in the DOM, laid out,
+              and 0px wide. Shrinking first is right; disappearing is not.
+            */}
+            <div className="hidden min-w-0 shrink overflow-hidden md:block">
+              <Breadcrumbs />
+            </div>
           </div>
 
-          <div className="mx-auto hidden w-full max-w-md md:block">
+          {/*
+            Equal share with the left zone rather than double it, so the trail
+            keeps a usable width at the middle sizes where both are visible. The
+            floor stops the field becoming narrower than its own placeholder;
+            `max-w-md` keeps the familiar desktop proportion.
+          */}
+          <div className="hidden min-w-40 max-w-md flex-1 md:block xl:min-w-44">
             <GlobalSearch cases={searchableCases} />
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+            {/* Search is a primary control, so it survives the breakpoint that
+                drops the full field rather than disappearing with it. */}
+            <div className="md:hidden">
+              <GlobalSearch cases={searchableCases} compact />
+            </div>
             <DemoModeBadge
               environmentLabel={environmentLabel}
               dataDisclosure={dataDisclosure}
             />
-            <div className="hidden xl:block">
-              <PlantScopeSelector plants={plants} scope={plantScope} />
-            </div>
+            <PlantScopeSelector plants={plants} scope={plantScope} />
             <PlatformControls />
             <NotificationTray items={notifications} />
-            <div className="h-5 w-px bg-line" />
+            <div className="hidden h-5 w-px bg-line sm:block" />
             <UserMenu user={user} personas={personas} />
           </div>
         </header>

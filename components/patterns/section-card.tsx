@@ -39,13 +39,17 @@ export function SectionCard({
       )}
     >
       <header className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
-        <div className="flex min-w-0 items-start gap-2.5">
+        <div className="flex min-w-0 flex-1 items-start gap-2.5">
           {icon ? (
-            <span className="mt-px flex size-6 items-center justify-center rounded-md bg-surface-hover text-content-secondary">
+            // A fixed-size badge: without `shrink-0` it squashed into an oval
+            // whenever the title and the action group competed for the row.
+            <span className="mt-px flex size-6 shrink-0 items-center justify-center rounded-md bg-surface-hover text-content-secondary">
               <Icon name={icon} size="sm" />
             </span>
           ) : null}
-          <div className="min-w-0">
+          {/* Truncating is fine; being crushed to a few characters is not, and a
+              `shrink-0` action group opposite this could do exactly that. */}
+          <div className="min-w-24">
             <h2 className="truncate text-base font-semibold leading-5 text-content">
               {title}
             </h2>
