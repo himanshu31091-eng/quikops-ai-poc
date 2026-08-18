@@ -1,3 +1,4 @@
+import { ExecutionFlowVisual } from "@/components/patterns/execution-flow-visual";
 import { Icon } from "@/components/patterns/icon";
 import { BrandMark } from "@/components/shell/brand-mark";
 import {
@@ -60,6 +61,14 @@ export default async function LoginPage() {
             <p className="text-2xs text-content-inverse-secondary">{APP.tagline}</p>
           </div>
         </div>
+
+        {/*
+          Sits in the space the panel already had between the brand mark and the
+          proposition, so nothing below it moves. Hidden under 1100px, where the
+          panel is narrow enough that the diagram would compete with the words
+          rather than introduce them.
+        */}
+        <ExecutionFlowVisual className="hidden h-auto w-full max-w-lg text-content-inverse-secondary min-[1100px]:block" />
 
         <div className="max-w-md">
           <p className="text-2xs font-semibold uppercase tracking-wider text-content-inverse-secondary">

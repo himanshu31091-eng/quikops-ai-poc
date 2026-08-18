@@ -381,3 +381,103 @@
     outline-offset: 2px;
   }
 }
+
+/* ============================================================================
+   Sign-in illustration.
+
+   Deliberately *outside* the five-animation vocabulary above. Those five are the
+   product's interaction motion — how a row changes status, how a panel arrives,
+   how an optimistic write settles — and the rule that there are exactly five
+   exists so those stay predictable across every screen. This is brand chrome on
+   the unauthenticated screen: it never appears beside a control, drives no
+   state, and adds nothing to the vocabulary a signed-in user has to read.
+
+   Every rule is scoped to the illustration's own classes, so none of it can
+   reach a product surface.
+
+   Under `prefers-reduced-motion` the reset above collapses each of these to its
+   final frame, which is why the structural ones are authored to end complete:
+   track full, ring closed, check and trend drawn.
+   ========================================================================= */
+
+@keyframes qo-signal-travel {
+  /* Enters faint, brightens along the lane, absorbed at the hub. */
+  0%   { offset-distance: 0%;   opacity: 0; r: 2; }
+  12%  { opacity: 0.9; }
+  70%  { opacity: 0.9; r: 3; }
+  92%  { offset-distance: 100%; opacity: 0; r: 5; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes qo-draw {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+
+@keyframes qo-step-land {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes qo-hub-breathe {
+  0%, 100% { opacity: 0.35; transform: scale(0.94); }
+  50%      { opacity: 0.85; transform: scale(1.06); }
+}
+
+@layer utilities {
+  .qo-signal {
+    animation: qo-signal-travel 9s cubic-bezier(0.4, 0, 0.2, 1) infinite both;
+    offset-rotate: 0deg;
+  }
+  .qo-hub-glow {
+    animation: qo-hub-breathe 9s ease-in-out infinite both;
+    transform-origin: 150px 96px;
+  }
+  .qo-track {
+    animation: qo-draw 1.8s ease-out 3s both;
+  }
+  .qo-step {
+    animation: qo-step-land 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .qo-verify-ring {
+    animation: qo-draw 1.1s ease-out 5s both;
+  }
+  .qo-verify-check {
+    animation: qo-draw 450ms ease-out 6s both;
+  }
+  .qo-kpi {
+    animation: qo-draw 1.3s ease-out 6.4s both;
+  }
+  .qo-kpi-tip {
+    animation: qo-step-land 420ms cubic-bezier(0.16, 1, 0.3, 1) 7.5s both;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+}
+
+/*
+ * The reduced-motion reset above collapses duration but leaves `animation-delay`
+ * alone — so with delays of three to six seconds the illustration sat visibly
+ * half-drawn for a reader who had asked for no motion, then snapped together.
+ * Zeroing the delays lets each element resolve to its final frame immediately:
+ * the diagram is simply complete, which is the whole point of the still state.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .qo-signal {
+    /* Pure motion. At rest there is no signal in flight to depict. */
+    display: none;
+  }
+
+  .qo-hub-glow,
+  .qo-track,
+  .qo-step,
+  .qo-verify-ring,
+  .qo-verify-check,
+  .qo-kpi,
+  .qo-kpi-tip {
+    animation-delay: 0s !important;
+  }
+}
