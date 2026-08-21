@@ -59,7 +59,19 @@
   /* ---- Content ---------------------------------------------------------- */
   --color-content: #0b1220;
   --color-content-secondary: #4a5565;
-  --color-content-tertiary: #8794a5;
+  /*
+   * Tertiary text carries timestamps, plant codes, KPI footnotes and table meta
+   * — and it is paired with the 11px size in a few hundred places. At the
+   * previous #8794a5 that combination measured 2.90:1 on the canvas and 3.08:1
+   * on a card, against the 4.5:1 WCAG AA needs for text at this size. The
+   * `prefers-contrast: more` block below fixed it only for readers who had
+   * already told their OS they were struggling.
+   *
+   * This is the lightest value that clears 4.5:1 on every surface it is used
+   * on, hover rows included (4.95:1 there, 5.43:1 on white). Hierarchy survives:
+   * secondary still reads a full step stronger at 7.6:1.
+   */
+  --color-content-tertiary: #5f6b7a;
   --color-content-inverse: #f8fafc;
   --color-content-inverse-secondary: #94a3b8;
 
@@ -98,13 +110,24 @@
   --color-success-content: #065f46;
 
   /* ---- Semantic: case status ------------------------------------------- */
+  /*
+   * Text variants for the three badge tones whose base colour is too light to
+   * carry 11px label text on its own subtle background: rose measured 4.28:1,
+   * amber 3.07:1 and emerald 3.58:1, against the 4.5:1 AA requires at that size.
+   * The base tokens stay exactly as they are — they are correct for the dot,
+   * the fill and the border, where the bar is 3:1 — so the badge keeps its
+   * colour identity and only the label darkens.
+   */
+
   --color-status-new: #e11d48;
   --color-status-new-subtle: #fff1f2;
   --color-status-new-line: #fecdd3;
+  --color-status-new-content: #9f1239;
 
   --color-status-triaged: #d97706;
   --color-status-triaged-subtle: #fffbeb;
   --color-status-triaged-line: #fde68a;
+  --color-status-triaged-content: #92400e;
 
   --color-status-assigned: #1d4ed8;
   --color-status-assigned-subtle: #eff6ff;
@@ -121,6 +144,7 @@
   --color-status-verified: #059669;
   --color-status-verified-subtle: #ecfdf5;
   --color-status-verified-line: #a7f3d0;
+  --color-status-verified-content: #065f46;
 
   --color-status-closed: #64748b;
   --color-status-closed-subtle: #f8fafc;
@@ -134,7 +158,15 @@
   --color-chart-5: #7c3aed;
   --color-chart-6: #059669;
   --color-chart-grid: #eceff3;
-  --color-chart-axis: #8794a5;
+  /*
+   * Axis ticks are 11px *text*, not decoration — Recharts paints tick labels
+   * with the axis stroke. This token kept the old tertiary value after that was
+   * darkened, which left every date along the bottom of every chart at 3.08:1.
+   * It tracks tertiary deliberately: the two are the same class of quiet label
+   * and should not drift apart again. The reference lines that also use it only
+   * gain from the extra weight.
+   */
+  --color-chart-axis: #5f6b7a;
 
   /* ---- Layout ---------------------------------------------------------- */
   --spacing-nav: 15rem; /* 240px sidebar */

@@ -205,12 +205,12 @@ interface TokenSet {
 export const CASE_STATUS_META: Record<CaseStatus, TokenSet> = {
   NEW: {
     label: "New",
-    className: "bg-status-new-subtle text-status-new border-status-new-line",
+    className: "bg-status-new-subtle text-status-new-content border-status-new-line",
     dotClassName: "bg-status-new",
   },
   TRIAGED: {
     label: "Triaged",
-    className: "bg-status-triaged-subtle text-status-triaged border-status-triaged-line",
+    className: "bg-status-triaged-subtle text-status-triaged-content border-status-triaged-line",
     dotClassName: "bg-status-triaged",
   },
   ASSIGNED: {
@@ -230,7 +230,7 @@ export const CASE_STATUS_META: Record<CaseStatus, TokenSet> = {
   },
   VERIFIED: {
     label: "Verified",
-    className: "bg-status-verified-subtle text-status-verified border-status-verified-line",
+    className: "bg-status-verified-subtle text-status-verified-content border-status-verified-line",
     dotClassName: "bg-status-verified",
   },
   CLOSED: {

@@ -14,11 +14,21 @@ import { cn } from "@/src/lib/cn";
 import { TIMELINE_ICON, TIMELINE_TONE } from "../utils/evidence";
 import { recentClass, SectionEmpty } from "./primitives";
 
+/*
+ * Text tones use the `-content` token, not the base one. The base colours are
+ * sized for fills, borders and icons, where 3:1 is the bar; as 11px label text
+ * on their own subtle background they measured 3.58:1 for success and 4.28:1
+ * for critical, both under the 4.5:1 that text this small needs. The `-content`
+ * variants exist for exactly this position and land at 7.3:1.
+ *
+ * `verify` keeps its base token: it has no `-content` variant and already
+ * measures 5.20:1 on its own subtle background.
+ */
 const TONE_CLASS: Record<string, string> = {
   neutral: "border-line bg-surface-hover text-content-secondary",
-  accent: "border-accent-line bg-accent-subtle text-accent",
-  success: "border-success-line bg-success-subtle text-success",
-  critical: "border-critical-line bg-critical-subtle text-critical",
+  accent: "border-accent-line bg-accent-subtle text-accent-content",
+  success: "border-success-line bg-success-subtle text-success-content",
+  critical: "border-critical-line bg-critical-subtle text-critical-content",
   verify: "border-status-verify-line bg-status-verify-subtle text-status-verify",
 };
 
