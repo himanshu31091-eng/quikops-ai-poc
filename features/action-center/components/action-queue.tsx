@@ -72,7 +72,7 @@ function Checkbox({
         "flex size-4 shrink-0 items-center justify-center rounded-sm border transition-colors duration-150",
         checked || indeterminate
           ? "border-accent bg-accent text-white"
-          : "border-line-strong bg-surface hover:border-accent",
+          : "border-line-control bg-surface hover:border-accent",
       )}
     >
       {indeterminate ? (

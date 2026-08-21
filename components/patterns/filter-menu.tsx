@@ -83,7 +83,7 @@ function FilterMenuInner<Field extends string>({
             "inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors duration-150",
             active
               ? "border-accent-line bg-accent-subtle text-accent-content"
-              : "border-line bg-surface text-content-secondary hover:bg-surface-hover hover:text-content",
+              : "border-line-control bg-surface text-content-secondary hover:bg-surface-hover hover:text-content",
           )}
         >
           <Icon name={icon} size="sm" className={active ? "text-accent" : undefined} />
@@ -154,7 +154,7 @@ function FilterMenuInner<Field extends string>({
                       "flex size-4 shrink-0 items-center justify-center rounded-sm border transition-colors duration-150",
                       checked
                         ? "border-accent bg-accent text-white"
-                        : "border-line-strong bg-surface",
+                        : "border-line-control bg-surface",
                     )}
                   >
                     {checked ? <Icon name="Check" size="xs" strokeWidth={3} /> : null}

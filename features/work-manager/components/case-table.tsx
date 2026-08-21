@@ -172,7 +172,7 @@ export function CaseTable({
                             : "ArrowUpDown"
                         }
                         size="xs"
-                        className={isSorted ? "text-accent" : "text-content-tertiary/60"}
+                        className={isSorted ? "text-accent" : "text-content-tertiary"}
                       />
                     </button>
                   ) : (

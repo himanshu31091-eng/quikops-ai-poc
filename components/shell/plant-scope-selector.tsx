@@ -62,7 +62,7 @@ export function PlantScopeSelector({ plants, scope }: PlantScopeSelectorProps) {
             "flex h-8 shrink-0 items-center gap-1.5 rounded-md border bg-surface px-1.5 text-sm text-content transition-colors duration-150 hover:border-line-strong hover:bg-surface-hover sm:gap-2 sm:px-2.5",
             // A scoped view is a modal state: the control says so rather than
             // leaving the reader to notice the numbers are smaller.
-            current ? "border-accent-line bg-accent-subtle" : "border-line",
+            current ? "border-accent-line bg-accent-subtle" : "border-line-control",
             isPending && "opacity-60",
           )}
         >

@@ -55,6 +55,20 @@
   --color-line: #e4e9ef;
   --color-line-strong: #cbd5e1;
   --color-line-inverse: #1e293b;
+  /*
+   * The boundary of an interactive control, and only that.
+   *
+   * WCAG 2.1 §1.4.11 asks for 3:1 on "the visual information required to
+   * identify" a component. An empty text field or an icon-only button is
+   * identified by nothing except its edge, and `--color-line` measures 1.22:1
+   * on white — it is a hairline drawn for structure, not for identification.
+   *
+   * Deliberately a separate token rather than a darker `--color-line`: card
+   * edges, table rules and dividers are not components, they are decoration,
+   * and raising all of them to 3:1 would turn a calm enterprise surface into a
+   * grid of heavy boxes. This reaches 3.51:1 on a card and 3.30:1 on the canvas.
+   */
+  --color-line-control: #7b8a9f;
 
   /* ---- Content ---------------------------------------------------------- */
   --color-content: #0b1220;
@@ -206,6 +220,20 @@
        enterprise UI is misaligned digits in a column. */
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1, "cv05" 1, "ss03" 1;
+  }
+
+
+  /*
+   * Any form control that draws a border gets the control token, whether or not
+   * it went through FIELD_CLASS. §1.4.11 applies to the control, not to the
+   * helper that happened to style it, and a bare <input> in a feature is the
+   * case most likely to be missed. Checkboxes and radios are excluded: they are
+   * custom-painted here and carry their own indicator.
+   */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    border-color: var(--color-line-control);
   }
 
   h1,

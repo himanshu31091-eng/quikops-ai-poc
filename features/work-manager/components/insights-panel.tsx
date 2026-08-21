@@ -112,7 +112,7 @@ export const InsightsPanel = React.memo(function InsightsPanel({
                   type="button"
                   onClick={() => onRemoveChip(chip.id)}
                   title={`Remove ${chip.group.toLowerCase()} filter`}
-                  className="group flex max-w-full items-center gap-1.5 rounded-sm border border-line bg-surface-subtle py-1 pl-2 pr-1.5 text-2xs transition-colors duration-150 hover:border-line-strong hover:bg-surface-hover"
+                  className="group flex max-w-full items-center gap-1.5 rounded-sm border border-line-control bg-surface-subtle py-1 pl-2 pr-1.5 text-2xs transition-colors duration-150 hover:border-line-strong hover:bg-surface-hover"
                 >
                   <span className="shrink-0 font-medium text-content-tertiary">
                     {chip.group}

@@ -57,7 +57,7 @@ export function PersonaSignIn({ personas }: { personas: User[] }) {
             aria-busy={isPending}
             aria-label={`Sign in as ${persona.name}, ${persona.jobTitle}`}
             className={cn(
-              "group flex w-full items-center gap-3 rounded-md border border-line bg-surface px-3 py-2.5 text-left transition-colors duration-150",
+              "group flex w-full items-center gap-3 rounded-md border border-line-control bg-surface px-3 py-2.5 text-left transition-colors duration-150",
               "hover:border-accent-line hover:bg-accent-subtle",
               "focus-visible:border-accent-line focus-visible:bg-accent-subtle",
               // The chosen card holds the hover treatment while it redirects;

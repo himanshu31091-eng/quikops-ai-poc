@@ -8,7 +8,7 @@ import { cn } from "@/src/lib/cn";
  * object rather than two strings that drifted apart.
  */
 export const FIELD_CLASS =
-  "h-8 w-full rounded-md border border-line bg-surface px-2.5 text-xs text-content outline-none transition-colors duration-150 placeholder:text-content-tertiary focus:border-accent-line";
+  "h-8 w-full rounded-md border border-line-control bg-surface px-2.5 text-xs text-content outline-none transition-colors duration-150 placeholder:text-content-tertiary focus:border-accent-line";
 
 interface FormFieldProps {
   label: string;

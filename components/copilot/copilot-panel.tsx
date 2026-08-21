@@ -286,7 +286,7 @@ export function CopilotPanel({
                     <button
                       type="button"
                       onClick={() => ask(suggestion.prompt)}
-                      className="flex w-full items-center gap-2.5 rounded-md border border-line bg-surface px-3 py-2 text-left transition-colors duration-150 hover:border-accent-line hover:bg-accent-subtle"
+                      className="flex w-full items-center gap-2.5 rounded-md border border-line-control bg-surface px-3 py-2 text-left transition-colors duration-150 hover:border-accent-line hover:bg-accent-subtle"
                     >
                       <Icon
                         name={suggestion.icon}
@@ -390,7 +390,7 @@ export function CopilotPanel({
                   type="button"
                   disabled={copilot.isStreaming}
                   onClick={() => ask(suggestion.prompt)}
-                  className="rounded-sm border border-line bg-surface-subtle px-2 py-1 text-2xs text-content-secondary transition-colors duration-150 hover:border-accent-line hover:text-accent-content disabled:opacity-50"
+                  className="rounded-sm border border-line-control bg-surface-subtle px-2 py-1 text-2xs text-content-secondary transition-colors duration-150 hover:border-accent-line hover:text-accent-content disabled:opacity-50"
                 >
                   {suggestion.label}
                 </button>

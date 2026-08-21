@@ -103,7 +103,7 @@ export function GlobalSearch({ cases, compact = false }: GlobalSearchProps) {
               // `w-full` with no floor let this collapse toward zero while still
               // claiming the row; the width now comes from the header's own
               // sizing, and the label truncates rather than forcing a wrap.
-              "flex h-8 w-full min-w-0 items-center gap-2 rounded-md border border-line bg-surface-subtle px-2.5",
+              "flex h-8 w-full min-w-0 items-center gap-2 rounded-md border border-line-control bg-surface-subtle px-2.5",
               "text-sm text-content-tertiary transition-colors duration-150",
               "hover:border-line-strong hover:bg-surface",
             )}

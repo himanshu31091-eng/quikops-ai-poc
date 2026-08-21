@@ -43,7 +43,7 @@ const ActionKpiTile = React.memo(function ActionKpiTile({
       className={cn(
         "anim-reveal flex min-w-0 flex-col rounded-lg border bg-surface px-3.5 py-3 text-left transition-colors duration-150",
         "hover:bg-surface-hover focus-visible:outline-none",
-        kpi.active ? tone.activeRing : "border-line",
+        kpi.active ? tone.activeRing : "border-line-control",
       )}
     >
       <span className="flex items-center gap-2">

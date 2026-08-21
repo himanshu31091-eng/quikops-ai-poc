@@ -279,7 +279,7 @@ export const CommentsCard = React.memo(function CommentsCard({
                     <button
                       type="button"
                       onClick={() => insertMention(user)}
-                      className="flex items-center gap-1.5 rounded-sm border border-line bg-surface px-2 py-1 text-2xs text-content-secondary transition-colors duration-150 hover:border-accent-line hover:text-accent-content"
+                      className="flex items-center gap-1.5 rounded-sm border border-line-control bg-surface px-2 py-1 text-2xs text-content-secondary transition-colors duration-150 hover:border-accent-line hover:text-accent-content"
                     >
                       <OwnerAvatar user={user} size="sm" showName={false} />
                       {user.name}

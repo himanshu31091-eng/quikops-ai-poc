@@ -51,7 +51,7 @@ export const WorkKpiHeader = React.memo(function WorkKpiHeader({
               "group flex min-w-0 flex-col rounded-lg border bg-surface px-3.5 py-3 text-left transition-colors duration-150",
               kpi.active
                 ? "border-accent-line bg-accent-subtle"
-                : "border-line hover:border-line-strong hover:bg-surface-subtle",
+                : "border-line-control hover:border-line-strong hover:bg-surface-subtle",
             )}
           >
             <span className="flex items-center gap-2">

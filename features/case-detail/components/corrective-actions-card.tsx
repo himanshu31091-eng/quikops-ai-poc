@@ -399,7 +399,7 @@ const ActionRow = React.memo(function ActionRow({
               onClick={() => setEditingNotes(true)}
               className={cn(
                 "mt-2 flex w-full items-start gap-1.5 rounded-md border border-transparent px-2 py-1.5 text-left text-2xs leading-relaxed text-content-tertiary transition-colors duration-150",
-                readOnly ? "cursor-default" : "hover:border-line hover:bg-surface",
+                readOnly ? "cursor-default" : "hover:border-line-control hover:bg-surface",
               )}
             >
               <Icon name="SquarePen" size="xs" className="mt-0.5 shrink-0" />

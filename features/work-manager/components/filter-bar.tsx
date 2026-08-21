@@ -137,7 +137,7 @@ export const FilterBar = React.memo(function FilterBar({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 text-xs font-medium text-content-secondary transition-colors duration-150 hover:bg-surface-hover hover:text-content"
+              className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line-control bg-surface px-2.5 text-xs font-medium text-content-secondary transition-colors duration-150 hover:bg-surface-hover hover:text-content"
             >
               <Icon name="ArrowUpDown" size="sm" />
               <span className="hidden sm:inline">{SORT_META[sort.key].label}</span>

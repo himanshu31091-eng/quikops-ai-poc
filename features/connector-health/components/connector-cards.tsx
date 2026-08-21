@@ -60,7 +60,7 @@ const ConnectorCard = React.memo(function ConnectorCard({
       className={cn(
         "anim-reveal flex min-w-0 flex-col rounded-lg border bg-surface p-3.5 text-left transition-colors duration-150",
         "hover:bg-surface-hover focus-visible:outline-none",
-        selected ? "border-accent" : "border-line",
+        selected ? "border-accent" : "border-line-control",
       )}
     >
       <div className="flex items-start gap-2.5">

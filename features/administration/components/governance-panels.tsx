@@ -125,7 +125,7 @@ export function PermissionMatrix() {
             "rounded-sm border px-2 py-0.5 text-2xs font-medium transition-colors duration-150",
             area === null
               ? "border-accent-line bg-accent-subtle text-accent-content"
-              : "border-line text-content-tertiary hover:bg-surface-hover",
+              : "border-line-control text-content-tertiary hover:bg-surface-hover",
           )}
         >
           {t("common.all")}
@@ -140,7 +140,7 @@ export function PermissionMatrix() {
               "rounded-sm border px-2 py-0.5 text-2xs font-medium transition-colors duration-150",
               area === entry
                 ? AREA_TONE[entry]
-                : "border-line text-content-tertiary hover:bg-surface-hover",
+                : "border-line-control text-content-tertiary hover:bg-surface-hover",
             )}
           >
             {entry}

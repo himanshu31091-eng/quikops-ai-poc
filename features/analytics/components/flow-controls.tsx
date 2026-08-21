@@ -41,8 +41,12 @@ function Segment({
       className={cn(
         SEGMENT_BASE,
         active
-          ? "bg-surface text-content shadow-raised"
-          : "text-content-tertiary hover:text-content-secondary",
+          // Which segment is selected was carried by a white pill on a grey
+          // track — 1.1:1, below the 3:1 §1.4.11 asks of a state indicator. The
+          // border makes the selection legible on its own rather than relying
+          // on a shadow the eye may not resolve.
+          ? "border border-line-control bg-surface text-content shadow-raised"
+          : "border border-transparent text-content-tertiary hover:text-content-secondary",
       )}
     >
       {children}

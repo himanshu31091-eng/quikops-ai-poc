@@ -370,7 +370,7 @@ export function ReportsView({ data }: { data: ReportsData }) {
                         "flex w-full min-w-0 items-start gap-2.5 rounded-md border p-2.5 text-left transition-colors duration-150",
                         template.id === selectedId
                           ? "border-accent bg-accent-subtle"
-                          : "border-line bg-surface hover:bg-surface-hover",
+                          : "border-line-control bg-surface hover:bg-surface-hover",
                       )}
                     >
                       <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-surface text-accent">

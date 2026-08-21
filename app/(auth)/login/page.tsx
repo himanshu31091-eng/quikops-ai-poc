@@ -122,7 +122,7 @@ export default async function LoginPage() {
           <button
             type="button"
             disabled
-            className="mt-6 flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-line bg-surface text-sm font-medium text-content shadow-raised transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-6 flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-line-control bg-surface text-sm font-medium text-content shadow-raised transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-70"
           >
             <svg viewBox="0 0 21 21" className="size-4" aria-hidden="true">
               <rect x="1" y="1" width="9" height="9" fill="#F25022" />
